@@ -67,7 +67,7 @@ pub fn system_page<'a>(
     }
 }
 
-fn string_loadavg(lavg: &LoadAVG) -> String {
+pub fn string_loadavg(lavg: &LoadAVG) -> String {
     format!("1min: {}\n5min: {}\n15min: {}", lavg.0, lavg.1, lavg.2)
 }
 
@@ -79,7 +79,7 @@ fn string_uptime(uptime: &Uptime) -> String {
     )
 }
 
-fn string_time(time: f32) -> String {
+pub fn string_time(time: f32) -> String {
     let hours = (time / 3600.) as u32;
     let remain_secs_after_hours = time % 3600.;
     let mins = (remain_secs_after_hours / 60.) as u32;

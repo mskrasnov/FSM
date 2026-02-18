@@ -103,6 +103,27 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
         },
         None => "Unknown hostname",
     };
+    let uptime = match fx.system.to_option() {
+        Some(system) => match &system.uptime {
+            Some(uptime) => super::system::string_time(uptime.0),
+            None => "Unknown".to_string(),
+        },
+        None => "Unknown".to_string(),
+    };
+    let lavg = match fx.system.to_option() {
+        Some(system) => match &system.loadavg {
+            Some(lavg) => super::system::string_loadavg(lavg),
+            None => "Unknown".to_string(),
+        },
+        None => "Unknown".to_string(),
+    };
+    let locale = match fx.system.to_option() {
+        Some(system) => match &system.language {
+            Some(lang) => lang as &str,
+            None => "Unknown",
+        },
+        None => "Unknown",
+    };
     let de = match fx.system.to_option() {
         Some(system) => match &system.desktop {
             Some(de) => de as &str,
@@ -179,9 +200,6 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
             ]
             .spacing(5),
         ),
-        Card::new(fl!("dash-sys"), Message::SelectPage(Page::Distro)).widget(text(os_name)),
-        Card::new(fl!("dash-host"), Message::SelectPage(Page::SystemMisc)).widget(text(hostname)),
-        Card::new(fl!("misc-de"), Message::SelectPage(Page::SystemMisc)).widget(text(de)),
     ];
 
     /* 0 - CPU,
@@ -262,6 +280,19 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
             }
         }
     }
+
+    let cards = [
+        Card::new(fl!("dash-sys"), Message::SelectPage(Page::Distro)).widget(text(os_name)),
+        Card::new(fl!("dash-host"), Message::SelectPage(Page::SystemMisc)).widget(text(hostname)),
+        Card::new(fl!("misc-de"), Message::SelectPage(Page::SystemMisc)).widget(text(de)),
+        Card::new(fl!("misc-uptime"), Message::SelectPage(Page::SystemMisc)).widget(text(uptime)),
+        Card::new(fl!("misc-loadavg"), Message::SelectPage(Page::SystemMisc)).widget(text(lavg)),
+        Card::new(fl!("misc-lang"), Message::SelectPage(Page::SystemMisc)).widget(text(locale)),
+    ];
+    for card in cards {
+        items.push(card);
+    }
+    items.shrink_to_fit();
 
     let mut gr = grid([]).spacing(5).fluid(185.);
     for item in items {

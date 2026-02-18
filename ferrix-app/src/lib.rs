@@ -72,3 +72,16 @@ impl System {
         })
     }
 }
+
+impl Default for System {
+    fn default() -> Self {
+        Self {
+            hostname: Some("unknown-host".to_string()),
+            loadavg: None,
+            uptime: None,
+            desktop: Some("Unknown DE".to_string()),
+            language: Some("Unknown locale".to_string()),
+            env_vars: Vec::new(),
+        }
+    }
+}

@@ -314,7 +314,7 @@ impl Ferrix {
                 )
             } else {
                 match self.current_page {
-                    Page::SystemMisc => Some(
+                    Page::SystemMisc | Page::Dashboard => Some(
                         time::every(Duration::from_secs(self.u()))
                             .map(|_| Message::DataReceiver(DataReceiverMessage::GetSystemData)),
                     ),
