@@ -18,6 +18,7 @@ page-cpufreq = Частоты ЦП
 page-vuln = Уязвимости ЦП
 page-memory = Память
 page-fsystems = Файловые системы
+page-net = Сеть
 page-dmi = Таблицы DMI
 page-battery = Аккумулятор
 page-screen = Экран

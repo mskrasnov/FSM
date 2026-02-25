@@ -52,6 +52,7 @@ pub fn sidebar<'a>(cur_page: Page) -> Element<'a, Message> {
         Item::Page(Page::CPUVulnerabilities),
         Item::Page(Page::Memory),
         Item::Page(Page::FileSystems),
+        Item::Page(Page::Network),
         Item::Page(Page::DMI),
         Item::Page(Page::Battery),
         Item::Page(Page::Screen),

@@ -63,6 +63,7 @@ impl Ferrix {
             self.cpu_freq_subscription(),
             self.cpu_vuln_subscription(),
             self.storage_subscription(),
+            self.networks_subscription(),
             self.dmi_subscription(),
             self.battery_subscription(),
             self.drm_subscription(),
@@ -189,6 +190,22 @@ impl Ferrix {
             Some(
                 time::every(Duration::from_secs(10))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetStorageData)),
+            )
+        } else {
+            None
+        }
+    }
+
+    fn networks_subscription(&self) -> OScript<Message> {
+        if self.data.networks.is_none() && self.current_page == Page::Dashboard {
+            Some(
+                time::every(Duration::from_millis(START_UPERIOD))
+                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetNetworksData)),
+            )
+        } else if self.current_page == Page::Network {
+            Some(
+                time::every(Duration::from_secs(self.u()))
+                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetNetworksData)),
             )
         } else {
             None

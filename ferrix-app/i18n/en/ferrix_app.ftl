@@ -18,6 +18,7 @@ page-cpufreq = CPU Frequencies
 page-vuln = CPU Vulnerabilities
 page-memory = Memory
 page-fsystems = Filesystems
+page-net = Network
 page-dmi = DMI Tables
 page-battery = Battery
 page-screen = Screen

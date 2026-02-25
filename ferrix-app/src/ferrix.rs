@@ -30,6 +30,7 @@ use ferrix_lib::{
     cpu_freq::CpuFreq,
     drm::Video,
     init::SystemdServices,
+    net::Networks,
     parts::Mounts,
     ram::{RAM, Swaps},
     soft::InstalledPackages,
@@ -108,6 +109,7 @@ pub struct FerrixData {
     pub ram_usage_chart: LineChart,
 
     pub storages: LoadState<Mounts>,
+    pub networks: LoadState<Networks>,
     pub dmi_data: LoadState<DMIData>,
     pub bat_data: LoadState<BatInfo>,
     pub drm_data: LoadState<Video>,
@@ -142,9 +144,11 @@ impl Default for FerrixData {
             curr_proc_stat: LoadState::default(),
             cpu_freq: LoadState::default(),
             cpu_vulnerabilities: LoadState::default(),
+
             ram_data: LoadState::default(),
             swap_data: LoadState::default(),
             storages: LoadState::default(),
+            networks: LoadState::default(),
             dmi_data: LoadState::default(),
             bat_data: LoadState::default(),
             drm_data: LoadState::default(),

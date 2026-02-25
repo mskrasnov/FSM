@@ -26,6 +26,7 @@ use ferrix_lib::{
     cpu_freq::CpuFreq,
     drm::Video,
     init::{Connection, SystemdServices},
+    net::Networks,
     parts::Mounts,
     ram::{RAM, Swaps},
     soft::InstalledPackages,
@@ -117,6 +118,9 @@ pub enum DataReceiverMessage {
 
     GetStorageData,
     StorageDataReceived(DataLoadingState<Mounts>),
+
+    GetNetworksData,
+    NetworksDataReceived(DataLoadingState<Networks>),
 
     GetDMIData,
     DMIDataReceived(DataLoadingState<DMIData>),
@@ -301,6 +305,20 @@ impl DataReceiverMessage {
                     }
                 },
                 |val| Message::DataReceiver(DataReceiverMessage::StorageDataReceived(val)),
+            ),
+            Self::NetworksDataReceived(state) => {
+                fx.networks = state;
+                Task::none()
+            }
+            Self::GetNetworksData => Task::perform(
+                async move {
+                    let net = Networks::new();
+                    match net {
+                        Ok(net) => DataLoadingState::Loaded(net),
+                        Err(why) => DataLoadingState::Error(why.to_string()),
+                    }
+                },
+                |val| Message::DataReceiver(DataReceiverMessage::NetworksDataReceived(val)),
             ),
             Self::DMIDataReceived(state) => {
                 if state.some_value() && fx.is_polkit {
