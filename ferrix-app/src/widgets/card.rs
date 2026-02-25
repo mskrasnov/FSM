@@ -71,26 +71,7 @@ impl Card {
         .height(135)
         .max_width(135)
         .max_height(135)
-        .style(move |t| {
-            let is_dark = t.extended_palette().is_dark;
-            let shadow = match is_transparent {
-                true => iced::Shadow::default(),
-                false => iced::Shadow {
-                    color: match is_dark {
-                        true => color!(0x1d2021),
-                        false => color!(0xebdbb2),
-                    },
-                    offset: Vector::new(2., 2.),
-                    blur_radius: 2.,
-                },
-            };
-            let mut style = container::rounded_box(t);
-            style.shadow = shadow;
-            if is_transparent {
-                style.background = style.background.and_then(|b| Some(b.scale_alpha(0.6)));
-            }
-            style
-        });
+        .style(move |theme| default(theme, is_transparent));
 
         button(cont)
             .padding(0)
@@ -98,4 +79,25 @@ impl Card {
             .on_press(self.on_press.clone())
             .into()
     }
+}
+
+pub fn default(theme: &iced::Theme, is_transparent: bool) -> container::Style {
+    let is_dark = theme.extended_palette().is_dark;
+    let shadow = match is_transparent {
+        true => iced::Shadow::default(),
+        false => iced::Shadow {
+            color: match is_dark {
+                true => color!(0x1d2021),
+                false => color!(0xebdbb2),
+            },
+            offset: Vector::new(2., 2.),
+            blur_radius: 2.,
+        },
+    };
+    let mut style = container::rounded_box(theme);
+    style.shadow = shadow;
+    if is_transparent {
+        style.background = style.background.and_then(|b| Some(b.scale_alpha(0.6)));
+    }
+    style
 }
