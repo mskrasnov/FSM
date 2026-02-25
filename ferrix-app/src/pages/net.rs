@@ -21,6 +21,7 @@
 //! Pages with information about network
 
 use crate::{
+    fl,
     load_state::LoadState,
     messages::Message,
     widgets::table::{InfoRow, kv_info_table},
@@ -34,12 +35,12 @@ pub fn net_page<'a>(net: &'a LoadState<Networks>) -> container::Container<'a, Me
         LoadState::Loaded(net) => {
             let mut net_data = column![].spacing(5);
             for net in &net.networks {
-                let header = text(format!("Adapter: {}", &net.name)).style(text::warning);
+                let header = text(fl!("net-adp", adp = net.name.clone())).style(text::warning);
                 let rows = vec![
-                    InfoRow::new("Operstate", Some(net.operstate.to_string())),
-                    InfoRow::new("Address", Some(net.address.clone())),
-                    InfoRow::new("Broadcast", Some(net.broadcast.clone())),
-                    InfoRow::new("MTU", Some(net.mtu.to_string())),
+                    InfoRow::new(fl!("net-os"), Some(net.operstate.to_string())),
+                    InfoRow::new(fl!("net-addr"), Some(net.address.clone())),
+                    InfoRow::new(fl!("net-bcast"), Some(net.broadcast.clone())),
+                    InfoRow::new(fl!("net-mtu"), Some(net.mtu.to_string())),
                 ];
                 net_data = net_data.push(header);
                 net_data =

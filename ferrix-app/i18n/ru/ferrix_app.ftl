@@ -242,6 +242,13 @@ kernel-avail-enthropy = Доступная энтропия
 kernel-mods-hdr = Загруженные модули ядра
 kernel-mods-is-empty = Модули ядра не загружены
 
+# NETWORK PAGE
+net-adp = Интерфейс: {$adp}
+net-os = Состояние
+net-addr = MAC адрес
+net-bcast = Broadcast
+net-mtu = MTU
+
 # RAM PAGE
 ram-total = Всего
 ram-free = Свободно

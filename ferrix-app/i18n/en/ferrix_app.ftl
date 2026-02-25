@@ -242,6 +242,13 @@ kernel-avail-enthropy = Available enthropy
 kernel-mods-hdr = Loaded kernel modules
 kernel-mods-is-empty = Kernel modules are not loaded
 
+# NETWORK PAGE
+net-adp = Interface: {$adp}
+net-os = Operstate
+net-addr = MAC Address
+net-bcast = Broadcast
+net-mtu = MTU
+
 # RAM PAGE
 ram-total = Total
 ram-free = Free
