@@ -337,6 +337,10 @@ sysd-hdr-load = Загружен
 sysd-hdr-actv = Активен
 sysd-hdr-work = Работает
 sysd-total = Всего сервисов: {$total}
+sysd-btime = Загрузка завершена за {$firm} (прошивка) + {$ldr} (загрузчик) + {$krn} (ядро) + {$uspc} (польз. простр-во) = {$total}
+sysd-btime-ldng = Время загрузки: вычисление...
+sysd-btime-err = Время загрузки: ошибка: {$err}
+sysd-btime-unk = Время загрузки: неизвестно
 
 # SOFTWARE PAGE
 soft-hdr-name = Имя

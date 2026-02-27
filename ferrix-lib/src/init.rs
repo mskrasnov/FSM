@@ -1,6 +1,6 @@
 /* init.rs
  *
- * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
 
 //! Get information about `systemd` services
 
-use std::fmt::Display;
-
-use anyhow::Result;
+use anyhow::{Result, anyhow};
+use libc::{CLOCK_MONOTONIC, CLOCK_REALTIME, clock_gettime, timespec};
 use serde::Serialize;
+use std::{fmt::Display, io::Error, mem::MaybeUninit};
 pub use zbus::{Connection, zvariant::OwnedObjectPath};
 use zbus_systemd::systemd1::ManagerProxy;
 
@@ -32,6 +32,7 @@ use crate::traits::*;
 /// A structure containing information about `systemd` services
 #[derive(Debug, Serialize, Clone)]
 pub struct SystemdServices {
+    pub timestamps: BootTimestamps,
     pub units: Vec<ServiceInfo>,
 }
 
@@ -39,12 +40,11 @@ impl SystemdServices {
     pub async fn new_from_connection(conn: &Connection) -> Result<Self> {
         let mgr = ManagerProxy::new(conn).await?;
         let mut units = vec![];
-
         for unit in mgr.list_units().await? {
             units.push(ServiceInfo::from(unit));
         }
-
-        Ok(Self { units })
+        let timestamps = BootTimestamps::get().await?;
+        Ok(Self { timestamps, units })
     }
 }
 
@@ -58,6 +58,92 @@ impl ToPlainText for SystemdServices {
         }
 
         s
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Default)]
+pub struct BootTimestamps {
+    pub firmware: u64,
+    pub loader: u64,
+    pub kernel: u64,
+    pub initrd_timestamp_mono: u64,
+    pub userspace: u64,
+    pub finish_timestamp_mono: u64,
+    pub total: u64,
+}
+
+impl BootTimestamps {
+    pub async fn get<'a>() -> Result<Self> {
+        let conn = zbus::Connection::system().await?;
+        let mgr = ManagerProxy::new(&conn).await?;
+        Ok(Self {
+            firmware: mgr.cached_firmware_timestamp_monotonic()?.unwrap_or(0),
+            loader: mgr.loader_timestamp_monotonic().await?,
+            kernel: mgr.kernel_timestamp().await?,
+            initrd_timestamp_mono: mgr.init_rd_timestamp_monotonic().await?,
+            userspace: mgr.userspace_timestamp_monotonic().await?,
+            finish_timestamp_mono: mgr.finish_timestamp_monotonic().await?,
+            total: 0,
+        })
+    }
+
+    pub fn calc_boot_time(&mut self) -> Result<()> {
+        if self.userspace == 0 || self.finish_timestamp_mono == 0 {
+            return Err(anyhow!("Failed to get system load time: not enough data"));
+        }
+        let userspace_usec = self.finish_timestamp_mono.saturating_sub(self.userspace);
+        let kernel_usec = if self.kernel > 0 {
+            let now_rt = get_clock_time(CLOCK_REALTIME)?;
+            let now_mono = get_clock_time(CLOCK_MONOTONIC)?;
+            let offset = now_rt.saturating_sub(now_mono);
+
+            let kernel_timestamp_mono = self.kernel.saturating_sub(offset);
+            self.userspace.saturating_sub(kernel_timestamp_mono)
+        } else {
+            0
+        };
+        // let initrd_usec = if self.initrd_timestamp_mono > 0 {
+        //     self.userspace_timestamp_mono
+        //         .saturating_sub(self.initrd_timestamp_mono)
+        // } else {
+        //     0
+        // };
+        let loader_usec = if self.loader > 0 {
+            if self.initrd_timestamp_mono > 0 {
+                self.initrd_timestamp_mono.saturating_sub(self.loader)
+            } else {
+                self.userspace.saturating_sub(self.loader)
+            }
+        } else {
+            0
+        };
+        let firmware_usec = if self.loader > 0 {
+            self.loader.saturating_sub(self.firmware)
+        } else {
+            0
+        };
+
+        self.firmware = firmware_usec;
+        self.loader = loader_usec;
+        self.kernel = kernel_usec;
+        self.userspace = userspace_usec;
+
+        self.total = firmware_usec + loader_usec + kernel_usec + userspace_usec;
+        Ok(())
+    }
+}
+
+fn get_clock_time(clock_id: i32) -> Result<u64> {
+    let mut tp = MaybeUninit::<timespec>::uninit();
+    let res = unsafe { clock_gettime(clock_id, tp.as_mut_ptr()) };
+    if res == 0 {
+        let tp = unsafe { tp.assume_init() };
+        Ok(tp.tv_sec as u64 * 1_000_000 + (tp.tv_nsec as u64 / 1_000))
+    } else {
+        Err(anyhow!(
+            "Failed to get clock_time: {}",
+            Error::last_os_error()
+        ))
     }
 }
 

@@ -122,7 +122,7 @@ impl From<&str> for Page {
             "users" => Self::Users,
             "groups" => Self::Groups,
             "misc" => Self::SystemMisc,
-            "systemd" => Self::SystemManager,
+            "init" | "sysd" | "systemd" => Self::SystemManager,
             "software" | "soft" | "pkg" | "pkgs" => Self::Software,
             "env" => Self::Environment,
             "sensors" => Self::Sensors,
@@ -330,7 +330,11 @@ impl<'a> Page {
             Self::SystemMisc => system::system_page(&state.data.system).into(),
             Self::Users => users::users_page(&state.data.users_list).into(),
             Self::Groups => groups::groups_page(&state.data.groups_list).into(),
-            Self::SystemManager => systemd::services_page(&state.data.sysd_services_list).into(),
+            Self::SystemManager => systemd::services_page(
+                &state.data.boot_time,
+                &state.data.sysd_services_list,
+            )
+            .into(),
             Self::Software => soft::soft_page(&state.data.installed_pkgs_list).into(),
             Self::Environment => env::env_page(&state.data.system).into(),
             Self::Settings => settings::settings_page(&state).into(),

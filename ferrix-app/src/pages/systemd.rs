@@ -23,7 +23,9 @@
 use crate::{
     Message, fl, load_state::DataLoadingState, messages::ButtonsMessage, widgets::table::hdr_name,
 };
-use ferrix_lib::init::{ActiveState, LoadState, ServiceInfo, SystemdServices, WorkState};
+use ferrix_lib::init::{
+    ActiveState, BootTimestamps, LoadState, ServiceInfo, SystemdServices, WorkState,
+};
 
 use iced::{
     Length,
@@ -31,6 +33,7 @@ use iced::{
 };
 
 pub fn services_page<'a>(
+    timestamps: &'a DataLoadingState<BootTimestamps>,
     services: &'a DataLoadingState<SystemdServices>,
 ) -> container::Container<'a, Message> {
     match services {
@@ -39,7 +42,7 @@ pub fn services_page<'a>(
             let table = container(srv_table(units)).style(container::rounded_box);
             let services_count = text(fl!("sysd-total", total = units.len()));
 
-            let layout = column![services_count, table,].spacing(5);
+            let layout = column![boot_time(timestamps), services_count, table,].spacing(5);
             container(
                 scrollable(layout)
                     .spacing(5)
@@ -48,6 +51,42 @@ pub fn services_page<'a>(
         }
         DataLoadingState::Error(why) => super::error_page(why),
         DataLoadingState::Loading => super::loading_page(),
+    }
+}
+
+fn fmt_dur(usec: u64) -> String {
+    if usec >= 1_000_000 {
+        format!("{:.3}s", usec as f64 / 1_000_000.)
+    } else if usec >= 1_000 {
+        format!("{:.3}ms", usec as f64 / 1_000.)
+    } else {
+        format!("{usec}μs")
+    }
+}
+
+fn boot_time<'a>(usec: &'a DataLoadingState<BootTimestamps>) -> text::Text<'a> {
+    match usec {
+        DataLoadingState::Loaded(usec) => match usec.total != 0 {
+            true => {
+                let firmware = fmt_dur(usec.firmware);
+                let loader = fmt_dur(usec.loader);
+                let kernel = fmt_dur(usec.kernel);
+                let userspace = fmt_dur(usec.userspace);
+                let total = fmt_dur(usec.total);
+
+                text(fl!(
+                    "sysd-btime",
+                    firm = firmware,
+                    ldr = loader,
+                    krn = kernel,
+                    uspc = userspace,
+                    total = total
+                ))
+            }
+            false => text(fl!("sysd-btime-unk")),
+        },
+        DataLoadingState::Loading => text(fl!("sysd-btime-ldng")),
+        DataLoadingState::Error(why) => text(fl!("sysd-btime-err", err = why)),
     }
 }
 

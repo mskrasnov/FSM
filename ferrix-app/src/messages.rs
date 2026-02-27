@@ -25,7 +25,7 @@ use ferrix_lib::{
     cpu::{Processors, Stat},
     cpu_freq::CpuFreq,
     drm::Video,
-    init::{Connection, SystemdServices},
+    init::{BootTimestamps, Connection, SystemdServices},
     net::Networks,
     parts::Mounts,
     ram::{RAM, Swaps},
@@ -147,7 +147,12 @@ pub enum DataReceiverMessage {
     GroupsDataReceived(DataLoadingState<Groups>),
 
     GetSystemdServices,
-    SystemdServicesReceived(DataLoadingState<SystemdServices>),
+    SystemdServicesReceived(
+        (
+            DataLoadingState<SystemdServices>,
+            DataLoadingState<BootTimestamps>,
+        ),
+    ),
 
     GetPackagesList,
     PackagesListReceived(DataLoadingState<InstalledPackages>),
@@ -541,22 +546,45 @@ impl DataReceiverMessage {
                 },
                 |val| Message::DataReceiver(Self::GroupsDataReceived(val)),
             ),
-            Self::SystemdServicesReceived(state) => {
-                fx.sysd_services_list = state;
+            Self::SystemdServicesReceived((sysd_services, boot_time)) => {
+                fx.sysd_services_list = sysd_services;
+                fx.boot_time = boot_time;
                 Task::none()
             }
             Self::GetSystemdServices => Task::perform(
                 async move {
                     let conn = Connection::session().await;
                     if let Err(why) = conn {
-                        return DataLoadingState::Error(why.to_string());
+                        return (
+                            DataLoadingState::Error(why.to_string()),
+                            DataLoadingState::Loading,
+                        );
                     }
                     let conn = conn.unwrap();
 
                     let srv_list = SystemdServices::new_from_connection(&conn).await;
                     match srv_list {
-                        Ok(srv_list) => DataLoadingState::Loaded(srv_list),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
+                        Ok(mut srv) => {
+                            if srv.timestamps.total == 0 {
+                                let a = srv.timestamps.calc_boot_time();
+                                if let Err(why) = a {
+                                    return (
+                                        DataLoadingState::Loaded(srv),
+                                        DataLoadingState::Error(why.to_string()),
+                                    );
+                                }
+                            }
+
+                            let boot_time = srv.timestamps;
+                            (
+                                DataLoadingState::Loaded(srv),
+                                DataLoadingState::Loaded(boot_time),
+                            )
+                        }
+                        Err(why) => (
+                            DataLoadingState::Error(why.to_string()),
+                            DataLoadingState::Error("".to_string()),
+                        ),
                     }
                 },
                 |val| Message::DataReceiver(Self::SystemdServicesReceived(val)),

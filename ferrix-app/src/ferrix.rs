@@ -29,7 +29,7 @@ use ferrix_lib::{
     cpu::{Processors, Stat},
     cpu_freq::CpuFreq,
     drm::Video,
-    init::SystemdServices,
+    init::{SystemdServices, BootTimestamps},
     net::Networks,
     parts::Mounts,
     ram::{RAM, Swaps},
@@ -121,6 +121,7 @@ pub struct FerrixData {
     pub users_list: LoadState<Users>,
     pub groups_list: LoadState<Groups>,
     pub sysd_services_list: LoadState<SystemdServices>,
+    pub boot_time: LoadState<BootTimestamps>,
     pub installed_pkgs_list: LoadState<InstalledPackages>,
     pub system: LoadState<crate::System>,
 }
@@ -158,6 +159,7 @@ impl Default for FerrixData {
             users_list: LoadState::default(),
             groups_list: LoadState::default(),
             sysd_services_list: LoadState::default(),
+            boot_time: LoadState::default(),
             installed_pkgs_list: LoadState::default(),
             system: LoadState::default(),
         }
