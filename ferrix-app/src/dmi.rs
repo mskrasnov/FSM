@@ -77,7 +77,6 @@ pub async fn get_dmi_data() -> LoadState<DMIData> {
 
     let output =
         task::spawn_blocking(move || Command::new(auth_app).arg(fx_app).arg("dmi").output()).await;
-    dbg!(&output);
 
     if let Err(why) = output {
         return LoadState::Error(why.to_string());
