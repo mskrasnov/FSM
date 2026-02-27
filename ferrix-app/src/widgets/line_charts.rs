@@ -160,12 +160,19 @@ impl LineChart {
 
         for line in &self.data {
             let last = line.data.len() - 1;
+            let percent = line.data[last];
             items.push(
                 row![
                     text(format!("{}:", &line.name))
                         .color(to_icolor(line.color))
                         .font(bold_font),
-                    text(format!("{:.2}%", line.data[last])),
+                    text(format!("{percent:.2}%")).style(move |t| if percent > 90. {
+                        text::danger(t)
+                    } else if percent > 70. {
+                        text::warning(t)
+                    } else {
+                        text::default(t)
+                    }),
                 ]
                 .spacing(3),
             );
