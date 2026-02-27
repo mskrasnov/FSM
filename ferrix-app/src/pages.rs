@@ -217,7 +217,7 @@ impl<'a> Page {
 
     pub fn next_page(&self) -> Self {
         let mut id = self.page_num() + 1;
-        if id > 21 {
+        if id > Self::About.page_num() {
             id = 0;
         }
         Self::from(id)
