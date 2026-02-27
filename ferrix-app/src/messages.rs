@@ -49,6 +49,7 @@ use crate::{
     export::{ExportData, ExportFormat, ExportMode},
     ferrix::{Ferrix, FerrixData},
     settings::{ChartLineThickness, FXSettings, Style},
+    styles::CPU_CHARTS_COLORS,
     utils::{ToColor, get_home},
     widgets::line_charts::LineSeries,
 };
@@ -228,7 +229,7 @@ impl DataReceiverMessage {
                 let len = curr_proc.cpus.len();
 
                 let colors_set = &settings.chart_colors.colors;
-                let def_colors = &settings.chart_colors.default_colors;
+                let def_colors = CPU_CHARTS_COLORS;
 
                 for id in 0..len {
                     let percent =
@@ -244,7 +245,7 @@ impl DataReceiverMessage {
                                     if def_colors.len() - 1 < id {
                                         color!(255, 255, 255)
                                     } else {
-                                        def_colors[id].to_color()
+                                        def_colors[id]
                                     }
                                 }
                             }
@@ -410,7 +411,7 @@ impl DataReceiverMessage {
                 let ram_usage = ram.usage_percentage().unwrap_or(0.);
 
                 let colors_set = &settings.chart_colors.colors;
-                let def_colors = &settings.chart_colors.default_colors;
+                let def_colors = CPU_CHARTS_COLORS;
                 let ram_color = match colors_set.get("RAM") {
                     Some(col) => col.to_color(),
                     None => color!(128, 64, 255),
@@ -421,7 +422,6 @@ impl DataReceiverMessage {
                         format!("RAM"),
                         ram_color,
                         fx.show_chart_elements,
-                        // fx.show_chart_elements,
                     );
                     ram_line.push(ram_usage);
                     fx.ram_usage_chart.push_series(ram_line);
@@ -445,7 +445,7 @@ impl DataReceiverMessage {
                                     if def_colors.len() - 1 < id {
                                         color!(255, 255, 128)
                                     } else {
-                                        def_colors[id].to_color()
+                                        def_colors[id]
                                     }
                                 }
                             };

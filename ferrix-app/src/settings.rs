@@ -142,7 +142,7 @@ impl Display for ChartLineThickness {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChartColors {
     pub colors: HashMap<String, (u8, u8, u8)>,
-    pub default_colors: Vec<(u8, u8, u8)>,
+    // pub default_colors: Vec<(u8, u8, u8)>,
 }
 
 impl Default for ChartColors {
@@ -159,15 +159,13 @@ impl Default for ChartColors {
                 }
                 colors
             },
-            default_colors: CPU_CHARTS_COLORS
-                .iter()
-                .map(|c| {
-                    let c = c.into_rgba8();
-                    (c[0], c[1], c[2])
-                })
-                .collect(),
+            // default_colors: CPU_CHARTS_COLORS
+            //     .iter()
+            //     .map(|c| {
+            //         let c = c.into_rgba8();
+            //         (c[0], c[1], c[2])
+            //     })
+            //     .collect(),
         }
     }
 }
-
-impl ChartColors {}
