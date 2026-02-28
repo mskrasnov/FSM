@@ -91,29 +91,25 @@ impl BootTimestamps {
         if self.userspace == 0 || self.finish_timestamp_mono == 0 {
             return Err(anyhow!("Failed to get system load time: not enough data"));
         }
-        let userspace_usec = self.finish_timestamp_mono.saturating_sub(self.userspace);
-        let kernel_usec = if self.kernel > 0 {
+        let offset = {
             let now_rt = get_clock_time(CLOCK_REALTIME)?;
             let now_mono = get_clock_time(CLOCK_MONOTONIC)?;
-            let offset = now_rt.saturating_sub(now_mono);
+            now_rt.saturating_sub(now_mono)
+        };
 
+        let userspace_usec = self.finish_timestamp_mono.saturating_sub(self.userspace);
+        let kernel_usec = if self.kernel > 0 {
             let kernel_timestamp_mono = self.kernel.saturating_sub(offset);
             self.userspace.saturating_sub(kernel_timestamp_mono)
         } else {
             0
         };
-        // let initrd_usec = if self.initrd_timestamp_mono > 0 {
-        //     self.userspace_timestamp_mono
-        //         .saturating_sub(self.initrd_timestamp_mono)
-        // } else {
-        //     0
-        // };
         let loader_usec = if self.loader > 0 {
-            if self.initrd_timestamp_mono > 0 {
-                self.initrd_timestamp_mono.saturating_sub(self.loader)
-            } else {
+            // if self.initrd_timestamp_mono > 0 {
+            //     self.initrd_timestamp_mono.saturating_sub(self.loader)
+            // } else {
                 self.userspace.saturating_sub(self.loader)
-            }
+            // }
         } else {
             0
         };
