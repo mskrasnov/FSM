@@ -20,20 +20,14 @@
 
 //! Pages with information about hardware and software
 
+use crate::{Message, ferrix::Ferrix, fl, icons::ERROR_ICON, widgets::header_text};
 use iced::{
-    Alignment::{self, Center},
+    Alignment::Center,
     Element,
-    widget::{center, column, container, row, rule, svg::Handle, text},
+    widget::{center, column, container, row, svg::Handle, text},
 };
 
-use crate::{
-    Message,
-    ferrix::Ferrix,
-    fl,
-    icons::ERROR_ICON,
-    widgets::{header_text, link_button},
-};
-
+mod about;
 mod battery;
 mod cpu;
 mod cpu_freq;
@@ -330,16 +324,14 @@ impl<'a> Page {
             Self::SystemMisc => system::system_page(&state.data.system).into(),
             Self::Users => users::users_page(&state.data.users_list).into(),
             Self::Groups => groups::groups_page(&state.data.groups_list).into(),
-            Self::SystemManager => systemd::services_page(
-                &state.data.boot_time,
-                &state.data.sysd_services_list,
-            )
-            .into(),
+            Self::SystemManager => {
+                systemd::services_page(&state.data.boot_time, &state.data.sysd_services_list).into()
+            }
             Self::Software => soft::soft_page(&state.data.installed_pkgs_list).into(),
             Self::Environment => env::env_page(&state.data.system).into(),
             Self::Settings => settings::settings_page(&state).into(),
             Self::Export => export::export_page().into(),
-            Self::About => self.about_page().into(),
+            Self::About => about::about_page().into(),
             _ => self.todo_page(),
         };
 
@@ -351,79 +343,6 @@ impl<'a> Page {
             text(fl!("page-todo-msg")).size(16).style(text::secondary),
         ))
         .into()
-    }
-
-    fn about_page(&'a self) -> container::Container<'a, Message> {
-        let img = iced::widget::svg("/usr/share/Ferrix/com.mskrasnov.Ferrix.svg")
-            .width(128)
-            .height(128);
-        let header = row![
-            img,
-            column![
-                text(fl!("about-hdr")).size(24),
-                text(format!(
-                    "{}: {}, {}: {}",
-                    fl!("about-ferrix"),
-                    env!("CARGO_PKG_VERSION"),
-                    fl!("about-flib"),
-                    ferrix_lib::FX_LIB_VERSION,
-                ))
-                .size(14),
-            ]
-            .spacing(5),
-        ]
-        .align_y(Center)
-        .spacing(5);
-
-        let about_info = row![
-            column![
-                text(fl!("about-author-hdr")).style(text::secondary),
-                text(fl!("about-feedback-hdr")).style(text::secondary),
-                text(fl!("about-source-hdr")).style(text::secondary),
-                text("crates.io:").style(text::secondary),
-                text(fl!("about-blog")).style(text::secondary),
-            ]
-            .align_x(Alignment::End)
-            .spacing(3),
-            column![
-                row![
-                    text(fl!("about-author")),
-                    link_button("(GitHub)", "https://github.com/mskrasnov"),
-                ]
-                .spacing(5),
-                link_button("mskrasnov07 at ya dot ru", "mailto:mskrasnov07@ya.ru"),
-                link_button("GitHub", "https://github.com/mskrasnov/Ferrix"),
-                row![
-                    link_button("ferrix-app", "https://crates.io/crates/ferrix-app"),
-                    text(", "),
-                    link_button("ferrix-lib", "https://crates.io/crates/ferrix-lib"),
-                ],
-                link_button("mskrasnov", "https://boosty.to/mskrasnov"),
-            ]
-            .spacing(3),
-        ]
-        .spacing(5);
-
-        let donate = column![
-            text(fl!("about-donate")),
-            link_button(fl!("about-donate-lbl"), "https://boosty.to/mskrasnov"),
-        ]
-        .spacing(5);
-
-        let contents = column![
-            column![header, rule::horizontal(1)].spacing(2),
-            about_info,
-            row![
-                text(fl!("about-support")).style(text::warning).size(16),
-                rule::horizontal(1)
-            ]
-            .align_y(Center)
-            .spacing(5),
-            donate,
-        ]
-        .spacing(5);
-
-        container(contents)
     }
 }
 
