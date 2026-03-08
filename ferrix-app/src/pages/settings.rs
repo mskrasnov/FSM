@@ -25,19 +25,19 @@ use crate::{
     fl,
     messages::{ButtonsMessage, Message, SettingsMessage},
     settings::{ChartLineThickness, Style},
-    widgets::icon_tooltip,
+    widgets::items_list::{items_group, items_list_container, list_header, list_item},
 };
 use iced::{
     Alignment::Center,
-    Element, Pixels,
-    widget::{button, center, column, container, pick_list, row, rule, slider, space, text},
+    Element,
+    widget::{button, center, column, container, pick_list, row, slider, space, text},
 };
 use std::ops::RangeInclusive;
 
 pub fn settings_page<'a>(state: &'a Ferrix) -> Element<'a, Message> {
-    let update_changer = settings_group(
+    let update_changer = items_group(
         column![
-            settings_item(
+            list_item(
                 fl!("settings-uper-main"),
                 time_slider(
                     1..=15,
@@ -46,7 +46,7 @@ pub fn settings_page<'a>(state: &'a Ferrix) -> Element<'a, Message> {
                     |per| { Message::Settings(SettingsMessage::ChangeUpdatePeriod(per)) }
                 ),
             ),
-            settings_item(
+            list_item(
                 fl!("page-sysmon"),
                 time_slider(
                     1..=15,
@@ -73,19 +73,19 @@ pub fn settings_page<'a>(state: &'a Ferrix) -> Element<'a, Message> {
     )
     .padding(3);
 
-    let theme_changer = settings_group(
+    let theme_changer = items_group(
         column![
-            settings_item(fl!("settings-look-select"), theme_selector),
-            settings_item(fl!("settings-look-thick"), chart_line_thick_selector),
+            list_item(fl!("settings-look-select"), theme_selector),
+            list_item(fl!("settings-look-thick"), chart_line_thick_selector),
         ]
         .spacing(5),
     );
 
-    let layout = settings_container(
+    let layout = items_list_container(
         column![
-            settings_header(fl!("settings-update-period"), fl!("settings-uperiod-tip")),
+            list_header(fl!("settings-update-period"), fl!("settings-uperiod-tip")),
             update_changer,
-            settings_header(fl!("settings-look"), fl!("settings-look-tip")),
+            list_header(fl!("settings-look"), fl!("settings-look-tip")),
             theme_changer,
             row![
                 space::horizontal(),
@@ -96,53 +96,6 @@ pub fn settings_page<'a>(state: &'a Ferrix) -> Element<'a, Message> {
         .spacing(5),
     );
     layout
-}
-
-fn settings_container<'a, Message: Clone + 'a>(
-    contents: impl Into<Element<'a, Message>>,
-) -> Element<'a, Message> {
-    row![
-        space::horizontal(),
-        container(contents.into())
-            .width(450)
-            .max_width(Pixels(550.)),
-        space::horizontal(),
-    ]
-    .align_y(Center)
-    .into()
-}
-
-fn settings_group<'a, Message: Clone + 'a>(
-    contents: impl Into<Element<'a, Message>>,
-) -> Element<'a, Message> {
-    container(contents.into())
-        .style(container::bordered_box)
-        .padding(5)
-        .into()
-}
-
-fn settings_item<'a, T, C, Message>(header: T, contents: C) -> Element<'a, Message>
-where
-    T: text::IntoFragment<'a>,
-    C: Into<Element<'a, Message>>,
-    Message: Clone + 'a,
-{
-    row![text(header), space::horizontal(), contents.into()]
-        .align_y(Center)
-        .into()
-}
-
-fn settings_header<'a, T>(header: T, tooltip: T) -> row::Row<'a, Message>
-where
-    T: text::IntoFragment<'a>,
-{
-    row![
-        text(header).size(16),
-        icon_tooltip("about", tooltip),
-        rule::horizontal(1.)
-    ]
-    .spacing(5)
-    .align_y(Center)
 }
 
 fn time_slider<'a, D, Message>(
