@@ -38,13 +38,13 @@ pub fn export_page<'a>(export_mgr: &'a ExportManager) -> Element<'a, Message> {
     let export_settings_changer = items_group(
         column![
             list_item(
-                "Формат экспорта",
+                fl!("export-fmt-lbl"),
                 pick_list(ExportFormat::ALL, Some(export_mgr.format), |format| {
                     Message::ExportManager(ExportManagerMessage::FormatSelected(format))
                 })
             ),
             list_item(
-                "Тип экспортируемых данных",
+                fl!("export-data-lbl"),
                 pick_list(ExportMode::ALL, Some(export_mgr.mode), |mode| {
                     Message::ExportManager(ExportManagerMessage::ModeSelected(mode))
                 })
@@ -63,9 +63,9 @@ pub fn export_page<'a>(export_mgr: &'a ExportManager) -> Element<'a, Message> {
         row![
             text(export_mgr.status.to_string()),
             space::horizontal(),
-            button("Экспорт").on_press(Message::ExportManager(ExportManagerMessage::ExportData(
-                export_mgr.output_path.clone(),
-            ))),
+            button(text(fl!("export-btn"))).on_press(Message::ExportManager(
+                ExportManagerMessage::ExportData(export_mgr.output_path.clone(),)
+            )),
         ]
         .align_y(Center),
     );
@@ -75,7 +75,7 @@ pub fn export_page<'a>(export_mgr: &'a ExportManager) -> Element<'a, Message> {
 
 fn export_pages_list<'a>(pages: &'a ExportPages) -> container::Container<'a, Message> {
     let list = column![
-        text("Выберите нужную информацию, которая будет экспортирована:"),
+        text(fl!("export-data-list")),
         checkbox(pages.proc)
             .label(fl!("page-procs"))
             .on_toggle(|_| Message::ExportManager(ExportManagerMessage::PageAdded(

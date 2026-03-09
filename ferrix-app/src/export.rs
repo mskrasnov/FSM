@@ -20,7 +20,7 @@
 
 //! Export manager
 
-use crate::{dmi::DMIData, ferrix::FerrixData, load_state::LoadState};
+use crate::{dmi::DMIData, ferrix::FerrixData, fl, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
@@ -53,13 +53,13 @@ pub enum ExportStatus {
 impl Display for ExportStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Pending => write!(f, "Status: Pending..."),
-            Self::LoadingData => write!(f, "Status: Loading data..."),
-            Self::ErrorLoadingData(err) => write!(f, "Status: Loading data error: {}", err),
-            Self::SerializingStructure => write!(f, "Status: Processing data..."),
-            Self::ErrorSerializing(err) => write!(f, "Status: Data error: {}", err),
-            Self::WritingData => write!(f, "Status: Writing data..."),
-            Self::ErrorWritingData(err) => write!(f, "Status: Write error: {}", err),
+            Self::Pending => write!(f, "{}", fl!("export-st-pending")),
+            Self::LoadingData => write!(f, "{}", fl!("export-st-load")),
+            Self::ErrorLoadingData(err) => write!(f, "{}", fl!("export-st-lerr", err = err)),
+            Self::SerializingStructure => write!(f, "{}", fl!("export-st-ser")),
+            Self::ErrorSerializing(err) => write!(f, "{}", fl!("export-st-serr", err = err)),
+            Self::WritingData => write!(f, "{}", fl!("export-st-wr")),
+            Self::ErrorWritingData(err) => write!(f, "{}", fl!("export-st-werr", err = err)),
         }
     }
 }

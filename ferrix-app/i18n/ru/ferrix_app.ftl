@@ -365,3 +365,16 @@ vuln-hdr-descr = Описание
 # LINE THICKNESS LABELS
 lthick-one = Один
 lthick-two = Два
+
+# EXPORT PAGE
+export-fmt-lbl = Формат экспорта
+export-data-lbl = Тип экспортируемых данных
+export-btn = Экспорт
+export-data-list = Выберите необходимые данные для экспорта
+export-st-pending = Статус: Ожидание...
+export-st-load = Статус: Загрузка данных...
+export-st-lerr = Статус: Ошибка загрузки: {$err}
+export-st-ser = Статус: Обработка данных...
+export-st-serr = Статус: Ошибка обработки: {$err}
+export-st-wr = Статус: Запись данных...
+export-st-werr = Статус: Ошибка записи: {$err}
