@@ -372,8 +372,9 @@ impl DataReceiverMessage {
                 Task::none()
             }
             Self::GetDMIData => {
-                if (!fx.is_polkit && fx.dmi_data.is_none() && cur_page == Page::DMI)
-                    || (export.selected_pages.dmi && !fx.is_polkit)
+                if !fx.is_polkit
+                    && ((fx.dmi_data.is_none() && cur_page == Page::DMI)
+                        || export.selected_pages.dmi)
                 {
                     fx.is_polkit = true;
                     Task::perform(async move { crate::dmi::get_dmi_data().await }, |val| {
