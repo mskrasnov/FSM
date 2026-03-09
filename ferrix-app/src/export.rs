@@ -48,6 +48,7 @@ pub enum ExportStatus {
     ErrorSerializing(String),
     WritingData,
     ErrorWritingData(String),
+    Complete,
 }
 
 impl Display for ExportStatus {
@@ -60,6 +61,7 @@ impl Display for ExportStatus {
             Self::ErrorSerializing(err) => write!(f, "{}", fl!("export-st-serr", err = err)),
             Self::WritingData => write!(f, "{}", fl!("export-st-wr")),
             Self::ErrorWritingData(err) => write!(f, "{}", fl!("export-st-werr", err = err)),
+            Self::Complete => write!(f, "OK"),
         }
     }
 }
