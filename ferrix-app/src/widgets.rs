@@ -33,6 +33,7 @@ pub mod card;
 pub mod line_charts;
 pub mod table;
 pub mod separated_view;
+pub mod items_list;
 
 use crate::{
     icons::{ABOUT_ICON, ERROR_ICON, EXPORT_ICON, SETTINGS_ICON},
