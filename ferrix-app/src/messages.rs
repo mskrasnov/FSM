@@ -46,8 +46,9 @@ use iced::{
 use crate::{
     DataLoadingState, Page, SETTINGS_PATH, System,
     dmi::DMIData,
-    export::{ExportData, ExportFormat, ExportMode},
-    ferrix::{Ferrix, FerrixData},
+    export::{ExportData, ExportFormat, ExportMode, ExportStatus},
+    ferrix::{ExportManager, Ferrix, FerrixData},
+    load_state::LoadState,
     settings::{ChartLineThickness, FXSettings, Style},
     styles::CPU_CHARTS_COLORS,
     utils::{ToColor, get_home},
@@ -69,9 +70,12 @@ pub enum Message {
 impl Message {
     pub fn update<'a>(self, state: &'a mut Ferrix) -> Task<Message> {
         match self {
-            Self::DataReceiver(data) => {
-                data.update(&mut state.data, &mut state.settings, state.current_page)
-            }
+            Self::DataReceiver(data) => data.update(
+                &mut state.data,
+                &mut state.settings,
+                &mut state.export_manager,
+                state.current_page,
+            ),
             Self::ExportManager(export) => export.update(state),
             Self::Settings(settings) => settings.update(state),
             Self::Buttons(buttons) => buttons.update(state),
@@ -87,12 +91,18 @@ impl Ferrix {
     fn select_page(&mut self, page: Page) -> Task<Message> {
         self.current_page = page;
         self.scrolled_area_id = page.scrolled_list_id();
+
+        if page == Page::Export {
+            self.export_manager.status = ExportStatus::LoadingData;
+        }
         Task::none()
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum DataReceiverMessage {
+    ClearAllData, // NOTE: run this BEFORE export!!!
+
     GetCPUData,
     CPUDataReceived(DataLoadingState<Processors>),
 
@@ -167,9 +177,36 @@ impl DataReceiverMessage {
         self,
         fx: &'a mut FerrixData,
         settings: &'a mut FXSettings,
+        export: &'a mut ExportManager,
         cur_page: Page,
     ) -> Task<Message> {
         match self {
+            Self::ClearAllData => {
+                export.status = ExportStatus::LoadingData;
+
+                fx.is_polkit = false;
+                fx.proc_data = LoadState::Loading;
+                fx.cpu_freq = LoadState::Loading;
+                fx.cpu_vulnerabilities = LoadState::Loading;
+                fx.ram_data = LoadState::Loading;
+                fx.swap_data = LoadState::Loading;
+                fx.storages = LoadState::Loading;
+                fx.networks = LoadState::Loading;
+                fx.dmi_data = LoadState::Loading;
+                fx.bat_data = LoadState::Loading;
+                fx.drm_data = LoadState::Loading;
+                fx.osrel_data = LoadState::Loading;
+                fx.kernel_data = LoadState::Loading;
+                fx.kmods_data = LoadState::Loading;
+                fx.users_list = LoadState::Loading;
+                fx.groups_list = LoadState::Loading;
+                fx.sysd_services_list = LoadState::Loading;
+                fx.boot_time = LoadState::Loading;
+                fx.installed_pkgs_list = LoadState::Loading;
+                fx.system = LoadState::Loading;
+
+                Task::none()
+            }
             Self::CPUDataReceived(state) => {
                 fx.proc_data = state;
                 Task::none()
@@ -418,11 +455,8 @@ impl DataReceiverMessage {
                 };
 
                 if fx.ram_usage_chart.series_count() == 0 {
-                    let mut ram_line = LineSeries::new(
-                        format!("RAM"),
-                        ram_color,
-                        fx.show_chart_elements,
-                    );
+                    let mut ram_line =
+                        LineSeries::new(format!("RAM"), ram_color, fx.show_chart_elements);
                     ram_line.push(ram_usage);
                     fx.ram_usage_chart.push_series(ram_line);
                 } else {
@@ -626,25 +660,75 @@ pub type ExportToFilePath = String;
 #[derive(Debug, Clone)]
 pub enum ExportManagerMessage {
     ExportData(ExportToFilePath),
-    ExportFormatSelected(ExportFormat),
-    ExportModeSelected(ExportMode),
+    FormatSelected(ExportFormat),
+    ModeSelected(ExportMode),
+    PageAdded(Page),
+    // GetPagesData,
 }
 
 impl ExportManagerMessage {
     pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
         match self {
             Self::ExportData(path) => fx.export_data(&path),
-            _ => Task::none(),
+            Self::FormatSelected(format) => fx.set_export_format(format),
+            Self::ModeSelected(mode) => fx.set_export_mode(mode),
+            Self::PageAdded(page) => fx.add_page_to_export_queue(page),
         }
     }
 }
 
 impl Ferrix {
     fn export_data(&mut self, path: &str) -> Task<Message> {
-        let json = ExportData::from(self)
-            .to_json()
-            .unwrap_or("{error}".to_string());
+        self.export_manager.status = ExportStatus::LoadingData;
+
+        self.export_manager.status = ExportStatus::SerializingStructure;
+        let export_data = ExportData::from(&self.data);
+        let json = match self.export_manager.format {
+            ExportFormat::CompressedJson => export_data.to_json().unwrap_or("{error}".to_string()),
+            _ => export_data
+                .to_json_pretty()
+                .unwrap_or("{error}".to_string()),
+        };
         let _ = std::fs::write(path, json);
+        Task::none()
+    }
+
+    fn set_export_format(&mut self, format: ExportFormat) -> Task<Message> {
+        self.export_manager.format = format;
+        Task::none()
+    }
+
+    fn set_export_mode(&mut self, mode: ExportMode) -> Task<Message> {
+        self.export_manager.mode = mode;
+        Task::none()
+    }
+
+    fn add_page_to_export_queue(&mut self, page: Page) -> Task<Message> {
+        if page.is_special() {
+            return Task::none();
+        }
+        let export = &mut self.export_manager.selected_pages;
+        match page {
+            Page::Processors => export.proc = !export.proc,
+            Page::CPUFrequency => export.cpu_freq = !export.cpu_freq,
+            Page::CPUVulnerabilities => export.cpu_vuln = !export.cpu_vuln,
+            Page::Memory => export.mem = !export.mem,
+            Page::FileSystems => export.fs = !export.fs,
+            Page::Network => export.net = !export.net,
+            Page::DMI => export.dmi = !export.dmi,
+            Page::Battery => export.bat = !export.bat,
+            Page::Screen => export.screen = !export.screen,
+            Page::Distro => export.distro = !export.distro,
+            Page::Users => export.users = !export.users,
+            Page::Groups => export.groups = !export.groups,
+            Page::Environment => export.env = !export.env,
+            Page::SystemManager => export.sys_mgr = !export.sys_mgr,
+            Page::Software => export.soft = !export.soft,
+            Page::Kernel => export.kernel = !export.kernel,
+            Page::KModules => export.kmods = !export.kmods,
+            Page::SystemMisc => export.sysmisc = !export.sysmisc,
+            _ => {}
+        }
         Task::none()
     }
 }

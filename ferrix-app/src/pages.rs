@@ -176,6 +176,52 @@ impl From<usize> for Page {
 }
 
 impl<'a> Page {
+    pub const ALL: &'a [Self] = &[
+        Self::Dashboard,
+        Self::SystemMonitor,
+        Self::Processors,
+        Self::CPUFrequency,
+        Self::CPUVulnerabilities,
+        Self::Memory,
+        Self::FileSystems,
+        Self::Network,
+        Self::DMI,
+        Self::Battery,
+        Self::Screen,
+        Self::Distro,
+        Self::Users,
+        Self::Groups,
+        Self::Environment,
+        Self::SystemManager,
+        Self::Software,
+        Self::Kernel,
+        Self::KModules,
+        Self::SystemMisc,
+        Self::Export,
+        Self::Settings,
+        Self::About,
+    ];
+
+    pub fn is_special(&self) -> bool {
+        *self == Self::Dashboard
+            || *self == Self::SystemMonitor
+            || *self == Self::Export
+            || *self == Self::Export
+            || *self == Self::Settings
+            || *self == Self::About
+    }
+
+    pub fn non_special_pages(&self) -> Vec<Self> {
+        let mut pages = Vec::with_capacity(Self::ALL.len());
+        for page in Self::ALL {
+            if !page.is_special() {
+                pages.push(*page);
+            }
+        }
+        pages.shrink_to_fit();
+        pages
+    }
+
     pub fn title(&'a self) -> iced::widget::Column<'a, Message> {
         header_text(self.title_str())
     }
@@ -330,7 +376,7 @@ impl<'a> Page {
             Self::Software => soft::soft_page(&state.data.installed_pkgs_list).into(),
             Self::Environment => env::env_page(&state.data.system).into(),
             Self::Settings => settings::settings_page(&state).into(),
-            Self::Export => export::export_page().into(),
+            Self::Export => export::export_page(&state.export_manager).into(),
             Self::About => about::about_page().into(),
             _ => self.todo_page(),
         };

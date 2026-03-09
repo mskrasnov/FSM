@@ -21,15 +21,23 @@
 //! Data from `ferrix-lib`
 
 use crate::{
-    SETTINGS_PATH, dmi::DMIData, load_state::LoadState, messages::Message, pages::Page,
-    settings::FXSettings, sidebar::sidebar, utils::get_home, widgets::line_charts::LineChart,
+    SETTINGS_PATH,
+    dmi::DMIData,
+    export::{ExportData, ExportFormat, ExportMode, ExportPages, ExportStatus},
+    load_state::LoadState,
+    messages::Message,
+    pages::Page,
+    settings::FXSettings,
+    sidebar::sidebar,
+    utils::get_home,
+    widgets::line_charts::LineChart,
 };
 use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
     cpu_freq::CpuFreq,
     drm::Video,
-    init::{SystemdServices, BootTimestamps},
+    init::{BootTimestamps, SystemdServices},
     net::Networks,
     parts::Mounts,
     ram::{RAM, Swaps},
@@ -45,6 +53,7 @@ pub struct Ferrix {
     pub settings: FXSettings,
     pub data: FerrixData,
     pub scrolled_area_id: Option<&'static str>,
+    pub export_manager: ExportManager,
 }
 
 impl Default for Ferrix {
@@ -62,6 +71,7 @@ impl Default for Ferrix {
             settings: settings.clone(),
             data: FerrixData::new(&settings),
             scrolled_area_id: None,
+            export_manager: ExportManager::default(),
         }
     }
 }
@@ -183,6 +193,29 @@ impl FerrixData {
             cpu_usage_chart,
             ram_usage_chart,
             ..Default::default()
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ExportManager {
+    pub output_path: String,
+    pub format: ExportFormat,
+    pub mode: ExportMode,
+    pub selected_pages: ExportPages,
+    pub export_data: ExportData,
+    pub status: ExportStatus,
+}
+
+impl Default for ExportManager {
+    fn default() -> Self {
+        Self {
+            output_path: "export.json".to_string(),
+            format: ExportFormat::default(),
+            mode: ExportMode::default(),
+            selected_pages: ExportPages::default(),
+            export_data: ExportData::default(),
+            status: ExportStatus::default(),
         }
     }
 }

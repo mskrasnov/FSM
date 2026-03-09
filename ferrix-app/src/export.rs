@@ -1,6 +1,6 @@
 /* export.rs
  *
- * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,23 +20,28 @@
 
 //! Export manager
 
-use std::fmt::Display;
-
+use crate::{dmi::DMIData, ferrix::FerrixData, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
+    cpu_freq::CpuFreq,
     drm::Video,
-    init::SystemdServices,
-    ram::RAM,
+    init::{BootTimestamps, SystemdServices},
+    net::Networks,
+    parts::Mounts,
+    ram::{RAM, Swaps},
+    soft::InstalledPackages,
     sys::{Groups, KModules, Kernel, OsRelease, Users},
     traits::ToJson,
+    vulnerabilities::Vulnerabilities,
 };
 use serde::Serialize;
+use std::fmt::Display;
 
-use crate::DataLoadingState;
-
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub enum ExportStatus {
+    #[default]
+    Pending,
     LoadingData,
     ErrorLoadingData(String),
     SerializingStructure,
@@ -45,14 +50,36 @@ pub enum ExportStatus {
     ErrorWritingData(String),
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+impl Display for ExportStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Pending => write!(f, "Status: Pending..."),
+            Self::LoadingData => write!(f, "Status: Loading data..."),
+            Self::ErrorLoadingData(err) => write!(f, "Status: Loading data error: {}", err),
+            Self::SerializingStructure => write!(f, "Status: Processing data..."),
+            Self::ErrorSerializing(err) => write!(f, "Status: Data error: {}", err),
+            Self::WritingData => write!(f, "Status: Writing data..."),
+            Self::ErrorWritingData(err) => write!(f, "Status: Write error: {}", err),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Default)]
 pub enum ExportFormat {
+    #[default]
     CompressedJson,
     HumanJson,
+    XML,
+    PlainText,
 }
 
 impl ExportFormat {
-    pub const ALL: &[Self] = &[Self::CompressedJson, Self::HumanJson];
+    pub const ALL: &[Self] = &[
+        Self::CompressedJson,
+        Self::HumanJson,
+        Self::XML,
+        Self::PlainText,
+    ];
 }
 
 impl Display for ExportFormat {
@@ -63,14 +90,17 @@ impl Display for ExportFormat {
             match self {
                 Self::CompressedJson => "Compressed JSON",
                 Self::HumanJson => "Human-readable JSON",
+                Self::XML => "XML",
+                Self::PlainText => "Plain Text (*.txt)",
             }
         )
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Default)]
 pub enum ExportMode {
     AllData,
+    #[default]
     Selected,
 }
 
@@ -91,63 +121,138 @@ impl Display for ExportMode {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
-#[serde(untagged)]
-pub enum ExportMember<'a, T> {
-    Data { data: Option<&'a T> },
-    Error { error_text: String },
+#[derive(Debug, Clone, Copy)]
+pub struct ExportPages {
+    pub proc: bool,
+    pub cpu_freq: bool,
+    pub cpu_vuln: bool,
+    pub mem: bool,
+    pub fs: bool,
+    pub net: bool,
+    pub dmi: bool,
+    pub bat: bool,
+    pub screen: bool,
+    pub distro: bool,
+    pub users: bool,
+    pub groups: bool,
+    pub env: bool,
+    pub sys_mgr: bool,
+    pub soft: bool,
+    pub kernel: bool,
+    pub kmods: bool,
+    pub sysmisc: bool,
 }
 
-impl<'a, T> From<&'a DataLoadingState<T>> for ExportMember<'a, T> {
-    fn from(value: &'a DataLoadingState<T>) -> Self {
-        match value {
-            DataLoadingState::Loaded(data) => Self::Data { data: Some(data) },
-            DataLoadingState::Loading => Self::Data { data: None },
-            DataLoadingState::Error(why) => Self::Error {
-                error_text: why.clone(),
-            },
-        }
-    }
-}
-
-fn get_data<'a, T>(data: &'a DataLoadingState<T>) -> Option<ExportMember<'a, T>> {
-    if let DataLoadingState::Loading = data {
-        return None;
-    }
-    Some(ExportMember::from(data))
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct ExportData<'a> {
-    pub cpu: Option<ExportMember<'a, Processors>>,
-    pub ram: Option<ExportMember<'a, RAM>>,
-    pub battery: Option<ExportMember<'a, BatInfo>>,
-    pub drm: Option<ExportMember<'a, Video>>,
-    pub os_release: Option<ExportMember<'a, OsRelease>>,
-    pub kernel: Option<ExportMember<'a, Kernel>>,
-    pub kmods: Option<ExportMember<'a, KModules>>,
-    pub users: Option<ExportMember<'a, Users>>,
-    pub groups: Option<ExportMember<'a, Groups>>,
-    pub systemd: Option<ExportMember<'a, SystemdServices>>,
-    pub misc: Option<ExportMember<'a, crate::System>>,
-}
-
-impl<'a> From<&'a mut crate::ferrix::Ferrix> for ExportData<'a> {
-    fn from(value: &'a mut crate::ferrix::Ferrix) -> Self {
+impl Default for ExportPages {
+    fn default() -> Self {
         Self {
-            cpu: get_data(&value.data.proc_data),
-            ram: get_data(&value.data.ram_data),
-            battery: get_data(&value.data.bat_data),
-            drm: get_data(&value.data.drm_data),
-            os_release: get_data(&value.data.osrel_data),
-            kernel: get_data(&value.data.kernel_data),
-            kmods: get_data(&value.data.kmods_data),
-            users: get_data(&value.data.users_list),
-            groups: get_data(&value.data.groups_list),
-            systemd: get_data(&value.data.sysd_services_list),
-            misc: get_data(&value.data.system),
+            proc: true,
+            cpu_freq: true,
+            cpu_vuln: false,
+            mem: true,
+            fs: true,
+            net: true,
+            dmi: false,
+            bat: true,
+            screen: true,
+            distro: true,
+            users: false,
+            groups: false,
+            env: true,
+            sys_mgr: true,
+            soft: false,
+            kernel: true,
+            kmods: false,
+            sysmisc: true,
         }
     }
 }
 
-impl<'a> ToJson for ExportData<'a> {}
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(untagged)]
+pub enum ExportMember<T> {
+    Data(Option<T>),
+    Error(String),
+    #[default]
+    None,
+}
+
+impl<T> From<LoadState<T>> for ExportMember<T> {
+    fn from(value: LoadState<T>) -> Self {
+        match value {
+            LoadState::Loaded(data) => Self::Data(Some(data)),
+            LoadState::Loading => Self::Data(None),
+            LoadState::Error(why) => Self::Error(why.clone()),
+        }
+    }
+}
+
+trait ToExportMember<T> {
+    fn to_export_memb(self) -> ExportMember<T>;
+}
+
+impl<T> ToExportMember<T> for LoadState<T> {
+    fn to_export_memb(self) -> ExportMember<T> {
+        match self {
+            Self::Loading => ExportMember::Data(None),
+            Self::Loaded(data) => ExportMember::Data(Some(data)),
+            Self::Error(why) => ExportMember::Error(why),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct ExportData {
+    pub proc_data: ExportMember<Processors>,
+    pub cpu_freq: ExportMember<CpuFreq>,
+    pub cpu_vulnerabilities: ExportMember<Vulnerabilities>,
+
+    pub ram_data: ExportMember<RAM>,
+    pub swap_data: ExportMember<Swaps>,
+
+    pub storages: ExportMember<Mounts>,
+    pub networks: ExportMember<Networks>,
+    pub dmi_data: ExportMember<DMIData>,
+    pub bat_data: ExportMember<BatInfo>,
+    pub drm_data: ExportMember<Video>,
+    pub osrel_data: ExportMember<OsRelease>,
+
+    pub kernel_data: ExportMember<Kernel>,
+    pub kmods_data: ExportMember<KModules>,
+
+    pub users_list: ExportMember<Users>,
+    pub groups_list: ExportMember<Groups>,
+    pub sysd_services_list: ExportMember<SystemdServices>,
+    pub boot_time: ExportMember<BootTimestamps>,
+    pub installed_pkgs_list: ExportMember<InstalledPackages>,
+    pub system: ExportMember<crate::System>,
+}
+
+impl ToJson for ExportData {}
+
+// NOTE: SHITCODE!!!
+impl<'a> From<&'a FerrixData> for ExportData {
+    fn from(fx: &'a FerrixData) -> Self {
+        Self {
+            proc_data: fx.proc_data.clone().to_export_memb(),
+            cpu_freq: fx.cpu_freq.clone().to_export_memb(),
+            cpu_vulnerabilities: fx.cpu_vulnerabilities.clone().to_export_memb(),
+            ram_data: fx.ram_data.clone().to_export_memb(),
+            swap_data: fx.swap_data.clone().to_export_memb(),
+            storages: fx.storages.clone().to_export_memb(),
+            networks: fx.networks.clone().to_export_memb(),
+            dmi_data: fx.dmi_data.clone().to_export_memb(),
+            bat_data: fx.bat_data.clone().to_export_memb(),
+            drm_data: fx.drm_data.clone().to_export_memb(),
+            osrel_data: fx.osrel_data.clone().to_export_memb(),
+            kernel_data: fx.kernel_data.clone().to_export_memb(),
+            kmods_data: fx.kmods_data.clone().to_export_memb(),
+            users_list: fx.users_list.clone().to_export_memb(),
+            groups_list: fx.groups_list.clone().to_export_memb(),
+            sysd_services_list: fx.sysd_services_list.clone().to_export_memb(),
+            boot_time: fx.boot_time.clone().to_export_memb(),
+            installed_pkgs_list: fx.installed_pkgs_list.clone().to_export_memb(),
+            system: fx.system.clone().to_export_memb(),
+        }
+    }
+}

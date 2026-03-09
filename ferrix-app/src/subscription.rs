@@ -19,6 +19,7 @@
  */
 
 use crate::{
+    export::ExportStatus,
     ferrix::Ferrix,
     load_state::LoadState,
     messages::{DataReceiverMessage, KeyboardMessage, Message},
@@ -46,6 +47,10 @@ impl<T> PushMaybe<T> for Vec<T> {
 
 impl Ferrix {
     pub fn subscription(&self) -> Script<Message> {
+        if self.export_manager.status == ExportStatus::LoadingData {
+            return self.export_data_subscription();
+        }
+
         let charts_uperiod = self.settings.charts_update_period_nsecs as f32 * 0.1;
         let mut scripts = vec![
             event::listen().map(|event| Message::Keyboard(KeyboardMessage::Event(event))),
@@ -82,13 +87,69 @@ impl Ferrix {
         Subscription::batch(scripts)
     }
 
+    fn export_data_subscription(&self) -> Script<Message> {
+        let mut scripts =
+            vec![event::listen().map(|event| Message::Keyboard(KeyboardMessage::Event(event)))];
+        let oscripts = [
+            self.cpu_basic_data(),
+            self.cpu_stat_data(),
+            self.ram_data(),
+            self.swap_data(),
+            self.cpu_freq_subscription(),
+            self.cpu_vuln_subscription(),
+            self.storage_subscription(),
+            self.networks_subscription(),
+            self.dmi_subscription(),
+            self.battery_subscription(),
+            self.drm_subscription(),
+            self.osrel_subscription(),
+            self.users_subscription(),
+            self.groups_subscription(),
+            self.sysd_subscription(),
+            self.soft_subscription(),
+            self.env_and_sys_subscription(),
+            self.kernel_subscription(),
+            self.kmods_subscription(),
+        ];
+        for oscr in oscripts {
+            scripts.push_maybe(oscr);
+        }
+        Subscription::batch(scripts)
+    }
+
     fn u(&self) -> u64 {
         self.settings.update_period as u64
     }
 
+    fn is_export_member(&self, page: Page) -> bool {
+        let e = self.export_manager.selected_pages;
+        match page {
+            Page::Processors => e.proc,
+            Page::CPUFrequency => e.cpu_freq,
+            Page::CPUVulnerabilities => e.cpu_vuln,
+            Page::Memory => e.mem,
+            Page::FileSystems => e.fs,
+            Page::Network => e.net,
+            Page::DMI => e.dmi,
+            Page::Battery => e.bat,
+            Page::Screen => e.screen,
+            Page::Distro => e.distro,
+            Page::Users => e.users,
+            Page::Groups => e.groups,
+            Page::SystemManager => e.sys_mgr,
+            Page::Environment => e.env,
+            Page::Software => e.soft,
+            Page::SystemMisc => e.sysmisc,
+            Page::Kernel => e.kernel,
+            Page::KModules => e.kmods,
+            _ => false,
+        }
+    }
+
     fn cpu_basic_data(&self) -> OScript<Message> {
-        if (self.current_page == Page::Dashboard || self.current_page == Page::Processors)
-            && self.data.proc_data.is_none()
+        if ((self.current_page == Page::Dashboard || self.current_page == Page::Processors)
+            && self.data.proc_data.is_none())
+            || self.is_export_member(Page::Processors)
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
@@ -117,8 +178,9 @@ impl Ferrix {
     }
 
     fn ram_data(&self) -> OScript<Message> {
-        if (self.current_page == Page::Dashboard || self.current_page == Page::Memory)
-            && self.data.ram_data.is_none()
+        if ((self.current_page == Page::Dashboard || self.current_page == Page::Memory)
+            && self.data.ram_data.is_none())
+            || self.is_export_member(Page::Memory)
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
@@ -134,8 +196,9 @@ impl Ferrix {
     }
 
     fn swap_data(&self) -> OScript<Message> {
-        if (self.current_page == Page::Dashboard || self.current_page == Page::Memory)
-            && self.data.swap_data.is_none()
+        if ((self.current_page == Page::Dashboard || self.current_page == Page::Memory)
+            && self.data.swap_data.is_none())
+            || self.is_export_member(Page::Memory)
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
@@ -151,7 +214,9 @@ impl Ferrix {
     }
 
     fn cpu_freq_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::CPUFrequency && self.data.cpu_freq.is_none() {
+        if (self.current_page == Page::CPUFrequency && self.data.cpu_freq.is_none())
+            || self.is_export_member(Page::CPUFrequency)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetCPUFrequency)),
@@ -167,7 +232,9 @@ impl Ferrix {
     }
 
     fn cpu_vuln_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::CPUVulnerabilities && self.data.cpu_vulnerabilities.is_none()
+        if (self.current_page == Page::CPUVulnerabilities
+            && self.data.cpu_vulnerabilities.is_none())
+            || self.is_export_member(Page::CPUVulnerabilities)
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
@@ -179,8 +246,9 @@ impl Ferrix {
     }
 
     fn storage_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::Dashboard || self.current_page == Page::FileSystems)
-            && self.data.storages.is_none()
+        if (self.current_page == Page::Dashboard
+            || self.current_page == Page::FileSystems && self.data.storages.is_none())
+            || self.is_export_member(Page::FileSystems)
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
@@ -197,7 +265,9 @@ impl Ferrix {
     }
 
     fn networks_subscription(&self) -> OScript<Message> {
-        if self.data.networks.is_none() && self.current_page == Page::Dashboard {
+        if (self.current_page == Page::Network && self.data.networks.is_none())
+            || self.is_export_member(Page::Network)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetNetworksData)),
@@ -213,7 +283,9 @@ impl Ferrix {
     }
 
     fn dmi_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::DMI && !self.data.is_polkit && self.data.dmi_data.is_none() {
+        if (self.current_page == Page::DMI && !self.data.is_polkit && self.data.dmi_data.is_none())
+            || self.is_export_member(Page::DMI)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetDMIData)),
@@ -224,7 +296,17 @@ impl Ferrix {
     }
 
     fn battery_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::Dashboard || self.current_page == Page::Battery {
+        if self.current_page == Page::Dashboard
+            || self.current_page == Page::Battery
+            || self.is_export_member(Page::Battery)
+        {
+            if self.is_export_member(Page::Battery) {
+                return Some(
+                    time::every(Duration::from_secs(self.u()))
+                        .map(|_| Message::DataReceiver(DataReceiverMessage::GetBatInfo)),
+                );
+            }
+
             match self.data.bat_data {
                 LoadState::Loaded(_) => Some(
                     time::every(Duration::from_secs(self.u()))
@@ -241,7 +323,9 @@ impl Ferrix {
     }
 
     fn drm_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::Screen && self.data.drm_data.is_none() {
+        if (self.current_page == Page::Screen && self.data.drm_data.is_none())
+            || self.is_export_member(Page::Screen)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetDRMData)),
@@ -257,8 +341,9 @@ impl Ferrix {
     }
 
     fn osrel_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::Dashboard || self.current_page == Page::Distro)
-            && self.data.osrel_data.is_none()
+        if ((self.current_page == Page::Dashboard || self.current_page == Page::Distro)
+            && self.data.osrel_data.is_none())
+            || self.is_export_member(Page::Distro)
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
@@ -270,7 +355,9 @@ impl Ferrix {
     }
 
     fn users_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::Users && self.data.users_list.is_none() {
+        if (self.current_page == Page::Users && self.data.users_list.is_none())
+            || self.is_export_member(Page::Users)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetUsersData)),
@@ -281,7 +368,9 @@ impl Ferrix {
     }
 
     fn groups_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::Groups && self.data.groups_list.is_none() {
+        if (self.current_page == Page::Groups && self.data.groups_list.is_none())
+            || self.is_export_member(Page::Groups)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetGroupsData)),
@@ -292,7 +381,9 @@ impl Ferrix {
     }
 
     fn sysd_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::SystemManager && self.data.sysd_services_list.is_none() {
+        if (self.current_page == Page::SystemManager && self.data.sysd_services_list.is_none())
+            || self.is_export_member(Page::SystemManager)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetSystemdServices)),
@@ -309,7 +400,9 @@ impl Ferrix {
     }
 
     fn soft_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::Software && self.data.installed_pkgs_list.is_none() {
+        if (self.current_page == Page::Software && self.data.installed_pkgs_list.is_none())
+            || self.is_export_member(Page::Software)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetPackagesList)),
@@ -323,8 +416,9 @@ impl Ferrix {
         if self.current_page == Page::Environment
             || self.current_page == Page::SystemMisc
             || self.current_page == Page::Dashboard
+            || self.is_export_member(Page::Environment)
         {
-            if self.data.system.is_none() {
+            if self.data.system.is_none() || self.is_export_member(Page::Environment) {
                 Some(
                     time::every(Duration::from_millis(START_UPERIOD))
                         .map(|_| Message::DataReceiver(DataReceiverMessage::GetSystemData)),
@@ -344,7 +438,9 @@ impl Ferrix {
     }
 
     fn kernel_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::Kernel && self.data.kernel_data.is_none() {
+        if (self.current_page == Page::Kernel && self.data.kernel_data.is_none())
+            || self.is_export_member(Page::Kernel)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetKernelData)),
@@ -355,7 +451,9 @@ impl Ferrix {
     }
 
     fn kmods_subscription(&self) -> OScript<Message> {
-        if self.current_page == Page::KModules && self.data.kmods_data.is_none() {
+        if (self.current_page == Page::KModules && self.data.kmods_data.is_none())
+            || self.is_export_member(Page::KModules)
+        {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetKModsData)),
