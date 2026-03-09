@@ -121,7 +121,7 @@ impl Ferrix {
         self.settings.update_period as u64
     }
 
-    fn is_export_member(&self, page: Page) -> bool {
+    pub fn is_export_member(&self, page: Page) -> bool {
         let e = self.export_manager.selected_pages;
         match page {
             Page::Processors => e.proc,

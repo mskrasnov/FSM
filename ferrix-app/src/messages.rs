@@ -372,7 +372,9 @@ impl DataReceiverMessage {
                 Task::none()
             }
             Self::GetDMIData => {
-                if !fx.is_polkit && fx.dmi_data.is_none() && cur_page == Page::DMI {
+                if (!fx.is_polkit && fx.dmi_data.is_none() && cur_page == Page::DMI)
+                    || (export.selected_pages.dmi && !fx.is_polkit)
+                {
                     fx.is_polkit = true;
                     Task::perform(async move { crate::dmi::get_dmi_data().await }, |val| {
                         Message::DataReceiver(Self::DMIDataReceived(val))
@@ -679,8 +681,6 @@ impl ExportManagerMessage {
 
 impl Ferrix {
     fn export_data(&mut self, path: &str) -> Task<Message> {
-        self.export_manager.status = ExportStatus::LoadingData;
-
         self.export_manager.status = ExportStatus::SerializingStructure;
         let export_data = ExportData::from(&self.data);
         let json = match self.export_manager.format {
@@ -689,7 +689,11 @@ impl Ferrix {
                 .to_json_pretty()
                 .unwrap_or("{error}".to_string()),
         };
-        let _ = std::fs::write(path, json);
+        self.export_manager.status = ExportStatus::WritingData;
+        if let Err(why) = std::fs::write(path, json) {
+            self.export_manager.status = ExportStatus::ErrorWritingData(why.to_string());
+        }
+        self.export_manager.status = ExportStatus::Complete;
         Task::none()
     }
 
