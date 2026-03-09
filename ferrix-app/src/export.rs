@@ -148,24 +148,24 @@ pub struct ExportPages {
 impl Default for ExportPages {
     fn default() -> Self {
         Self {
-            proc: true,
-            cpu_freq: true,
+            proc: false,
+            cpu_freq: false,
             cpu_vuln: false,
-            mem: true,
-            fs: true,
-            net: true,
+            mem: false,
+            fs: false,
+            net: false,
             dmi: false,
-            bat: true,
-            screen: true,
-            distro: true,
+            bat: false,
+            screen: false,
+            distro: false,
             users: false,
             groups: false,
-            env: true,
-            sys_mgr: true,
+            env: false,
+            sys_mgr: false,
             soft: false,
-            kernel: true,
+            kernel: false,
             kmods: false,
-            sysmisc: true,
+            sysmisc: false,
         }
     }
 }
