@@ -585,6 +585,7 @@ impl DataReceiverMessage {
             ),
             Self::SystemdServicesReceived((sysd_services, boot_time)) => {
                 fx.sysd_services_list = sysd_services;
+                // dbg!(&boot_time);
                 fx.boot_time = boot_time;
                 Task::none()
             }
@@ -604,6 +605,7 @@ impl DataReceiverMessage {
                         Ok(mut srv) => {
                             if srv.timestamps.total == 0 {
                                 let a = srv.timestamps.calc_boot_time();
+                                // dbg!(&a);
                                 if let Err(why) = a {
                                     return (
                                         DataLoadingState::Loaded(srv),
