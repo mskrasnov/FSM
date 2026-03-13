@@ -1,0 +1,12 @@
+[package]
+name = "ferrix-widgets"
+version = "0.1.0"
+description = "Custom widgets for FSM"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+exclude.workspace = true
+
+[dependencies]

@@ -10,13 +10,13 @@ keywords = ["ferrix", "hardware", "dmi", "smbios", "linux"]
 categories = ["os"]
 
 [dependencies]
-anyhow = "1.0.98"
-libc = "0.2.180"
+anyhow.workspace = true
+libc.workspace = true
 #futures = "0.3.31"
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.141"
-smbios-lib = "0.9.2"
+serde.workspace = true
+serde_json.workspace = true
+smbios-lib.workspace = true
 #tokio = { version = "1.46.1", features = ["full"] }
-xml_serde = "1.4.1"
-zbus = "5.9.0"
-zbus_systemd = { version = "0.25701.0", features = ["systemd1", "timedate1"] }
+xml_serde.workspace = true
+zbus.workspace = true
+zbus_systemd.workspace = true
