@@ -190,11 +190,11 @@ impl TryFrom<&str> for Package {
         let mut chunks = value.trim().split('\t').map(|s| s.trim().replace("'", ""));
 
         match (chunks.next(), chunks.next(), chunks.next(), chunks.next()) {
-            (Some(pkg), Some(name), Some(ver), Some(arch)) => Ok(Self {
+            (Some(pkg), Some(name), Some(version), Some(arch)) => Ok(Self {
                 pkg_type: PkgType::from(pkg.as_str()),
-                name: name,
-                version: ver,
-                arch: arch,
+                name,
+                version,
+                arch,
             }),
             _ => Err(anyhow!("String \"{value}\" has incorrect format!")),
         }

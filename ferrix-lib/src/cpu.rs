@@ -57,7 +57,7 @@ impl Processors {
 impl ToJson for Processors {}
 impl ToPlainText for Processors {
     fn to_plain(&self) -> String {
-        let mut s = format!("Information about processors");
+        let mut s = "Information about processors".to_string();
         for proc in &self.entries {
             s += &proc.to_plain();
         }
@@ -158,7 +158,7 @@ impl ToPlainText for CPU {
     fn to_plain(&self) -> String {
         let mut s = match self.processor {
             Some(proc) => format!("\nProcessor #{proc}\n"),
-            None => format!("\nProcessor #unknown\n"),
+            None => "\nProcessor #unknown\n".to_string(),
         };
         s += "\tArchitecture: x86_64\n";
         s += &print_opt_val("Vendor ID", &self.vendor_id);
@@ -287,10 +287,7 @@ fn parse_cpuinfo(cpu: &mut CPU, parts: &str) {
 }
 
 fn get_bool(s: &str) -> bool {
-    match s {
-        "yes" | "ok" => true,
-        _ => false,
-    }
+    matches!(s, "yes" | "ok")
 }
 
 /// Processor usage statistics

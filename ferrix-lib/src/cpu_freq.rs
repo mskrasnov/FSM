@@ -49,10 +49,9 @@ impl CpuFreq {
             ));
         }
 
-        let boost = match read_to_string(pth.join("boost")).ok() {
-            Some(boost) => Some(&boost == "1"),
-            None => None,
-        };
+        let boost = read_to_string(pth.join("boost"))
+            .ok()
+            .map(|boost| &boost == "1");
 
         let mut policy = Vec::new();
         for dir in read_dir(CPU_FREQ_DIR)? {
@@ -122,10 +121,7 @@ impl Policy {
         }
 
         let read = |path: &PathBuf, name: &str| read_to_string(path.join(name));
-        let get_bool = |num: Option<u8>| match num {
-            Some(num) => Some(if num != 0 { true } else { false }),
-            None => None,
-        };
+        let get_bool = |num: Option<u8>| num.map(|n| n != 0);
 
         Ok(Self {
             bios_limit: Self::get_data(read(&tgt, "bios_limit").ok()),
@@ -134,39 +130,39 @@ impl Policy {
             cpu_min_freq: Self::get_data(read(&tgt, "cpuinfo_min_freq").ok()),
             cpuinfo_transition_latency: get_bool(
                 read(&tgt, "cpuinfo_transition_latency")
-                    .and_then(|d| Ok(d.trim().parse::<u8>().unwrap_or(0)))
+                    .map(|d| d.trim().parse::<u8>().unwrap_or(0))
                     .ok(),
             ),
             scaling_available_frequencies: read(&tgt, "scaling_available_frequencies")
-                .and_then(|d| {
-                    Ok(d.trim()
+                .map(|d| {
+                    d.trim()
                         .split_whitespace()
                         .map(|freq| freq.parse::<u32>().ok())
                         .filter(|freq| freq.is_some())
                         .map(|freq| freq.unwrap())
-                        .collect::<Vec<_>>())
+                        .collect::<Vec<_>>()
                 })
                 .ok(),
             scaling_available_governors: read(&tgt, "scaling_available_governors")
-                .and_then(|d| {
-                    Ok(d.trim()
+                .map(|d| {
+                    d.trim()
                         .split_whitespace()
                         .map(|gov| gov.to_string())
-                        .collect::<Vec<_>>())
+                        .collect::<Vec<_>>()
                 })
                 .ok(),
             scaling_cur_freq: Self::get_data(read(&tgt, "scaling_cur_freq").ok()),
             scaling_driver: read(&tgt, "scaling_driver")
                 .ok()
-                .and_then(|s| Some(s.trim().to_string())),
+                .map(|s| s.trim().to_string()),
             scaling_governor: read(&tgt, "scaling_governor")
                 .ok()
-                .and_then(|s| Some(s.trim().to_string())),
+                .map(|s| s.trim().to_string()),
             scaling_max_freq: Self::get_data(read(&tgt, "scaling_max_freq").ok()),
             scaling_min_freq: Self::get_data(read(&tgt, "scaling_min_freq").ok()),
             scaling_setspeed: read(&tgt, "scaling_setspeed")
                 .ok()
-                .and_then(|s| Some(s.trim().to_string())),
+                .map(|s| s.trim().to_string()),
         })
     }
 }
