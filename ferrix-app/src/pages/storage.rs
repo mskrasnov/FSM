@@ -20,15 +20,12 @@
 
 //! Storage statistics page
 
-use crate::{
-    Message, fl,
-    load_state::LoadState,
-    widgets::{icon_tooltip, table::hdr_name},
-};
+use crate::{Message, fl, load_state::LoadState, widgets::table::hdr_name};
 use ferrix_lib::{
     parts::{MountEntry, Mounts},
     utils::Size,
 };
+use ferrix_widgets::tooltip::icon_tooltip;
 use iced::{
     Alignment::Center,
     Color, Element, Font, Length,

@@ -41,48 +41,6 @@ use crate::{
     pages::Page,
 };
 
-pub fn icon_tooltip<'a, T>(icon_name: &'a str, tooltip: T) -> container::Container<'a, Message>
-where
-    T: IntoFragment<'a>,
-{
-    let svg_bytes = match icon_name {
-        "about" => ABOUT_ICON,
-        "error" => ERROR_ICON,
-        "export" => EXPORT_ICON,
-        "settings" => SETTINGS_ICON,
-        _ => &[],
-    };
-    let icon = svg(Handle::from_memory(svg_bytes))
-        .style(|theme: &iced::Theme, _| svg::Style {
-            color: Some(theme.palette().text),
-        })
-        .width(16)
-        .height(16);
-
-    container(iced::widget::tooltip(
-        icon,
-        container(text(tooltip).style(|s: &iced::Theme| text::Style {
-            color: Some(if s.extended_palette().is_dark {
-                s.palette().text
-            } else {
-                Color::WHITE
-            }),
-        }))
-        .padding(2)
-        .style(|_| container::Style {
-            background: Some(iced::Background::Color(Color::from_rgba8(0, 0, 0, 0.71))),
-            border: iced::Border {
-                radius: iced::border::Radius::from(2),
-                ..iced::Border::default()
-            },
-            ..Default::default()
-        }),
-        Position::Bottom,
-    ))
-    .width(16)
-    .height(16)
-}
-
 pub fn icon_button<'a>(icon_name: &'a str, tooltip: String) -> button::Button<'a, Message> {
     let svg_bytes = match icon_name {
         "about" => ABOUT_ICON,

@@ -1,4 +1,4 @@
-/* lib.rs
+/* icons.rs
  *
  * Copyright 2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
@@ -18,7 +18,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-pub mod file_manager;
-// pub mod card;
-pub mod tooltip;
-pub mod icons;
+//! Hardcoded icons bytes
+
+pub const ERROR_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-error.svg");
+pub const SETTINGS_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-settings.svg");
+pub const ABOUT_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-about.svg");
+pub const EXPORT_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-export.svg");
+pub const FERRIX_ICON: &[u8] = include_bytes!("../data/com.mskrasnov.Ferrix.svg");
+
+pub fn get_svg_bytes<'a>(icon_name: &'a str) -> &'static [u8] {
+    match icon_name {
+        "about" => ABOUT_ICON,
+        "error" => ERROR_ICON,
+        "export" => EXPORT_ICON,
+        "settings" => SETTINGS_ICON,
+        _ => &[],
+    }
+}

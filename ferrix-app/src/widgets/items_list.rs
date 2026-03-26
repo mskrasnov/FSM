@@ -20,13 +20,13 @@
 
 //! Items list widget
 
+use crate::messages::Message;
+use ferrix_widgets::tooltip::icon_tooltip;
 use iced::{
     Alignment::Center,
     Element, Pixels,
     widget::{container, row, rule, space, text},
 };
-
-use crate::{messages::Message, widgets::icon_tooltip};
 
 pub fn items_list_container<'a, Message: Clone + 'a>(
     contents: impl Into<Element<'a, Message>>,
