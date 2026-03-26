@@ -1,4 +1,4 @@
-/* lib.rs
+/* card.rs
  *
  * Copyright 2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
@@ -18,5 +18,36 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-pub mod file_manager;
-// pub mod card;
+//! New dashboard cards
+
+use iced::{
+    Element,
+    widget::{column, text},
+};
+
+pub struct CardMember {
+    header: String,
+    contents: String,
+}
+
+impl CardMember {
+    pub fn new(header: String, contents: String) -> Self {
+        Self { header, contents }
+    }
+
+    pub fn view<'a, Message>(&'a self, widget: Option<Element<'a, Message>>) -> Element<'a, Message>
+    where
+        Message: 'a + Clone,
+    {
+        let mut col = column![
+            text(&self.header).style(text::secondary),
+            text(&self.contents),
+        ]
+        .spacing(5);
+
+        if let Some(w) = widget {
+            col = col.push(w);
+        }
+        col.into()
+    }
+}

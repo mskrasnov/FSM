@@ -10,3 +10,7 @@ readme.workspace = true
 exclude.workspace = true
 
 [dependencies]
+anyhow.workspace = true
+async-std.workspace = true
+iced.workspace = true
+tokio.workspace = true
