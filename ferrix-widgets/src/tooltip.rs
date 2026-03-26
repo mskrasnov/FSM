@@ -20,42 +20,38 @@
 
 //! Tooltip widget
 
-use crate::icons::get_svg_bytes;
+use crate::icons;
 use iced::{
     Color, Element,
     widget::{
-        container, svg,
-        svg::Handle,
-        text,
+        container, text,
         text::IntoFragment,
         tooltip::{self, Position},
     },
 };
 
-pub fn icon_tooltip<'a, T, Message>(
-    icon_name: &'a str,
-    tooltip_contents: T,
-) -> container::Container<'a, Message>
+pub fn tooltip_txt<'a, T>(txt: T) -> text::Text<'a>
+where
+    T: IntoFragment<'a>,
+{
+    text(txt).size(11).style(|s: &iced::Theme| text::Style {
+        color: Some(if s.extended_palette().is_dark {
+            s.palette().text
+        } else {
+            Color::WHITE
+        }),
+    })
+}
+
+pub fn icon_tooltip<'a, T, Message>(icon_name: &'a str, txt: T) -> container::Container<'a, Message>
 where
     T: IntoFragment<'a>,
     Message: 'a + Clone,
 {
-    let icon = svg(Handle::from_memory(get_svg_bytes(icon_name)))
-        .style(|theme: &iced::Theme, _| svg::Style {
-            color: Some(theme.palette().text),
-        })
+    let icon = icons::icon(icon_name).width(16).height(16);
+    container(tooltip(icon, tooltip_txt(txt)))
         .width(16)
-        .height(16);
-    let txt = text(tooltip_contents)
-        .size(11)
-        .style(|s: &iced::Theme| text::Style {
-            color: Some(if s.extended_palette().is_dark {
-                s.palette().text
-            } else {
-                Color::WHITE
-            }),
-        });
-    container(tooltip(icon, txt)).width(16).height(16)
+        .height(16)
 }
 
 pub fn tooltip<'a, C, T, Message>(

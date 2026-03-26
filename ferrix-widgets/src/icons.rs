@@ -20,12 +20,15 @@
 
 //! Hardcoded icons bytes
 
+use iced::widget::svg;
+
 pub const ERROR_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-error.svg");
 pub const SETTINGS_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-settings.svg");
 pub const ABOUT_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-about.svg");
 pub const EXPORT_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-export.svg");
 pub const FERRIX_ICON: &[u8] = include_bytes!("../data/com.mskrasnov.Ferrix.svg");
 
+/// Get icon bytes by its name
 pub fn get_svg_bytes<'a>(icon_name: &'a str) -> &'static [u8] {
     match icon_name {
         "about" => ABOUT_ICON,
@@ -34,4 +37,13 @@ pub fn get_svg_bytes<'a>(icon_name: &'a str) -> &'static [u8] {
         "settings" => SETTINGS_ICON,
         _ => &[],
     }
+}
+
+/// Scalable icon widget
+pub fn icon<'a>(icon_name: &'a str) -> svg::Svg<'a> {
+    svg(svg::Handle::from_memory(get_svg_bytes(icon_name))).style(|theme: &iced::Theme, _| {
+        svg::Style {
+            color: Some(theme.palette().text),
+        }
+    })
 }
