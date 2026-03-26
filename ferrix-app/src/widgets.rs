@@ -22,60 +22,23 @@
 
 use iced::{
     Alignment::Center,
-    Color, Element, Theme, Border,
+    Border, Color, Element, Theme,
     widget::{
-        Column, button, column, container, row, rule, svg, svg::Handle, text, text::IntoFragment,
-        tooltip, tooltip::Position,
+        Column, button, column, container, row, rule, text, text::IntoFragment, tooltip,
+        tooltip::Position,
     },
 };
 
 pub mod card;
-pub mod line_charts;
-pub mod table;
-pub mod separated_view;
 pub mod items_list;
+pub mod line_charts;
+pub mod separated_view;
+pub mod table;
 
 use crate::{
-    icons::{ABOUT_ICON, ERROR_ICON, EXPORT_ICON, SETTINGS_ICON},
     messages::{ButtonsMessage, Message},
     pages::Page,
 };
-
-pub fn icon_button<'a>(icon_name: &'a str, tooltip: String) -> button::Button<'a, Message> {
-    let svg_bytes = match icon_name {
-        "about" => ABOUT_ICON,
-        "error" => ERROR_ICON,
-        "export" => EXPORT_ICON,
-        "settings" => SETTINGS_ICON,
-        _ => &[],
-    };
-    let icon = svg(Handle::from_memory(svg_bytes)).style(|theme: &iced::Theme, _| svg::Style {
-        color: Some(theme.palette().text),
-    });
-
-    button(iced::widget::tooltip(
-        icon.width(16).height(16),
-        container(text(tooltip).size(11).style(|s: &iced::Theme| text::Style {
-            color: Some(if s.extended_palette().is_dark {
-                s.palette().text
-            } else {
-                Color::WHITE
-            }),
-        }))
-        .padding(2)
-        .style(|_| container::Style {
-            background: Some(iced::Background::Color(Color::from_rgba8(0, 0, 0, 0.71))),
-            border: iced::Border {
-                radius: iced::border::Radius::from(2),
-                ..iced::Border::default()
-            },
-            ..Default::default()
-        }),
-        Position::Bottom,
-    ))
-    .style(button::subtle)
-    .padding(2)
-}
 
 pub fn sidebar_button<'a>(page: Page, cur_page: Page) -> button::Button<'a, Message> {
     button(text(page.title_str()))
@@ -169,12 +132,15 @@ where
             let border_color = match is_dark {
                 true => base_color,
                 false => iced::Color::BLACK,
-            }.scale_alpha(0.08);
+            }
+            .scale_alpha(0.08);
 
-            container::Style::default().background(background_color).border(Border {
-                color: border_color,
-                width: 1.,
-                radius: 5.0.into(),
-            })
+            container::Style::default()
+                .background(background_color)
+                .border(Border {
+                    color: border_color,
+                    width: 1.,
+                    radius: 5.0.into(),
+                })
         })
 }

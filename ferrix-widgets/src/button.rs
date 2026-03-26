@@ -1,4 +1,4 @@
-/* lib.rs
+/* button.rs
  *
  * Copyright 2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
@@ -18,8 +18,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-pub mod file_manager;
-// pub mod card;
-pub mod button;
-pub mod icons;
-pub mod tooltip;
+//! Custom `Button` widget
+
+use crate::{
+    icons,
+    tooltip::{tooltip, tooltip_txt},
+};
+use iced::widget::{button, text::IntoFragment};
+
+pub fn icon_button<'a, T, Message>(icon_name: &'a str, txt: T) -> button::Button<'a, Message>
+where
+    T: IntoFragment<'a>,
+    Message: 'a + Clone,
+{
+    let icon = icons::icon(icon_name).width(16).height(16);
+    button(tooltip(icon, tooltip_txt(txt)))
+        .style(button::subtle)
+        .padding(2)
+}
