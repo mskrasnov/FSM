@@ -19,6 +19,19 @@
  */
 
 //! Interface headers
+//! ```ignore
+//! use ferrix_widgets::headers::*;
+//! header_text("My first FSM Page!");
+//!
+//! header("Hardware info (category 1)");
+//! category_header("Processor info:");
+//! category_header("Memory info:");
+//! category_header("Storage info:");
+//!
+//! header("Software info (category 2)");
+//! category_header("System info:");
+//! category_header("Users and groups:");
+//! ```
 
 use iced::{
     Alignment::Center,
@@ -26,6 +39,15 @@ use iced::{
     widget::{Column, column, row, rule, text, text::IntoFragment},
 };
 
+/// Page header (1 level)
+pub fn header_text<'a, Message>(txt: String) -> Column<'a, Message>
+where
+    Message: 'a + Clone,
+{
+    column![text(txt).size(22), rule::horizontal(1)].spacing(2)
+}
+
+/// Category header (2 level)
 pub fn header<'a, T, Message>(txt: T) -> row::Row<'a, Message>
 where
     T: 'a + IntoFragment<'a>,
@@ -36,13 +58,7 @@ where
         .align_y(Center)
 }
 
-pub fn header_text<'a, Message>(txt: String) -> Column<'a, Message>
-where
-    Message: 'a + Clone,
-{
-    column![text(txt).size(22), rule::horizontal(1)].spacing(2)
-}
-
+/// Subcategory small header (3 level)
 pub fn category_header<'a, T>(txt: T) -> text::Text<'a>
 where
     T: IntoFragment<'a> + 'a,

@@ -29,12 +29,20 @@ pub const EXPORT_ICON: &[u8] = include_bytes!("../data/icons/actions/ferrix-expo
 pub const FERRIX_ICON: &[u8] = include_bytes!("../data/com.mskrasnov.Ferrix.svg");
 
 /// Get icon bytes by its name
+///
+/// ## Names
+/// - about;
+/// - error;
+/// - export;
+/// - settings;
+/// - ferrix;
 pub fn get_svg_bytes<'a>(icon_name: &'a str) -> &'static [u8] {
     match icon_name {
         "about" => ABOUT_ICON,
         "error" => ERROR_ICON,
         "export" => EXPORT_ICON,
         "settings" => SETTINGS_ICON,
+        "ferrix" => FERRIX_ICON,
         _ => &[],
     }
 }

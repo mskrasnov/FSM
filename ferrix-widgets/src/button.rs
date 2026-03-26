@@ -26,6 +26,7 @@ use crate::{
 };
 use iced::widget::{button, text::IntoFragment};
 
+/// Button with an icon instead of text label
 pub fn icon_button<'a, T, Message>(icon_name: &'a str, txt: T) -> button::Button<'a, Message>
 where
     T: IntoFragment<'a>,

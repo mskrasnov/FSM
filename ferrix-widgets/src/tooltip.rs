@@ -30,6 +30,7 @@ use iced::{
     },
 };
 
+/// Text widget (`Text`) for tooltips
 pub fn tooltip_txt<'a, T>(txt: T) -> text::Text<'a>
 where
     T: IntoFragment<'a>,
@@ -43,6 +44,7 @@ where
     })
 }
 
+/// Tooltip with an icon instead of text label
 pub fn icon_tooltip<'a, T, Message>(icon_name: &'a str, txt: T) -> container::Container<'a, Message>
 where
     T: IntoFragment<'a>,
@@ -54,6 +56,7 @@ where
         .height(16)
 }
 
+/// Tooltip with custom styles
 pub fn tooltip<'a, C, T, Message>(
     main_contents: C,
     tooltip_contents: T,
