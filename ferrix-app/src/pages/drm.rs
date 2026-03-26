@@ -22,12 +22,10 @@
 
 use crate::{
     DataLoadingState, Message, fl,
-    widgets::{
-        header,
-        table::{InfoRow, fmt_val, kv_info_table},
-    },
+    widgets::table::{InfoRow, fmt_val, kv_info_table},
 };
 use ferrix_lib::drm::{DRM, EDID, Video, VideoInputParams};
+use ferrix_widgets::headers::header;
 use iced::widget::{Id, center, column, container, scrollable, text};
 
 pub fn drm_page<'a>(video: &'a DataLoadingState<Video>) -> container::Container<'a, Message> {

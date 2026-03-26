@@ -20,13 +20,17 @@
 
 //! Custom widgets for UI
 
+use crate::{
+    messages::{ButtonsMessage, Message},
+    pages::Page,
+};
+use ferrix_widgets::{
+    headers::category_header,
+    tooltip::{tooltip, tooltip_txt},
+};
 use iced::{
-    Alignment::Center,
-    Border, Color, Element, Theme,
-    widget::{
-        Column, button, column, container, row, rule, text, text::IntoFragment, tooltip,
-        tooltip::Position,
-    },
+    Border, Element,
+    widget::{Tooltip, button, column, container, text, text::IntoFragment},
 };
 
 pub mod card;
@@ -34,11 +38,6 @@ pub mod items_list;
 pub mod line_charts;
 pub mod separated_view;
 pub mod table;
-
-use crate::{
-    messages::{ButtonsMessage, Message},
-    pages::Page,
-};
 
 pub fn sidebar_button<'a>(page: Page, cur_page: Page) -> button::Button<'a, Message> {
     button(text(page.title_str()))
@@ -50,7 +49,7 @@ pub fn sidebar_button<'a>(page: Page, cur_page: Page) -> button::Button<'a, Mess
         .on_press(Message::SelectPage(page))
 }
 
-pub fn link_button<'a, P, L>(placeholder: P, link: L) -> tooltip::Tooltip<'a, Message>
+pub fn link_button<'a, P, L>(placeholder: P, link: L) -> Tooltip<'a, Message>
 where
     P: IntoFragment<'a>,
     L: ToString + IntoFragment<'a> + 'a,
@@ -62,52 +61,8 @@ where
             .on_press(Message::Buttons(ButtonsMessage::LinkButtonPressed(
                 link.to_string(),
             ))),
-        container(text(link).size(11).style(|s: &iced::Theme| text::Style {
-            color: Some(if s.extended_palette().is_dark {
-                s.palette().text
-            } else {
-                Color::WHITE
-            }),
-        }))
-        .padding(2)
-        .style(|_| container::Style {
-            background: Some(iced::Background::Color(Color::from_rgba8(0, 0, 0, 0.71))),
-            border: iced::Border {
-                radius: iced::border::Radius::from(2),
-                ..iced::Border::default()
-            },
-            ..Default::default()
-        }),
-        Position::Bottom,
+        tooltip_txt(link),
     )
-}
-
-pub fn header<'a, T>(txt: T) -> row::Row<'a, Message>
-where
-    T: IntoFragment<'a> + 'a,
-{
-    row![text(txt).size(16), rule::horizontal(1),]
-        .spacing(5)
-        .align_y(Center)
-}
-
-pub fn header_text<'a>(txt: String) -> Column<'a, Message> {
-    column![text(txt).size(22), rule::horizontal(1)].spacing(2)
-}
-
-pub fn category_header<'a, T>(txt: T) -> text::Text<'a>
-where
-    T: IntoFragment<'a> + 'a,
-{
-    text(txt).size(14).style(|t: &Theme| {
-        let palette = t.palette();
-        let text_color = palette.text.scale_alpha(0.7);
-
-        let mut style = text::Style::default();
-        style.color = Some(text_color);
-
-        style
-    })
 }
 
 pub fn glassy_container<'a, T, C>(header: T, content: C) -> container::Container<'a, Message>
