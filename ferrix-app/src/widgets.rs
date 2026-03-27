@@ -36,7 +36,6 @@ use iced::{
 pub mod card;
 pub mod items_list;
 pub mod line_charts;
-pub mod separated_view;
 pub mod table;
 
 pub fn sidebar_button<'a>(page: Page, cur_page: Page) -> button::Button<'a, Message> {

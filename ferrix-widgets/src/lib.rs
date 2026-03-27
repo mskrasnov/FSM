@@ -23,4 +23,5 @@ pub mod file_manager;
 pub mod button;
 pub mod headers;
 pub mod icons;
+pub mod separated_view;
 pub mod tooltip;
