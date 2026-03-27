@@ -24,17 +24,10 @@ use crate::{
     messages::{ButtonsMessage, Message},
     pages::Page,
 };
-use ferrix_widgets::{
-    headers::category_header,
-    tooltip::{tooltip, tooltip_txt},
-};
-use iced::{
-    Border, Element,
-    widget::{Tooltip, button, column, container, text, text::IntoFragment},
-};
+use ferrix_widgets::tooltip::{tooltip, tooltip_txt};
+use iced::widget::{Tooltip, button, text, text::IntoFragment};
 
 pub mod card;
-pub mod line_charts;
 pub mod table;
 
 pub fn sidebar_button<'a>(page: Page, cur_page: Page) -> button::Button<'a, Message> {
@@ -61,39 +54,4 @@ where
             ))),
         tooltip_txt(link),
     )
-}
-
-pub fn glassy_container<'a, T, C>(header: T, content: C) -> container::Container<'a, Message>
-where
-    T: IntoFragment<'a> + 'a,
-    C: Into<Element<'a, Message>> + 'a,
-{
-    container(column![category_header(header), content.into()].spacing(5))
-        .padding(5)
-        .style(|theme: &iced::Theme| {
-            let is_dark = theme.extended_palette().is_dark;
-            let text_color = theme.palette().text;
-
-            let base_color = match is_dark {
-                true => text_color,
-                false => theme.extended_palette().background.strong.color,
-            };
-            let background_color = base_color.scale_alpha(match is_dark {
-                true => 0.03,
-                false => 0.7,
-            });
-            let border_color = match is_dark {
-                true => base_color,
-                false => iced::Color::BLACK,
-            }
-            .scale_alpha(0.08);
-
-            container::Style::default()
-                .background(background_color)
-                .border(Border {
-                    color: border_color,
-                    width: 1.,
-                    radius: 5.0.into(),
-                })
-        })
 }

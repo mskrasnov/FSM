@@ -20,12 +20,9 @@
 
 //! CPU usage charts
 
-use crate::{
-    DataLoadingState, Message, ferrix::FerrixData, fl, messages::ButtonsMessage,
-    widgets::glassy_container,
-};
+use crate::{DataLoadingState, Message, ferrix::FerrixData, fl, messages::ButtonsMessage};
 use ferrix_lib::cpu::Stat;
-
+use ferrix_widgets::container::glassy_container;
 use iced::{
     Alignment::Center,
     widget::{column, container, row, slider, space, text, toggler},

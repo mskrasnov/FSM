@@ -21,8 +21,10 @@
 pub mod file_manager;
 // pub mod card;
 pub mod button;
+pub mod container;
 pub mod headers;
 pub mod icons;
 pub mod items_list;
+pub mod line_charts;
 pub mod separated_view;
 pub mod tooltip;

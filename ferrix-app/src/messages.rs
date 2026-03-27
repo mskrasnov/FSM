@@ -20,6 +20,16 @@
 
 //! UI events handler & Data Updater
 
+use crate::{
+    DataLoadingState, Page, SETTINGS_PATH, System,
+    dmi::DMIData,
+    export::{ExportData, ExportFormat, ExportMode, ExportStatus},
+    ferrix::{ExportManager, Ferrix, FerrixData},
+    load_state::LoadState,
+    settings::{ChartLineThickness, FXSettings, Style},
+    styles::CPU_CHARTS_COLORS,
+    utils::{ToColor, get_home},
+};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
@@ -34,6 +44,7 @@ use ferrix_lib::{
     traits::ToJson,
     vulnerabilities::Vulnerabilities,
 };
+use ferrix_widgets::line_charts::LineSeries;
 use iced::{
     Event, Task, color,
     keyboard::{Event as Kevent, Key, Modifiers, key},
@@ -41,18 +52,6 @@ use iced::{
         Id,
         operation::{self, AbsoluteOffset, RelativeOffset},
     },
-};
-
-use crate::{
-    DataLoadingState, Page, SETTINGS_PATH, System,
-    dmi::DMIData,
-    export::{ExportData, ExportFormat, ExportMode, ExportStatus},
-    ferrix::{ExportManager, Ferrix, FerrixData},
-    load_state::LoadState,
-    settings::{ChartLineThickness, FXSettings, Style},
-    styles::CPU_CHARTS_COLORS,
-    utils::{ToColor, get_home},
-    widgets::line_charts::LineSeries,
 };
 
 #[derive(Debug, Clone)]
@@ -781,8 +780,8 @@ impl Ferrix {
 
     fn change_line_thickness(&mut self, thick: ChartLineThickness) -> Task<Message> {
         self.settings.chart_line_thickness = thick;
-        self.data.cpu_usage_chart.set_line_thickness(thick);
-        self.data.ram_usage_chart.set_line_thickness(thick);
+        self.data.cpu_usage_chart.set_line_thickness(thick.to_u32());
+        self.data.ram_usage_chart.set_line_thickness(thick.to_u32());
 
         Task::none()
     }

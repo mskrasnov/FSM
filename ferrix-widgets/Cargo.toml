@@ -14,3 +14,5 @@ anyhow.workspace = true
 async-std.workspace = true
 iced.workspace = true
 tokio.workspace = true
+plotters.workspace = true
+plotters-iced2.workspace = true
