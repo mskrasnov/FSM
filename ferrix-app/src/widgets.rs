@@ -34,7 +34,6 @@ use iced::{
 };
 
 pub mod card;
-pub mod items_list;
 pub mod line_charts;
 pub mod table;
 

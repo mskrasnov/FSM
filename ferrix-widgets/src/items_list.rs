@@ -20,15 +20,14 @@
 
 //! Items list widget
 
-use crate::messages::Message;
-use ferrix_widgets::tooltip::icon_tooltip;
+use crate::tooltip::icon_tooltip;
 use iced::{
     Alignment::Center,
     Element, Pixels,
     widget::{container, row, rule, space, text},
 };
 
-pub fn items_list_container<'a, Message: Clone + 'a>(
+pub fn items_list_container<'a, Message: 'a + Clone>(
     contents: impl Into<Element<'a, Message>>,
 ) -> Element<'a, Message> {
     row![
@@ -42,7 +41,7 @@ pub fn items_list_container<'a, Message: Clone + 'a>(
     .into()
 }
 
-pub fn items_container<'a, Message: Clone + 'a>(
+pub fn items_container<'a, Message: 'a + Clone>(
     contents: impl Into<Element<'a, Message>>,
 ) -> Element<'a, Message> {
     row![
@@ -56,7 +55,7 @@ pub fn items_container<'a, Message: Clone + 'a>(
     .into()
 }
 
-pub fn items_group<'a, Message: Clone + 'a>(
+pub fn items_group<'a, Message: 'a + Clone>(
     contents: impl Into<Element<'a, Message>>,
 ) -> Element<'a, Message> {
     container(contents.into())
@@ -69,16 +68,17 @@ pub fn list_item<'a, T, C, Message>(header: T, contents: C) -> Element<'a, Messa
 where
     T: text::IntoFragment<'a>,
     C: Into<Element<'a, Message>>,
-    Message: Clone + 'a,
+    Message: 'a + Clone,
 {
     row![text(header), space::horizontal(), contents.into()]
         .align_y(Center)
         .into()
 }
 
-pub fn list_header<'a, T>(header: T, tooltip: T) -> row::Row<'a, Message>
+pub fn list_header<'a, T, Message>(header: T, tooltip: T) -> row::Row<'a, Message>
 where
     T: text::IntoFragment<'a>,
+    Message: 'a + Clone,
 {
     row![
         text(header).size(16),

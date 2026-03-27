@@ -26,8 +26,8 @@ use crate::{
     ferrix::ExportManager,
     fl,
     messages::{ExportManagerMessage, Message},
-    widgets::items_list::{items_group, items_list_container, list_item},
 };
+use ferrix_widgets::items_list::*;
 use iced::{
     Alignment::Center,
     Element, Length,
