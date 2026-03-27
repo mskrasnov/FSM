@@ -30,7 +30,6 @@ use crate::{
     settings::FXSettings,
     sidebar::sidebar,
     utils::get_home,
-    widgets::line_charts::LineChart,
 };
 use ferrix_lib::{
     battery::BatInfo,
@@ -45,6 +44,7 @@ use ferrix_lib::{
     sys::{Groups, KModules, Kernel, OsRelease, Users},
     vulnerabilities::Vulnerabilities,
 };
+use ferrix_widgets::line_charts::LineChart;
 use std::collections::HashSet;
 
 #[derive(Debug)]
@@ -183,11 +183,11 @@ impl FerrixData {
 
         let mut cpu_usage_chart = LineChart::new();
         cpu_usage_chart.set_style(&style.to_theme());
-        cpu_usage_chart.set_line_thickness(thickness);
+        cpu_usage_chart.set_line_thickness(thickness.to_u32());
 
         let mut ram_usage_chart = LineChart::new();
         ram_usage_chart.set_style(&style.to_theme());
-        ram_usage_chart.set_line_thickness(thickness);
+        ram_usage_chart.set_line_thickness(thickness.to_u32());
 
         Self {
             cpu_usage_chart,

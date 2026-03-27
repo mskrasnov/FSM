@@ -24,13 +24,10 @@ use crate::{
     fl,
     load_state::LoadState,
     messages::{ButtonsMessage, Message},
-    widgets::{
-        separated_view::SeparatedView,
-        table::{InfoRow, fmt_bool, fmt_val, fmt_vec, kv_info_table},
-    },
+    widgets::table::{InfoRow, fmt_bool, fmt_val, fmt_vec, kv_info_table},
 };
 use ferrix_lib::cpu::Processors;
-
+use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
     Length,
     widget::{Column, button, column, container, text},

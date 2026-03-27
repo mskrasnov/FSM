@@ -24,14 +24,12 @@ use crate::{
     DataLoadingState, Message,
     dmi::DMIData,
     fl,
-    widgets::{
-        header,
-        table::{InfoRow, fmt_bool, fmt_val, fmt_vec, hdr_name, text_fmt_val},
-    },
+    widgets::table::{InfoRow, fmt_bool, fmt_val, fmt_vec, hdr_name, text_fmt_val},
 };
 use ferrix_lib::dmi::{
     Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, Processor,
 };
+use ferrix_widgets::headers::header;
 use iced::{
     Element, Length,
     widget::{Id, column, container, scrollable, table, text},

@@ -1,6 +1,6 @@
 /* separated_view.rs
  *
- * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use crate::messages::Message;
+//! Two-pane view
+
 use iced::{
     Element, Length, Pixels,
     widget::{Id, column, container, scrollable},
 };
 
-pub struct SeparatedView<'a> {
+pub struct SeparatedView<'a, Message> {
     pub first_pane: Element<'a, Message>,
     pub second_pane: Element<'a, Message>,
     pub first_pane_id: Option<&'static str>,
@@ -32,7 +33,7 @@ pub struct SeparatedView<'a> {
     pub fpane_max_height: f32,
 }
 
-impl<'a> SeparatedView<'a> {
+impl<'a, Message: 'a + Clone> SeparatedView<'a, Message> {
     pub fn new(f: impl Into<Element<'a, Message>>, s: impl Into<Element<'a, Message>>) -> Self {
         Self {
             first_pane: f.into(),

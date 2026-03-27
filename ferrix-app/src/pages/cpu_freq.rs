@@ -24,11 +24,11 @@ use crate::{
     Message, fl,
     load_state::LoadState,
     widgets::{
-        header,
         table::{InfoRow, fmt_bool, fmt_val, fmt_vec, kv_info_table},
     },
 };
 use ferrix_lib::cpu_freq::CpuFreq;
+use ferrix_widgets::headers::header;
 use iced::widget::{Id, column, container, scrollable, text};
 
 pub fn cpu_freq_page<'a>(cpu_freq: &'a LoadState<CpuFreq>) -> container::Container<'a, Message> {

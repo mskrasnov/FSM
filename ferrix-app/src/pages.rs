@@ -20,7 +20,8 @@
 
 //! Pages with information about hardware and software
 
-use crate::{Message, ferrix::Ferrix, fl, icons::ERROR_ICON, widgets::header_text};
+use crate::{Message, ferrix::Ferrix, fl, icons::ERROR_ICON};
+use ferrix_widgets::headers::header_text;
 use iced::{
     Alignment::Center,
     Element,

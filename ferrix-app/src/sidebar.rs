@@ -20,16 +20,12 @@
 
 //! Sidebar widget
 
+use crate::{Page, fl, messages::Message, widgets::sidebar_button};
+use ferrix_widgets::button::icon_button;
 use iced::{
     Alignment::Center,
     Element, Length,
     widget::{Id, column, container, row, scrollable, text},
-};
-
-use crate::{
-    Page, fl,
-    messages::Message,
-    widgets::{icon_button, sidebar_button},
 };
 
 pub fn sidebar<'a>(cur_page: Page) -> Element<'a, Message> {
