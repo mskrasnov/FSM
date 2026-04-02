@@ -33,6 +33,7 @@ pub mod kernel;
 
 // REFACTORED MODULES
 pub mod ferrix;
+pub mod log;
 pub mod messages;
 pub mod settings;
 pub mod sidebar;
