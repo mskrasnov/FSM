@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/mskrasnov/FSM/refs/heads/master/ferrix-app/data/com.mskrasnov.Ferrix.svg" width="200">
   <h1>Ferrix System Monitor — Swiss Knife for Linux Hardware Diagnostics</h1>
-  <p><b>A simple program for getting information about computer hardware and installed software.</b></p>
+  <p><b>A modern program for getting information about computer hardware and installed software.</b></p>
 
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github)](https://github.com/mskrasnov/ferrix/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
@@ -9,27 +9,39 @@
   <small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small>
 </div>
 
-## What is Ferrix?
+## What is FSM?
 
-Ferrix System Monitor is a Rust-crate and program for obtaining information about computer hardware and software. It is designed to work in modern Linux OS distributions.
+FSM is a modern system profiler. Is a program for obtaining information about computer hardware and software. It is designed to work in modern GNU/Linux systems.
 
-## Functions (`ferrix-lib` crate)
+## Functions
 
-1. Get information about:
-    - [X] CPU;
-    - [X] RAM;
-    - [X] Storage;
-    - [X] BIOS and PC Motherboard;
-    - [X] Laptop battery;
-    - [X] Installed Linux distribution;
-    - [ ] Desktop environment;
-    - [ ] Network;
-    - [X] systemd services;
-    - [X] `deb`, `rpm` packages;
-    - [ ] flatpak packages;
-2. Convert collected data into:
-    - [X] JSON;
-    - [X] XML;
+- Beautiful CPU and RAM utilization charts ([System Monitor](https://mskrasnov.github.io/ferrix/screens/sysmon-new.png) page);
+- Hardware:
+    - Information about installed CPUs: name(s), model(s), topology, frequencies, vulnerabilities;
+    - Filesystems: mount point and mount options, total and used size, file system type;
+    - Memory: total, free, used memory, cached memory, buffers, swap(s), etc.;
+    - Network interfaces list;
+    - Some data from the DMI tables (BIOS, System, Baseboard, Processors) - WIP;
+    - Installed notebook battery(es) - status, capacity, battery health, technology, voltage, power, energy, battery manufacturer, battery model and serial number;
+    - Screens - supported modes and some data from EDID;
+- Software:
+    - Information about installed GNU/Linux system: name, version, maintainer/developer, homepage URL, etc.;
+    - Users and groups list;
+    - Environment variables list;
+    - `systemd` services list;
+    - Installed software list (only `deb` and `rpm` packages is displayed yet);
+    - Linux kernel information;
+    - Kernel modules list;
+    - Desktop environment name;
+
+**TODO:**
+
+- [ ] More information about environment (name and version of DE, WM, DM);
+- [ ] Information about media: name of video- and soundcard, information about Pulseaudio/PipeWire and Xorg/Wayland;
+- [ ] I/O utilization charts;
+- [ ] Process monitor;
+- [ ] More information about network;
+- [ ] Sensors information;
 
 ## Build & Install
 
