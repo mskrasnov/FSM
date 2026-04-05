@@ -20,8 +20,8 @@
 
 //! Data from `ferrix-lib`
 
-pub mod load_state;
 pub mod dmi;
+pub mod load_state;
 pub mod polkit;
 
 use ferrix_lib::{
@@ -37,8 +37,8 @@ use ferrix_lib::{
     sys::{Groups, KModules, Kernel, OsRelease, Users},
     vulnerabilities::Vulnerabilities,
 };
-use std::collections::HashSet;
-use load_state::LoadState;
+
+use crate::{dmi::DMIData, load_state::LoadState};
 
 #[derive(Debug)]
 pub struct FerrixData {
@@ -66,23 +66,12 @@ pub struct FerrixData {
     pub sysd_services_list: LoadState<SystemdServices>,
     pub boot_time: LoadState<BootTimestamps>,
     pub installed_pkgs_list: LoadState<InstalledPackages>,
-    pub system: LoadState<crate::System>,
+    // pub system: LoadState<crate::System>,
 }
 
 impl Default for FerrixData {
     fn default() -> Self {
         Self {
-            is_polkit: false,
-
-            cpu_usage_chart: LineChart::new(),
-            selected_proc: 0,
-            show_cpus_chart: HashSet::new(),
-            show_chart_elements: 100,
-            ram_usage_chart: LineChart::new(),
-            show_mem_chart: HashSet::new(),
-            show_ram_chart: true,
-            show_charts_legend: true,
-
             proc_data: LoadState::default(),
             prev_proc_stat: LoadState::default(),
             curr_proc_stat: LoadState::default(),
@@ -104,51 +93,7 @@ impl Default for FerrixData {
             sysd_services_list: LoadState::default(),
             boot_time: LoadState::default(),
             installed_pkgs_list: LoadState::default(),
-            system: LoadState::default(),
-        }
-    }
-}
-
-impl FerrixData {
-    pub fn new(settings: &FXSettings) -> Self {
-        let style = &settings.style;
-        let thickness = settings.chart_line_thickness;
-
-        let mut cpu_usage_chart = LineChart::new();
-        cpu_usage_chart.set_style(&style.to_theme());
-        cpu_usage_chart.set_line_thickness(thickness.to_u32());
-
-        let mut ram_usage_chart = LineChart::new();
-        ram_usage_chart.set_style(&style.to_theme());
-        ram_usage_chart.set_line_thickness(thickness.to_u32());
-
-        Self {
-            cpu_usage_chart,
-            ram_usage_chart,
-            ..Default::default()
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct ExportManager {
-    pub output_path: String,
-    pub format: ExportFormat,
-    pub mode: ExportMode,
-    pub selected_pages: ExportPages,
-    pub export_data: ExportData,
-    pub status: ExportStatus,
-}
-
-impl Default for ExportManager {
-    fn default() -> Self {
-        Self {
-            output_path: "export.json".to_string(),
-            format: ExportFormat::default(),
-            mode: ExportMode::default(),
-            selected_pages: ExportPages::default(),
-            export_data: ExportData::default(),
-            status: ExportStatus::default(),
+            // system: LoadState::default(),
         }
     }
 }
