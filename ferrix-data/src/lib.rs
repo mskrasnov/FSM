@@ -24,6 +24,7 @@ pub mod dmi;
 pub mod load_state;
 pub mod polkit;
 
+use anyhow::Result;
 use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
@@ -34,13 +35,17 @@ use ferrix_lib::{
     parts::Mounts,
     ram::{RAM, Swaps},
     soft::InstalledPackages,
-    sys::{Groups, KModules, Kernel, OsRelease, Users},
+    sys::{
+        Groups, KModules, Kernel, LoadAVG, OsRelease, Uptime, Users, get_current_desktop,
+        get_env_vars, get_hostname, get_lang,
+    },
     vulnerabilities::Vulnerabilities,
 };
+use serde::Serialize;
 
 use crate::{dmi::DMIData, load_state::LoadState};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct FerrixData {
     pub proc_data: LoadState<Processors>,
     pub prev_proc_stat: LoadState<Stat>,
@@ -66,7 +71,7 @@ pub struct FerrixData {
     pub sysd_services_list: LoadState<SystemdServices>,
     pub boot_time: LoadState<BootTimestamps>,
     pub installed_pkgs_list: LoadState<InstalledPackages>,
-    // pub system: LoadState<crate::System>,
+    pub system: LoadState<System>,
 }
 
 impl Default for FerrixData {
@@ -93,7 +98,43 @@ impl Default for FerrixData {
             sysd_services_list: LoadState::default(),
             boot_time: LoadState::default(),
             installed_pkgs_list: LoadState::default(),
-            // system: LoadState::default(),
+            system: LoadState::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct System {
+    pub hostname: Option<String>,
+    pub loadavg: Option<LoadAVG>,
+    pub uptime: Option<Uptime>,
+    pub desktop: Option<String>,
+    pub language: Option<String>,
+    pub env_vars: Vec<(String, String)>,
+}
+
+impl System {
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            hostname: get_hostname(),
+            loadavg: Some(LoadAVG::new()?),
+            uptime: Some(Uptime::new()?),
+            desktop: get_current_desktop(),
+            language: get_lang(),
+            env_vars: get_env_vars(),
+        })
+    }
+}
+
+impl Default for System {
+    fn default() -> Self {
+        Self {
+            hostname: Some("unknown-host".to_string()),
+            loadavg: None,
+            uptime: None,
+            desktop: Some("Unknown DE".to_string()),
+            language: Some("Unknown locale".to_string()),
+            env_vars: Vec::new(),
         }
     }
 }
