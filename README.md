@@ -49,7 +49,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 |-----------------------|-----------------------|-----------|--------------|
 | Programming language  | Rust                  | C         | C++          |
 | Program type          | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
-| GUI                   | `iced`                | GTK3      | Qt5          |
+| GUI                   | `iced`                | GTK3      | Qt5/Qt6      |
 | License               | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
 | Key features          | <ul><li><b>Deep system analisys:</b> systemd services, installed packages, DMI, EDID, etc.;</li><li>Beautiful CPU and RAM utilization charts;</li><li>Simple and clean UI;</li></ul> | <ul><li><b>Hardware benchmarks:</b> CPU, GPU, disks, memory;</li><li>Hardware ratings;</li><li>Export data to HTML/plain text;</li></ul> | <ul><li>System cleaner (caches, logs, packages);</li><li>Real-time resource monitoring;</li><li><tt>systemd</tt>-services management;</li></ul> |
 | Data accuracy         | 🟢️ | ⚪️ (incorrect battery information) | ⚪️ (stacer is outdated software) |
