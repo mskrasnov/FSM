@@ -43,6 +43,30 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 - [ ] More information about network;
 - [ ] Sensors information;
 
+## Difference from analogues
+
+| Criteria              | Ferrix System Monitor | Hardinfo2 | Stacer/Nexis |
+|-----------------------|-----------------------|-----------|--------------|
+| Programming language  | Rust                  | C         | C++          |
+| Program type          | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
+| GUI                   | `iced`                | GTK3      | Qt5          |
+| License               | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
+| Key features          | <ul><li><b>Deep system analisys:</b> systemd services, installed packages, DMI, EDID, etc.;</li><li>Beautiful CPU and RAM utilization charts;</li><li>Simple and clean UI;</li></ul> | <ul><li><b>Hardware benchmarks:</b> CPU, GPU, disks, memory;</li><li>Hardware ratings;</li><li>Export data to HTML/plain text;</li></ul> | <ul><li>System cleaner (caches, logs, packages);</li><li>Real-time resource monitoring;</li><li><tt>systemd</tt>-services management;</li></ul> |
+| Data accuracy         | 🟢️ | ⚪️ (incorrect battery information) | ⚪️ (stacer is outdated software) |
+| Target audience       | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
+| Processor topology    | 🟢️                    | 🟢️        | 🔴️           |
+| Processor frequencies | 🟢️                    | ⚪️        | ?            |
+| Processor vulnerabilities | 🟢️                | 🟢️        | 🔴️           |
+| Real-time monitoring  | 🟢️                    | ⚪️        | 🟢️           |
+| Hardware info panel   | 🟢️                    | 🟢️        | 🟢️           |
+| Battery health        | 🟢️                    | 🔴️        | 🟢️           |
+| systemd services list | 🟢️                    | 🔴️        | 🟢️           |
+| DMI Tables            | ⚪️ (more data than Hardinfo) | ⚪️ (less data than FSM) | 🔴️ |
+
+- 🟢️ - yes;
+- 🔴️ - no;
+- ⚪️ - partial;
+
 ## Build & Install
 
 [![](https://img.shields.io/github/downloads/mskrasnov/fsm/total?color=red)](https://github.com/mskrasnov/FSM/releases) [![](https://img.shields.io/github/downloads/mskrasnov/fsm/latest/total?color=green)](https://github.com/mskrasnov/FSM/releases/latest)
