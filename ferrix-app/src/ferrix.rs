@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-//! Data from `ferrix-lib`
+//! Data model and application state
 
 use crate::{
     SETTINGS_PATH,
@@ -36,10 +36,10 @@ use std::collections::HashSet;
 #[derive(Debug)]
 pub struct Ferrix {
     pub current_page: Page,
+    pub scrolled_area_id: Option<&'static str>,
     pub settings: FXSettings,
     pub data: FerrixData,
     pub state: FerrixState,
-    pub scrolled_area_id: Option<&'static str>,
     pub export_manager: ExportManager,
 }
 
@@ -55,10 +55,10 @@ impl Default for Ferrix {
 
         Self {
             current_page: page,
+            scrolled_area_id: None,
             settings: settings.clone(),
             data: FerrixData::default(),
             state: FerrixState::new(&settings),
-            scrolled_area_id: None,
             export_manager: ExportManager::default(),
         }
     }
