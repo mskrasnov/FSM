@@ -347,13 +347,13 @@ impl<'a> Page {
         let page = match self {
             Self::Dashboard => dashboard::dashboard(&state.data).into(),
             Self::SystemMonitor => sysmon::usage_charts_page(
-                &state.data,
+                &state.state,
                 &state.data.curr_proc_stat,
                 &state.data.prev_proc_stat,
             )
-            .into(), // TODO: cur_stat and proc_stat - ???
+            .into(),
             Self::Processors => {
-                cpu::proc_page(&state.data.proc_data, state.data.selected_proc).into()
+                cpu::proc_page(&state.data.proc_data, state.state.selected_proc).into()
             }
             Self::CPUFrequency => cpu_freq::cpu_freq_page(&state.data.cpu_freq).into(),
             Self::CPUVulnerabilities => {

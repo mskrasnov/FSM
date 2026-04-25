@@ -25,12 +25,10 @@ use crate::{
     load_state::DataLoadingState,
     widgets::table::{InfoRow, kv_info_table},
 };
-
+use ferrix_data::System;
 use iced::widget::{Id, container, scrollable};
 
-pub fn env_page<'a>(
-    system: &'a DataLoadingState<crate::System>,
-) -> container::Container<'a, Message> {
+pub fn env_page<'a>(system: &'a DataLoadingState<System>) -> container::Container<'a, Message> {
     match system {
         DataLoadingState::Loaded(sys) => {
             let mut rows = Vec::with_capacity(sys.env_vars.len());

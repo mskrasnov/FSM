@@ -20,7 +20,7 @@
 
 //! CPU usage charts
 
-use crate::{DataLoadingState, Message, ferrix::FerrixData, fl, messages::ButtonsMessage};
+use crate::{DataLoadingState, Message, ferrix::FerrixState, fl, messages::ButtonsMessage};
 use ferrix_lib::cpu::Stat;
 use ferrix_widgets::container::glassy_container;
 use iced::{
@@ -29,7 +29,7 @@ use iced::{
 };
 
 pub fn usage_charts_page<'a>(
-    fx: &'a FerrixData,
+    fs: &'a FerrixState,
     cur_stat: &'a DataLoadingState<Stat>,
     prev_stat: &'a DataLoadingState<Stat>,
 ) -> container::Container<'a, Message> {
@@ -45,20 +45,20 @@ pub fn usage_charts_page<'a>(
 
     let mx = row![
         text(fl!("sysmon-x-axis")),
-        slider(10.0..=120., fx.show_chart_elements as f64, |elems| {
+        slider(10.0..=120., fs.show_chart_elements as f64, |elems| {
             Message::DataReceiver(
                 crate::messages::DataReceiverMessage::ChangeShowCPUChartElements(elems as usize),
             )
         })
         .width(200.),
-        text(format!("{}", fx.show_chart_elements))
+        text(format!("{}", fs.show_chart_elements))
     ]
     .align_y(Center)
     .spacing(5);
 
     let line_widget = column![
         row![
-            toggler(fx.show_charts_legend)
+            toggler(fs.show_charts_legend)
                 .label(fl!("sysmon-toggle"))
                 .on_toggle(|show| Message::Buttons(ButtonsMessage::ChangeLegendShow(show))),
             space::horizontal(),
@@ -66,8 +66,8 @@ pub fn usage_charts_page<'a>(
         ]
         .align_y(Center)
         .spacing(5),
-        glassy_container(fl!("sysmon-cpu-hdr"), fx.cpu_usage_chart.view()),
-        glassy_container(fl!("sysmon-ram-hdr"), fx.ram_usage_chart.view()),
+        glassy_container(fl!("sysmon-cpu-hdr"), fs.cpu_usage_chart.view()),
+        glassy_container(fl!("sysmon-ram-hdr"), fs.ram_usage_chart.view()),
     ]
     .spacing(5);
 

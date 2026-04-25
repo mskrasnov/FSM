@@ -22,28 +22,14 @@
 
 use crate::{
     SETTINGS_PATH,
-    dmi::DMIData,
     export::{ExportData, ExportFormat, ExportMode, ExportPages, ExportStatus},
-    load_state::LoadState,
     messages::Message,
     pages::Page,
     settings::FXSettings,
     sidebar::sidebar,
     utils::get_home,
 };
-use ferrix_lib::{
-    battery::BatInfo,
-    cpu::{Processors, Stat},
-    cpu_freq::CpuFreq,
-    drm::Video,
-    init::{BootTimestamps, SystemdServices},
-    net::Networks,
-    parts::Mounts,
-    ram::{RAM, Swaps},
-    soft::InstalledPackages,
-    sys::{Groups, KModules, Kernel, OsRelease, Users},
-    vulnerabilities::Vulnerabilities,
-};
+use ferrix_data::FerrixData;
 use ferrix_widgets::line_charts::LineChart;
 use std::collections::HashSet;
 
@@ -52,6 +38,7 @@ pub struct Ferrix {
     pub current_page: Page,
     pub settings: FXSettings,
     pub data: FerrixData,
+    pub state: FerrixState,
     pub scrolled_area_id: Option<&'static str>,
     pub export_manager: ExportManager,
 }
@@ -69,7 +56,8 @@ impl Default for Ferrix {
         Self {
             current_page: page,
             settings: settings.clone(),
-            data: FerrixData::new(&settings),
+            data: FerrixData::default(),
+            state: FerrixState::new(&settings),
             scrolled_area_id: None,
             export_manager: ExportManager::default(),
         }
@@ -98,85 +86,35 @@ impl Ferrix {
 }
 
 #[derive(Debug)]
-pub struct FerrixData {
+pub struct FerrixState {
     pub is_polkit: bool,
-
-    pub proc_data: LoadState<Processors>,
     pub selected_proc: usize,
-    pub prev_proc_stat: LoadState<Stat>,
-    pub curr_proc_stat: LoadState<Stat>,
     pub cpu_usage_chart: LineChart,
     pub show_cpus_chart: HashSet<usize>,
     pub show_chart_elements: usize,
     pub show_charts_legend: bool,
-    pub cpu_freq: LoadState<CpuFreq>,
-    pub cpu_vulnerabilities: LoadState<Vulnerabilities>,
-
-    pub ram_data: LoadState<RAM>,
-    pub swap_data: LoadState<Swaps>,
     pub show_mem_chart: HashSet<usize>,
     pub show_ram_chart: bool,
     pub ram_usage_chart: LineChart,
-
-    pub storages: LoadState<Mounts>,
-    pub networks: LoadState<Networks>,
-    pub dmi_data: LoadState<DMIData>,
-    pub bat_data: LoadState<BatInfo>,
-    pub drm_data: LoadState<Video>,
-    pub osrel_data: LoadState<OsRelease>,
-
-    pub kernel_data: LoadState<Kernel>,
-    pub kmods_data: LoadState<KModules>,
-
-    pub users_list: LoadState<Users>,
-    pub groups_list: LoadState<Groups>,
-    pub sysd_services_list: LoadState<SystemdServices>,
-    pub boot_time: LoadState<BootTimestamps>,
-    pub installed_pkgs_list: LoadState<InstalledPackages>,
-    pub system: LoadState<crate::System>,
 }
 
-impl Default for FerrixData {
+impl Default for FerrixState {
     fn default() -> Self {
         Self {
             is_polkit: false,
-
-            cpu_usage_chart: LineChart::new(),
             selected_proc: 0,
+            cpu_usage_chart: LineChart::new(),
             show_cpus_chart: HashSet::new(),
             show_chart_elements: 100,
-            ram_usage_chart: LineChart::new(),
+            show_charts_legend: true,
             show_mem_chart: HashSet::new(),
             show_ram_chart: true,
-            show_charts_legend: true,
-
-            proc_data: LoadState::default(),
-            prev_proc_stat: LoadState::default(),
-            curr_proc_stat: LoadState::default(),
-            cpu_freq: LoadState::default(),
-            cpu_vulnerabilities: LoadState::default(),
-
-            ram_data: LoadState::default(),
-            swap_data: LoadState::default(),
-            storages: LoadState::default(),
-            networks: LoadState::default(),
-            dmi_data: LoadState::default(),
-            bat_data: LoadState::default(),
-            drm_data: LoadState::default(),
-            osrel_data: LoadState::default(),
-            kernel_data: LoadState::default(),
-            kmods_data: LoadState::default(),
-            users_list: LoadState::default(),
-            groups_list: LoadState::default(),
-            sysd_services_list: LoadState::default(),
-            boot_time: LoadState::default(),
-            installed_pkgs_list: LoadState::default(),
-            system: LoadState::default(),
+            ram_usage_chart: LineChart::new(),
         }
     }
 }
 
-impl FerrixData {
+impl FerrixState {
     pub fn new(settings: &FXSettings) -> Self {
         let style = &settings.style;
         let thickness = settings.chart_line_thickness;

@@ -20,7 +20,8 @@
 
 //! Export manager
 
-use crate::{dmi::DMIData, ferrix::FerrixData, fl, load_state::LoadState};
+use crate::fl;
+use ferrix_data::{FerrixData, System, dmi::DMIData, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
@@ -227,7 +228,7 @@ pub struct ExportData {
     pub sysd_services_list: ExportMember<SystemdServices>,
     pub boot_time: ExportMember<BootTimestamps>,
     pub installed_pkgs_list: ExportMember<InstalledPackages>,
-    pub system: ExportMember<crate::System>,
+    pub system: ExportMember<System>,
 }
 
 impl ToJson for ExportData {}

@@ -22,13 +22,11 @@ pub mod export;
 pub mod i18n;
 pub mod icons;
 pub mod load_state;
-// pub mod modals;
 pub mod pages;
 pub mod styles;
 pub mod utils;
 pub mod widgets;
 
-pub mod dmi;
 pub mod kernel;
 
 // REFACTORED MODULES

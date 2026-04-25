@@ -20,7 +20,8 @@
 
 //! Dashboard page
 
-use crate::{Message, Page, ferrix::FerrixData, fl, load_state::LoadState, widgets::card::Card};
+use crate::{Message, Page, fl, load_state::LoadState, widgets::card::Card};
+use ferrix_data::FerrixData;
 use ferrix_lib::{battery::Status, utils::Size};
 use iced::widget::{Id, column, container, grid, progress_bar, scrollable, text};
 

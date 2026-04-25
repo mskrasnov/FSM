@@ -283,7 +283,7 @@ impl Ferrix {
     }
 
     fn dmi_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::DMI && !self.data.is_polkit && self.data.dmi_data.is_none())
+        if (self.current_page == Page::DMI && !self.state.is_polkit && self.data.dmi_data.is_none())
             || self.is_export_member(Page::DMI)
         {
             Some(

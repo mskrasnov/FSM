@@ -21,11 +21,10 @@
 //! DMI table viewer page
 
 use crate::{
-    DataLoadingState, Message,
-    dmi::DMIData,
-    fl,
+    DataLoadingState, Message, fl,
     widgets::table::{InfoRow, fmt_bool, fmt_val, fmt_vec, hdr_name, text_fmt_val},
 };
+use ferrix_data::dmi::DMIData;
 use ferrix_lib::dmi::{
     Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, Processor,
 };

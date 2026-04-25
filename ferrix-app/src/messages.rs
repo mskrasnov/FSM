@@ -21,15 +21,15 @@
 //! UI events handler & Data Updater
 
 use crate::{
-    DataLoadingState, Page, SETTINGS_PATH, System,
-    dmi::DMIData,
+    DataLoadingState, Page, SETTINGS_PATH,
     export::{ExportData, ExportFormat, ExportMode, ExportStatus},
-    ferrix::{ExportManager, Ferrix, FerrixData},
+    ferrix::{ExportManager, Ferrix, FerrixState},
     load_state::LoadState,
     settings::{ChartLineThickness, FXSettings, Style},
     styles::CPU_CHARTS_COLORS,
     utils::{ToColor, get_home},
 };
+use ferrix_data::{FerrixData, System, dmi::DMIData};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
@@ -71,6 +71,7 @@ impl Message {
         match self {
             Self::DataReceiver(data) => data.update(
                 &mut state.data,
+                &mut state.state,
                 &mut state.settings,
                 &mut state.export_manager,
                 state.current_page,
@@ -174,7 +175,8 @@ pub enum DataReceiverMessage {
 impl DataReceiverMessage {
     pub fn update<'a>(
         self,
-        fx: &'a mut FerrixData,
+        fd: &'a mut FerrixData,
+        fs: &'a mut FerrixState,
         settings: &'a mut FXSettings,
         export: &'a mut ExportManager,
         cur_page: Page,
@@ -183,31 +185,31 @@ impl DataReceiverMessage {
             Self::ClearAllData => {
                 export.status = ExportStatus::LoadingData;
 
-                fx.is_polkit = false;
-                fx.proc_data = LoadState::Loading;
-                fx.cpu_freq = LoadState::Loading;
-                fx.cpu_vulnerabilities = LoadState::Loading;
-                fx.ram_data = LoadState::Loading;
-                fx.swap_data = LoadState::Loading;
-                fx.storages = LoadState::Loading;
-                fx.networks = LoadState::Loading;
-                fx.dmi_data = LoadState::Loading;
-                fx.bat_data = LoadState::Loading;
-                fx.drm_data = LoadState::Loading;
-                fx.osrel_data = LoadState::Loading;
-                fx.kernel_data = LoadState::Loading;
-                fx.kmods_data = LoadState::Loading;
-                fx.users_list = LoadState::Loading;
-                fx.groups_list = LoadState::Loading;
-                fx.sysd_services_list = LoadState::Loading;
-                fx.boot_time = LoadState::Loading;
-                fx.installed_pkgs_list = LoadState::Loading;
-                fx.system = LoadState::Loading;
+                fs.is_polkit = false;
+                fd.proc_data = LoadState::Loading;
+                fd.cpu_freq = LoadState::Loading;
+                fd.cpu_vulnerabilities = LoadState::Loading;
+                fd.ram_data = LoadState::Loading;
+                fd.swap_data = LoadState::Loading;
+                fd.storages = LoadState::Loading;
+                fd.networks = LoadState::Loading;
+                fd.dmi_data = LoadState::Loading;
+                fd.bat_data = LoadState::Loading;
+                fd.drm_data = LoadState::Loading;
+                fd.osrel_data = LoadState::Loading;
+                fd.kernel_data = LoadState::Loading;
+                fd.kmods_data = LoadState::Loading;
+                fd.users_list = LoadState::Loading;
+                fd.groups_list = LoadState::Loading;
+                fd.sysd_services_list = LoadState::Loading;
+                fd.boot_time = LoadState::Loading;
+                fd.installed_pkgs_list = LoadState::Loading;
+                fd.system = LoadState::Loading;
 
                 Task::none()
             }
             Self::CPUDataReceived(state) => {
-                fx.proc_data = state;
+                fd.proc_data = state;
                 Task::none()
             }
             Self::GetCPUData => Task::perform(
@@ -221,12 +223,12 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::CPUDataReceived(val)),
             ),
             Self::ProcStatReceived(state) => {
-                if fx.curr_proc_stat.is_some() {
-                    fx.prev_proc_stat = fx.curr_proc_stat.clone();
-                } else if fx.curr_proc_stat.is_none() && fx.prev_proc_stat.is_none() {
-                    fx.prev_proc_stat = state.clone();
+                if fd.curr_proc_stat.is_some() {
+                    fd.prev_proc_stat = fd.curr_proc_stat.clone();
+                } else if fd.curr_proc_stat.is_none() && fd.prev_proc_stat.is_none() {
+                    fd.prev_proc_stat = state.clone();
                 }
-                fx.curr_proc_stat = state;
+                fd.curr_proc_stat = state;
                 Task::none()
             }
             Self::GetProcStat => Task::perform(
@@ -250,8 +252,8 @@ impl DataReceiverMessage {
             //     Task::none()
             // }
             Self::AddCPUCoreLineSeries => {
-                let curr_proc = &fx.curr_proc_stat;
-                let prev_proc = &fx.prev_proc_stat;
+                let curr_proc = &fd.curr_proc_stat;
+                let prev_proc = &fd.prev_proc_stat;
 
                 if curr_proc.is_none() || prev_proc.is_none() {
                     return Task::none();
@@ -271,7 +273,7 @@ impl DataReceiverMessage {
                     let percent =
                         curr_proc.cpus[id].usage_percentage(Some(prev_proc.cpus[id])) as f64;
 
-                    if fx.show_cpus_chart.get(&id).is_none() {
+                    if fs.show_cpus_chart.get(&id).is_none() {
                         let name = format!("CPU #{id}");
                         let color = {
                             let hm_color = colors_set.get(&name);
@@ -286,28 +288,28 @@ impl DataReceiverMessage {
                                 }
                             }
                         };
-                        let mut line = LineSeries::new(name, color, fx.show_chart_elements);
+                        let mut line = LineSeries::new(name, color, fs.show_chart_elements);
                         line.push(percent);
 
-                        fx.cpu_usage_chart.push_series(line);
-                        fx.show_cpus_chart.insert(id);
+                        fs.cpu_usage_chart.push_series(line);
+                        fs.show_cpus_chart.insert(id);
                     } else {
-                        fx.cpu_usage_chart.push_to(id, percent);
+                        fs.cpu_usage_chart.push_to(id, percent);
                     }
                 }
 
                 Task::none()
             }
             Self::ChangeShowCPUChartElements(elems) => {
-                fx.show_chart_elements = elems;
+                fs.show_chart_elements = elems;
 
-                fx.cpu_usage_chart.set_max_values(elems);
-                fx.ram_usage_chart.set_max_values(elems);
+                fs.cpu_usage_chart.set_max_values(elems);
+                fs.ram_usage_chart.set_max_values(elems);
 
                 Task::none()
             }
             Self::CPUFrequencyReceived(state) => {
-                fx.cpu_freq = state;
+                fd.cpu_freq = state;
                 Task::none()
             }
             Self::GetCPUFrequency => Task::perform(
@@ -321,7 +323,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(DataReceiverMessage::CPUFrequencyReceived(val)),
             ),
             Self::CPUVulnerabilitiesReveived(state) => {
-                fx.cpu_vulnerabilities = state;
+                fd.cpu_vulnerabilities = state;
                 Task::none()
             }
             Self::GetCPUVulnerabilities => Task::perform(
@@ -335,7 +337,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::CPUVulnerabilitiesReveived(val)),
             ),
             Self::StorageDataReceived(state) => {
-                fx.storages = state;
+                fd.storages = state;
                 Task::none()
             }
             Self::GetStorageData => Task::perform(
@@ -349,7 +351,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(DataReceiverMessage::StorageDataReceived(val)),
             ),
             Self::NetworksDataReceived(state) => {
-                fx.networks = state;
+                fd.networks = state;
                 Task::none()
             }
             Self::GetNetworksData => Task::perform(
@@ -363,28 +365,29 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(DataReceiverMessage::NetworksDataReceived(val)),
             ),
             Self::DMIDataReceived(state) => {
-                if state.some_value() && fx.is_polkit {
-                    fx.dmi_data = state;
-                } else if !fx.is_polkit {
-                    fx.dmi_data = state;
+                if state.some_value() && fs.is_polkit {
+                    fd.dmi_data = state;
+                } else if !fs.is_polkit {
+                    fd.dmi_data = state;
                 }
                 Task::none()
             }
             Self::GetDMIData => {
-                if !fx.is_polkit
-                    && ((fx.dmi_data.is_none() && cur_page == Page::DMI)
+                if !fs.is_polkit
+                    && ((fd.dmi_data.is_none() && cur_page == Page::DMI)
                         || export.selected_pages.dmi)
                 {
-                    fx.is_polkit = true;
-                    Task::perform(async move { crate::dmi::get_dmi_data().await }, |val| {
-                        Message::DataReceiver(Self::DMIDataReceived(val))
-                    })
+                    fs.is_polkit = true;
+                    Task::perform(
+                        async move { ferrix_data::dmi::get_dmi_data().await },
+                        |val| Message::DataReceiver(Self::DMIDataReceived(val)),
+                    )
                 } else {
                     Task::none()
                 }
             }
             Self::BatInfoReceived(state) => {
-                fx.bat_data = state;
+                fd.bat_data = state;
                 Task::none()
             }
             Self::GetBatInfo => Task::perform(
@@ -398,7 +401,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::BatInfoReceived(val)),
             ),
             Self::DRMDataReceived(state) => {
-                fx.drm_data = state;
+                fd.drm_data = state;
                 Task::none()
             }
             Self::GetDRMData => Task::perform(
@@ -412,7 +415,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::DRMDataReceived(val)),
             ),
             Self::RAMDataReceived(state) => {
-                fx.ram_data = state;
+                fd.ram_data = state;
                 Task::none()
             }
             Self::GetRAMData => Task::perform(
@@ -426,7 +429,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::RAMDataReceived(val)),
             ),
             Self::SwapDataReceived(state) => {
-                fx.swap_data = state;
+                fd.swap_data = state;
                 Task::none()
             }
             Self::GetSwapData => Task::perform(
@@ -440,8 +443,8 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::SwapDataReceived(val)),
             ),
             Self::AddTotalRAMUsage => {
-                let ram = &fx.ram_data;
-                let swap = &fx.swap_data;
+                let ram = &fd.ram_data;
+                let swap = &fd.swap_data;
 
                 if ram.is_none() {
                     return Task::none();
@@ -456,18 +459,18 @@ impl DataReceiverMessage {
                     None => color!(128, 64, 255),
                 };
 
-                if fx.ram_usage_chart.series_count() == 0 {
+                if fs.ram_usage_chart.series_count() == 0 {
                     let mut ram_line =
-                        LineSeries::new(format!("RAM"), ram_color, fx.show_chart_elements);
+                        LineSeries::new(format!("RAM"), ram_color, fs.show_chart_elements);
                     ram_line.push(ram_usage);
-                    fx.ram_usage_chart.push_series(ram_line);
+                    fs.ram_usage_chart.push_series(ram_line);
                 } else {
-                    fx.ram_usage_chart.push_to(0, ram_usage);
+                    fs.ram_usage_chart.push_to(0, ram_usage);
                 }
 
                 if let Some(swap) = swap.to_option() {
                     let len = swap.swaps.len();
-                    let current_series_cnt = fx.ram_usage_chart.series_count();
+                    let current_series_cnt = fs.ram_usage_chart.series_count();
 
                     for id in 0..len {
                         let series_idx = id + 1;
@@ -488,20 +491,20 @@ impl DataReceiverMessage {
                             let mut line = LineSeries::new(
                                 swap.swaps[id].filename.clone(),
                                 color,
-                                fx.show_chart_elements,
+                                fs.show_chart_elements,
                             );
                             line.push(swap_usage);
 
-                            fx.ram_usage_chart.push_series(line);
+                            fs.ram_usage_chart.push_series(line);
                         } else {
-                            fx.ram_usage_chart.push_to(series_idx, swap_usage);
+                            fs.ram_usage_chart.push_to(series_idx, swap_usage);
                         }
                     }
                 }
                 Task::none()
             }
             Self::OsReleaseDataReceived(state) => {
-                fx.osrel_data = state;
+                fd.osrel_data = state;
                 Task::none()
             }
             Self::GetOsReleaseData => Task::perform(
@@ -515,7 +518,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::OsReleaseDataReceived(val)),
             ),
             Self::KernelDataReceived(state) => {
-                fx.kernel_data = state;
+                fd.kernel_data = state;
                 Task::none()
             }
             Self::GetKernelData => Task::perform(
@@ -532,7 +535,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::KernelDataReceived(val)),
             ),
             Self::KModsDataReceived(state) => {
-                fx.kmods_data = state;
+                fd.kmods_data = state;
                 Task::none()
             }
             Self::GetKModsData => Task::perform(
@@ -549,7 +552,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::KModsDataReceived(val)),
             ),
             Self::UsersDataReceived(state) => {
-                fx.users_list = state;
+                fd.users_list = state;
                 Task::none()
             }
             Self::GetUsersData => Task::perform(
@@ -566,7 +569,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::UsersDataReceived(val)),
             ),
             Self::GroupsDataReceived(state) => {
-                fx.groups_list = state;
+                fd.groups_list = state;
                 Task::none()
             }
             Self::GetGroupsData => Task::perform(
@@ -583,9 +586,9 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::GroupsDataReceived(val)),
             ),
             Self::SystemdServicesReceived((sysd_services, boot_time)) => {
-                fx.sysd_services_list = sysd_services;
+                fd.sysd_services_list = sysd_services;
                 // dbg!(&boot_time);
-                fx.boot_time = boot_time;
+                fd.boot_time = boot_time;
                 Task::none()
             }
             Self::GetSystemdServices => Task::perform(
@@ -628,7 +631,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::SystemdServicesReceived(val)),
             ),
             Self::SystemDataReceived(state) => {
-                fx.system = state;
+                fd.system = state;
                 Task::none()
             }
             Self::GetPackagesList => Task::perform(
@@ -642,7 +645,7 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(Self::PackagesListReceived(val)),
             ),
             Self::PackagesListReceived(state) => {
-                fx.installed_pkgs_list = state;
+                fd.installed_pkgs_list = state;
                 Task::none()
             }
             Self::GetSystemData => Task::perform(
@@ -763,8 +766,8 @@ impl SettingsMessage {
 impl Ferrix {
     fn change_style(&mut self, style: Style) -> Task<Message> {
         self.settings.style = style;
-        self.data.cpu_usage_chart.set_style(&style.to_theme());
-        self.data.ram_usage_chart.set_style(&style.to_theme());
+        self.state.cpu_usage_chart.set_style(&style.to_theme());
+        self.state.ram_usage_chart.set_style(&style.to_theme());
         Task::none()
     }
 
@@ -780,8 +783,12 @@ impl Ferrix {
 
     fn change_line_thickness(&mut self, thick: ChartLineThickness) -> Task<Message> {
         self.settings.chart_line_thickness = thick;
-        self.data.cpu_usage_chart.set_line_thickness(thick.to_u32());
-        self.data.ram_usage_chart.set_line_thickness(thick.to_u32());
+        self.state
+            .cpu_usage_chart
+            .set_line_thickness(thick.to_u32());
+        self.state
+            .ram_usage_chart
+            .set_line_thickness(thick.to_u32());
 
         Task::none()
     }
@@ -830,14 +837,14 @@ impl Ferrix {
     }
 
     fn set_show_charts_legend(&mut self, show: bool) -> Task<Message> {
-        self.data.cpu_usage_chart.set_show_legend(show);
-        self.data.ram_usage_chart.set_show_legend(show);
-        self.data.show_charts_legend = show;
+        self.state.cpu_usage_chart.set_show_legend(show);
+        self.state.ram_usage_chart.set_show_legend(show);
+        self.state.show_charts_legend = show;
         Task::none()
     }
 
     fn proc_selected(&mut self, id: usize) -> Task<Message> {
-        self.data.selected_proc = id;
+        self.state.selected_proc = id;
         Task::none()
     }
 }
