@@ -321,6 +321,7 @@ misc-uptime = Uptime
 misc-uptime-val = uptime: {$up}, downtime: {$down}
 misc-de = Desktop
 misc-lang = Language
+misc-user = Current user
 
 # SYSTEM MONITOR PAGE
 sysmon-x-axis = Number of counts on the X-axis:

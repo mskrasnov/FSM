@@ -443,6 +443,11 @@ impl ToPlainText for User {
     }
 }
 
+/// Get current user string (user name)
+pub fn current_user() -> Option<String> {
+    std::env::var("USER").ok()
+}
+
 /// Information about groups
 #[derive(Debug, Serialize, Clone)]
 pub struct Groups {

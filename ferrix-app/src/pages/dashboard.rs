@@ -125,6 +125,13 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
         },
         None => "Unknown",
     };
+    let user = match fx.system.to_option() {
+        Some(system) => match &system.current_user {
+            Some(cu) => cu as &str,
+            None => "Unknown",
+        },
+        None => "Unknown",
+    };
     let de = match fx.system.to_option() {
         Some(system) => match &system.desktop {
             Some(de) => de as &str,
@@ -289,6 +296,7 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
         Card::new(fl!("misc-uptime"), Message::SelectPage(Page::SystemMisc)).widget(text(uptime)),
         Card::new(fl!("misc-loadavg"), Message::SelectPage(Page::SystemMisc)).widget(text(lavg)),
         Card::new(fl!("misc-lang"), Message::SelectPage(Page::SystemMisc)).widget(text(locale)),
+        Card::new(fl!("misc-user"), Message::SelectPage(Page::Users)).widget(text(user)),
     ];
     for card in cards {
         items.push(card);

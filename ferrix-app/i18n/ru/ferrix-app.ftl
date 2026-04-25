@@ -321,6 +321,7 @@ misc-uptime = Время работы
 misc-uptime-val = работы: {$up}, простоя: {$down}
 misc-de = Рабочее окружение
 misc-lang = Язык
+misc-user = Текущий пользоват.
 
 # SYSTEM MONITOR PAGE
 sysmon-x-axis = Число отсчётов по оси X:
