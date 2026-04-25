@@ -50,6 +50,7 @@ pub fn system_page<'a>(system: &'a DataLoadingState<System>) -> container::Conta
                 ),
                 InfoRow::new(fl!("misc-de"), sys.desktop.clone()),
                 InfoRow::new(fl!("misc-lang"), sys.language.clone()),
+                InfoRow::new(fl!("misc-user"), sys.current_user.clone()),
             ];
 
             let sys_table = container(kv_info_table(rows)).style(container::rounded_box);
