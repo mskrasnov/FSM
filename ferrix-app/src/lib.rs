@@ -27,8 +27,6 @@ pub mod styles;
 pub mod utils;
 pub mod widgets;
 
-pub mod kernel;
-
 // REFACTORED MODULES
 pub mod ferrix;
 pub mod log;

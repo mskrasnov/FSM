@@ -25,6 +25,7 @@ use crate::{
     load_state::DataLoadingState,
     widgets::table::{InfoRow, fmt_val, hdr_name, kv_info_table, text_fmt_val},
 };
+use ferrix_data::kmods::KResult;
 use ferrix_lib::sys::{KModules, Kernel, Module};
 
 use iced::{
@@ -60,26 +61,31 @@ pub fn kernel_page<'a>(
     }
 }
 
-pub fn kmods_page<'a>(kmods: &'a DataLoadingState<KModules>) -> container::Container<'a, Message> {
+pub fn kmods_page<'a>(kmods: &'a DataLoadingState<KResult>) -> container::Container<'a, Message> {
     match kmods {
-        DataLoadingState::Loaded(kmods) => {
-            if kmods.modules.is_empty() {
-                container(center(
-                    text(fl!("kernel-mods-is-empty"))
-                        .size(16)
-                        .style(text::secondary),
-                ))
-            } else {
-                let table = container(modules_table(&kmods.modules)).style(container::rounded_box);
-                container(
-                    scrollable(table)
-                        .spacing(5)
-                        .id(Id::new(super::Page::KModules.page_id())),
-                )
-            }
-        }
+        DataLoadingState::Loaded(kmods) => match kmods {
+            KResult::Ok { data } => kmods_view(data),
+            KResult::Err { error } => super::error_page(error),
+        },
         DataLoadingState::Error(why) => super::error_page(why),
         DataLoadingState::Loading => super::loading_page(),
+    }
+}
+
+fn kmods_view<'a>(kmods: &'a KModules) -> container::Container<'a, Message> {
+    if kmods.modules.is_empty() {
+        container(center(
+            text(fl!("kernel-mods-is-empty"))
+                .size(16)
+                .style(text::secondary),
+        ))
+    } else {
+        let table = container(modules_table(&kmods.modules)).style(container::rounded_box);
+        container(
+            scrollable(table)
+                .spacing(5)
+                .id(Id::new(super::Page::KModules.page_id())),
+        )
     }
 }
 

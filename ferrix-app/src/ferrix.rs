@@ -87,7 +87,8 @@ impl Ferrix {
 
 #[derive(Debug)]
 pub struct FerrixState {
-    pub is_polkit: bool,
+    pub is_dmi_polkit: bool,
+    pub is_kmods_polkit: bool,
     pub selected_proc: usize,
     pub cpu_usage_chart: LineChart,
     pub show_cpus_chart: HashSet<usize>,
@@ -101,7 +102,8 @@ pub struct FerrixState {
 impl Default for FerrixState {
     fn default() -> Self {
         Self {
-            is_polkit: false,
+            is_dmi_polkit: false,
+            is_kmods_polkit: false,
             selected_proc: 0,
             cpu_usage_chart: LineChart::new(),
             show_cpus_chart: HashSet::new(),

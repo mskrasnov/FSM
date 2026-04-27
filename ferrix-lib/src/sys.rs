@@ -550,6 +550,8 @@ pub struct KModules {
     pub modules: Vec<Module>,
 }
 
+impl ToJson for KModules {}
+
 impl KModules {
     pub fn new() -> Result<Self> {
         let contents = read_to_string("/proc/modules")?;

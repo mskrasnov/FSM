@@ -21,7 +21,7 @@
 //! Export manager
 
 use crate::fl;
-use ferrix_data::{FerrixData, System, dmi::DMIData, load_state::LoadState};
+use ferrix_data::{FerrixData, System, dmi::DMIData, kmods::KResult, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
@@ -32,7 +32,7 @@ use ferrix_lib::{
     parts::Mounts,
     ram::{RAM, Swaps},
     soft::InstalledPackages,
-    sys::{Groups, KModules, Kernel, OsRelease, Users},
+    sys::{Groups, Kernel, OsRelease, Users},
     traits::ToJson,
     vulnerabilities::Vulnerabilities,
 };
@@ -221,7 +221,7 @@ pub struct ExportData {
     pub osrel_data: ExportMember<OsRelease>,
 
     pub kernel_data: ExportMember<Kernel>,
-    pub kmods_data: ExportMember<KModules>,
+    pub kmods_data: ExportMember<KResult>,
 
     pub users_list: ExportMember<Users>,
     pub groups_list: ExportMember<Groups>,

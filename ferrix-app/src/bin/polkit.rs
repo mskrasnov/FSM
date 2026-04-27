@@ -18,8 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use ferrix_app::kernel::KResult;
-use ferrix_data::dmi::DMIData;
+use ferrix_data::{dmi::DMIData, kmods::KResult};
 use std::env;
 
 fn print_error_mode() {

@@ -29,7 +29,7 @@ use crate::{
     styles::CPU_CHARTS_COLORS,
     utils::{ToColor, get_home},
 };
-use ferrix_data::{FerrixData, System, dmi::DMIData};
+use ferrix_data::{FerrixData, System, dmi::DMIData, kmods::KResult};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
@@ -40,7 +40,7 @@ use ferrix_lib::{
     parts::Mounts,
     ram::{RAM, Swaps},
     soft::InstalledPackages,
-    sys::{Groups, KModules, Kernel, OsRelease, Users},
+    sys::{Groups, Kernel, OsRelease, Users},
     traits::ToJson,
     vulnerabilities::Vulnerabilities,
 };
@@ -149,7 +149,7 @@ pub enum DataReceiverMessage {
     KernelDataReceived(DataLoadingState<Kernel>),
 
     GetKModsData,
-    KModsDataReceived(DataLoadingState<KModules>),
+    KModsDataReceived(DataLoadingState<KResult>),
 
     GetUsersData,
     UsersDataReceived(DataLoadingState<Users>),
@@ -185,7 +185,7 @@ impl DataReceiverMessage {
             Self::ClearAllData => {
                 export.status = ExportStatus::LoadingData;
 
-                fs.is_polkit = false;
+                fs.is_dmi_polkit = false;
                 fd.proc_data = LoadState::Loading;
                 fd.cpu_freq = LoadState::Loading;
                 fd.cpu_vulnerabilities = LoadState::Loading;
@@ -365,19 +365,19 @@ impl DataReceiverMessage {
                 |val| Message::DataReceiver(DataReceiverMessage::NetworksDataReceived(val)),
             ),
             Self::DMIDataReceived(state) => {
-                if state.some_value() && fs.is_polkit {
+                if state.some_value() && fs.is_dmi_polkit {
                     fd.dmi_data = state;
-                } else if !fs.is_polkit {
+                } else if !fs.is_dmi_polkit {
                     fd.dmi_data = state;
                 }
                 Task::none()
             }
             Self::GetDMIData => {
-                if !fs.is_polkit
+                if !fs.is_dmi_polkit
                     && ((fd.dmi_data.is_none() && cur_page == Page::DMI)
                         || export.selected_pages.dmi)
                 {
-                    fs.is_polkit = true;
+                    fs.is_dmi_polkit = true;
                     Task::perform(
                         async move { ferrix_data::dmi::get_dmi_data().await },
                         |val| Message::DataReceiver(Self::DMIDataReceived(val)),
@@ -538,19 +538,33 @@ impl DataReceiverMessage {
                 fd.kmods_data = state;
                 Task::none()
             }
-            Self::GetKModsData => Task::perform(
-                async move {
-                    let kern = KModules::new();
-                    match kern {
-                        Ok(mut kern) => {
-                            kern.modules.sort_by_key(|module| module.name.clone());
-                            DataLoadingState::Loaded(kern)
-                        }
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::KModsDataReceived(val)),
-            ),
+            // Self::GetKModsData => Task::perform(
+            //     async move {
+            //         let kern = KModules::new();
+            //         match kern {
+            //             Ok(mut kern) => {
+            //                 kern.modules.sort_by_key(|module| module.name.clone());
+            //                 DataLoadingState::Loaded(kern)
+            //             }
+            //             Err(why) => DataLoadingState::Error(why.to_string()),
+            //         }
+            //     },
+            //     |val| Message::DataReceiver(Self::KModsDataReceived(val)),
+            // ),
+            Self::GetKModsData => {
+                if !fs.is_kmods_polkit
+                    && ((fd.kmods_data.is_none() && cur_page == Page::KModules)
+                        || export.selected_pages.kmods)
+                {
+                    fs.is_kmods_polkit = true;
+                    Task::perform(
+                        async move { ferrix_data::kmods::get_kmods_list().await },
+                        |val| Message::DataReceiver(Self::KModsDataReceived(val)),
+                    )
+                } else {
+                    Task::none()
+                }
+            }
             Self::UsersDataReceived(state) => {
                 fd.users_list = state;
                 Task::none()

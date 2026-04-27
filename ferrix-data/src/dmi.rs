@@ -21,24 +21,18 @@
 //! DMI Service Provider
 
 use crate::{
+    FromJson,
     load_state::{LoadState, ToLoadState},
     polkit::*,
 };
 use anyhow::Result;
 use ferrix_lib::dmi::{Baseboard, Bios, Chassis, Processor};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 pub async fn get_dmi_data() -> LoadState<DMIData> {
     let json = get_data("dmi".to_string()).await;
     match json {
-        LoadState::Loaded(json) => {
-            let json_data = DMIData::from_json(json);
-            match json_data {
-                Ok(data) => LoadState::Loaded(data),
-                Err(why) => LoadState::Error(why.to_string()),
-            }
-        }
+        LoadState::Loaded(json) => DMIData::from_json(json).to_load_state(),
         LoadState::Error(why) => LoadState::Error(why),
         _ => LoadState::Loading,
     }
@@ -66,8 +60,6 @@ impl DMIData {
         let contents = serde_json::to_string(&self)?;
         Ok(contents)
     }
-
-    pub fn from_json(json: Value) -> Result<Self> {
-        Ok(serde_json::from_value(json)?)
-    }
 }
+
+impl FromJson for DMIData {}

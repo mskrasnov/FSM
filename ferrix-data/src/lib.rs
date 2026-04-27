@@ -21,6 +21,7 @@
 //! Data from `ferrix-lib`
 
 pub mod dmi;
+pub mod kmods;
 pub mod load_state;
 pub mod polkit;
 
@@ -36,14 +37,15 @@ use ferrix_lib::{
     ram::{RAM, Swaps},
     soft::InstalledPackages,
     sys::{
-        Groups, KModules, Kernel, LoadAVG, OsRelease, Uptime, Users, current_user,
-        get_current_desktop, get_env_vars, get_hostname, get_lang,
+        Groups, Kernel, LoadAVG, OsRelease, Uptime, Users, current_user, get_current_desktop,
+        get_env_vars, get_hostname, get_lang,
     },
     vulnerabilities::Vulnerabilities,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
-use crate::{dmi::DMIData, load_state::LoadState};
+use crate::{dmi::DMIData, kmods::KResult, load_state::LoadState};
 
 #[derive(Debug, Serialize)]
 pub struct FerrixData {
@@ -64,7 +66,7 @@ pub struct FerrixData {
     pub osrel_data: LoadState<OsRelease>,
 
     pub kernel_data: LoadState<Kernel>,
-    pub kmods_data: LoadState<KModules>,
+    pub kmods_data: LoadState<KResult>,
 
     pub users_list: LoadState<Users>,
     pub groups_list: LoadState<Groups>,
@@ -139,5 +141,15 @@ impl Default for System {
             env_vars: Vec::new(),
             current_user: None,
         }
+    }
+}
+
+trait FromJson {
+    fn from_json(json: Value) -> Result<Self>
+    where
+        Self: Sized,
+        for<'de> Self: Deserialize<'de>,
+    {
+        Ok(serde_json::from_value(json)?)
     }
 }
