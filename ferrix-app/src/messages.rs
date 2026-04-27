@@ -212,16 +212,7 @@ impl DataReceiverMessage {
                 fd.proc_data = state;
                 Task::none()
             }
-            Self::GetCPUData => Task::perform(
-                async move {
-                    let proc = Processors::new();
-                    match proc {
-                        Ok(proc) => DataLoadingState::Loaded(proc),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::CPUDataReceived(val)),
-            ),
+            Self::GetCPUData => crate::pages::cpu::ProcPage::get_data().map(Message::DataReceiver),
             Self::ProcStatReceived(state) => {
                 if fd.curr_proc_stat.is_some() {
                     fd.prev_proc_stat = fd.curr_proc_stat.clone();

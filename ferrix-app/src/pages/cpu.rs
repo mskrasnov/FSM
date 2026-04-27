@@ -23,16 +23,85 @@
 use crate::{
     fl,
     load_state::LoadState,
-    messages::{ButtonsMessage, Message},
+    messages::{ButtonsMessage, DataReceiverMessage, Message},
     widgets::table::{InfoRow, fmt_bool, fmt_val, fmt_vec, kv_info_table},
 };
+use ferrix_data::load_state::ToLoadState;
 use ferrix_lib::cpu::Processors;
 use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
-    Length,
+    Element, Length, Task,
     widget::{Column, button, column, container, text},
 };
 
+#[derive(Debug, Clone)]
+pub struct ProcPage<'a> {
+    pub processors: &'a LoadState<Processors>,
+    pub id: usize,
+}
+
+impl<'a> ProcPage<'a> {
+    pub const IS_SPECIAL: bool = false;
+
+    pub fn new(processors: &'a LoadState<Processors>, id: usize) -> Self {
+        Self { processors, id }
+    }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let proc = Processors::new();
+                proc.to_load_state()
+            },
+            |val| DataReceiverMessage::CPUDataReceived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match self.processors {
+            LoadState::Loaded(proc) => {
+                let proc_names = get_proc_names(proc);
+                let proc_list = {
+                    let mut elements = Vec::with_capacity(proc.entries.len());
+                    for p in proc_names {
+                        let b = button(text(p.1))
+                            .on_press(Message::Buttons(ButtonsMessage::ProcessorSelected(p.0)))
+                            .style(if p.0 == self.id {
+                                button::subtle
+                            } else {
+                                button::text
+                            })
+                            .height(Length::Fill)
+                            .padding(2)
+                            .into();
+                        elements.push(b);
+                    }
+                    elements
+                };
+                let first_panel = container(
+                    column![
+                        text(fl!("page-procs")).style(text::secondary),
+                        Column::from_vec(proc_list),
+                    ]
+                    .spacing(5),
+                )
+                .style(container::rounded_box)
+                .width(Length::Fill)
+                .padding(2);
+                let second_panel = proc_info(proc, self.id).style(container::rounded_box);
+
+                let view = SeparatedView::new(first_panel, second_panel)
+                    .set_fpane_id(super::Page::Processors.scrolled_list_id().unwrap_or(""))
+                    .set_spane_id(super::Page::Processors.page_id());
+                container(view.view()).into()
+            }
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
+        }
+    }
+}
+
+#[deprecated]
 pub fn proc_page<'a>(
     processors: &'a LoadState<Processors>,
     id: usize,
