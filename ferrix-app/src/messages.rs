@@ -106,7 +106,6 @@ pub enum DataReceiverMessage {
     GetCPUData,
     CPUDataReceived(DataLoadingState<Processors>),
 
-    // AddTotalCPUUsage,
     AddCPUCoreLineSeries,
     ChangeShowCPUChartElements(usize),
 
@@ -232,16 +231,6 @@ impl DataReceiverMessage {
                 },
                 |val| Message::DataReceiver(Self::ProcStatReceived(val)),
             ),
-            // Self::AddTotalCPUUsage => {
-            //     fx.cpu_usage_chart.push_value(match &fx.curr_proc_stat {
-            //         DataLoadingState::Loaded(val) => val.cpu.unwrap().usage_percentage({
-            //             let prev = fx.prev_proc_stat.clone().unwrap();
-            //             prev.cpu
-            //         }) as f64,
-            //         _ => 0.,
-            //     });
-            //     Task::none()
-            // }
             Self::AddCPUCoreLineSeries => {
                 let curr_proc = &fd.curr_proc_stat;
                 let prev_proc = &fd.prev_proc_stat;
@@ -529,19 +518,6 @@ impl DataReceiverMessage {
                 fd.kmods_data = state;
                 Task::none()
             }
-            // Self::GetKModsData => Task::perform(
-            //     async move {
-            //         let kern = KModules::new();
-            //         match kern {
-            //             Ok(mut kern) => {
-            //                 kern.modules.sort_by_key(|module| module.name.clone());
-            //                 DataLoadingState::Loaded(kern)
-            //             }
-            //             Err(why) => DataLoadingState::Error(why.to_string()),
-            //         }
-            //     },
-            //     |val| Message::DataReceiver(Self::KModsDataReceived(val)),
-            // ),
             Self::GetKModsData => {
                 if !fs.is_kmods_polkit
                     && ((fd.kmods_data.is_none() && cur_page == Page::KModules)

@@ -101,53 +101,6 @@ impl<'a> ProcPage<'a> {
     }
 }
 
-#[deprecated]
-pub fn proc_page<'a>(
-    processors: &'a LoadState<Processors>,
-    id: usize,
-) -> container::Container<'a, Message> {
-    match processors {
-        LoadState::Loaded(proc) => {
-            let proc_names = get_proc_names(proc);
-            let proc_list = {
-                let mut elements = Vec::with_capacity(proc.entries.len());
-                for p in proc_names {
-                    let b = button(text(p.1))
-                        .on_press(Message::Buttons(ButtonsMessage::ProcessorSelected(p.0)))
-                        .style(if p.0 == id {
-                            button::subtle
-                        } else {
-                            button::text
-                        })
-                        .height(Length::Fill)
-                        .padding(2)
-                        .into();
-                    elements.push(b);
-                }
-                elements
-            };
-            let first_panel = container(
-                column![
-                    text(fl!("page-procs")).style(text::secondary),
-                    Column::from_vec(proc_list),
-                ]
-                .spacing(5),
-            )
-            .style(container::rounded_box)
-            .width(Length::Fill)
-            .padding(2);
-            let second_panel = proc_info(proc, id).style(container::rounded_box);
-
-            let view = SeparatedView::new(first_panel, second_panel)
-                .set_fpane_id(super::Page::Processors.scrolled_list_id().unwrap_or(""))
-                .set_spane_id(super::Page::Processors.page_id());
-            container(view.view())
-        }
-        LoadState::Error(why) => super::error_page(why),
-        LoadState::Loading => super::loading_page(),
-    }
-}
-
 fn get_proc_names<'a>(proc: &'a Processors) -> Vec<(usize, String)> {
     let mut i = 0;
     let mut v = Vec::with_capacity(proc.entries.len());
