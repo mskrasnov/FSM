@@ -31,7 +31,7 @@ use iced::{
 mod about;
 mod battery;
 pub mod cpu;
-mod cpu_freq;
+pub mod cpu_freq;
 mod dashboard;
 mod distro;
 mod dmi;
@@ -353,11 +353,13 @@ impl<'a> Page {
             )
             .into(),
             Self::Processors => {
-                // cpu::proc_page(&state.data.proc_data, state.state.selected_proc).into()
                 let cpu_page = cpu::ProcPage::new(&state.data.proc_data, state.state.selected_proc);
                 cpu_page.view()
             }
-            Self::CPUFrequency => cpu_freq::cpu_freq_page(&state.data.cpu_freq).into(),
+            Self::CPUFrequency => {
+                let freq_page = cpu_freq::ProcFreqPage::new(&state.data.cpu_freq);
+                freq_page.view()
+            }
             Self::CPUVulnerabilities => {
                 vulnerabilities::vulnerabilities_page(&state.data.cpu_vulnerabilities).into()
             }

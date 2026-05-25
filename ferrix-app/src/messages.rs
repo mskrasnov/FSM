@@ -292,16 +292,9 @@ impl DataReceiverMessage {
                 fd.cpu_freq = state;
                 Task::none()
             }
-            Self::GetCPUFrequency => Task::perform(
-                async move {
-                    let cpu_freq = CpuFreq::new();
-                    match cpu_freq {
-                        Ok(cpu_freq) => DataLoadingState::Loaded(cpu_freq),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(DataReceiverMessage::CPUFrequencyReceived(val)),
-            ),
+            Self::GetCPUFrequency => {
+                crate::pages::cpu_freq::ProcFreqPage::get_data().map(Message::DataReceiver)
+            }
             Self::CPUVulnerabilitiesReveived(state) => {
                 fd.cpu_vulnerabilities = state;
                 Task::none()
