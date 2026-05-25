@@ -765,6 +765,7 @@ pub enum ButtonsMessage {
 
     ChangeLegendShow(bool),
     ProcessorSelected(usize),
+    FrequencySelected(usize),
 }
 
 impl ButtonsMessage {
@@ -775,6 +776,7 @@ impl ButtonsMessage {
             Self::CopyButtonPressed(s) => iced::clipboard::write(s),
             Self::ChangeLegendShow(show) => fx.set_show_charts_legend(show),
             Self::ProcessorSelected(id) => fx.proc_selected(id),
+            Self::FrequencySelected(id) => fx.freq_selected(id),
         }
     }
 }
@@ -803,6 +805,11 @@ impl Ferrix {
 
     fn proc_selected(&mut self, id: usize) -> Task<Message> {
         self.state.selected_proc = id;
+        Task::none()
+    }
+
+    fn freq_selected(&mut self, id: usize) -> Task<Message> {
+        self.state.selected_freq = id;
         Task::none()
     }
 }

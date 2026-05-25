@@ -363,7 +363,8 @@ impl<'a> Page {
                 cpu_page.view()
             }
             Self::CPUFrequency => {
-                let freq_page = cpu_freq::ProcFreqPage::new(&state.data.cpu_freq);
+                let freq_page =
+                    cpu_freq::ProcFreqPage::new(&state.data.cpu_freq, state.state.selected_freq);
                 freq_page.view()
             }
             Self::CPUVulnerabilities => {
