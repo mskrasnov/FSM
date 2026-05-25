@@ -221,16 +221,7 @@ impl DataReceiverMessage {
                 fd.curr_proc_stat = state;
                 Task::none()
             }
-            Self::GetProcStat => Task::perform(
-                async move {
-                    let stat = Stat::new();
-                    match stat {
-                        Ok(stat) => DataLoadingState::Loaded(stat),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::ProcStatReceived(val)),
-            ),
+            Self::GetProcStat => crate::pages::SysmonPage::get_data().map(Message::DataReceiver),
             Self::AddCPUCoreLineSeries => {
                 let curr_proc = &fd.curr_proc_stat;
                 let prev_proc = &fd.prev_proc_stat;

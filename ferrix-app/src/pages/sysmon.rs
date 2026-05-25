@@ -20,18 +20,62 @@
 
 //! CPU usage charts
 
-use crate::{DataLoadingState, Message, ferrix::FerrixState, fl, messages::ButtonsMessage};
+use crate::{
+    Message,
+    ferrix::FerrixState,
+    fl,
+    messages::{ButtonsMessage, DataReceiverMessage},
+};
+use ferrix_data::load_state::{LoadState, ToLoadState};
 use ferrix_lib::cpu::Stat;
 use ferrix_widgets::container::glassy_container;
 use iced::{
     Alignment::Center,
+    Element, Task,
     widget::{column, container, row, slider, space, text, toggler},
 };
 
-pub fn usage_charts_page<'a>(
+#[derive(Debug, Clone)]
+pub struct SysmonPage<'a> {
+    pub current: &'a LoadState<Stat>,
+    pub previous: &'a LoadState<Stat>,
+    pub state: &'a FerrixState,
+}
+
+impl<'a> SysmonPage<'a> {
+    pub const IS_SPECIAL: bool = false;
+
+    pub fn new(
+        current: &'a LoadState<Stat>,
+        previous: &'a LoadState<Stat>,
+        state: &'a FerrixState,
+    ) -> Self {
+        Self {
+            current,
+            previous,
+            state,
+        }
+    }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let stat = Stat::new();
+                stat.to_load_state()
+            },
+            |val| DataReceiverMessage::ProcStatReceived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        usage_charts_page(&self.state, &self.current, &self.previous).into()
+    }
+}
+
+fn usage_charts_page<'a>(
     fs: &'a FerrixState,
-    cur_stat: &'a DataLoadingState<Stat>,
-    prev_stat: &'a DataLoadingState<Stat>,
+    cur_stat: &'a LoadState<Stat>,
+    prev_stat: &'a LoadState<Stat>,
 ) -> container::Container<'a, Message> {
     if cur_stat.is_none() || prev_stat.is_none() {
         return container(text(fl!("sysmon-cpu-unk")).style(text::danger));

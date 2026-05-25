@@ -346,12 +346,20 @@ impl<'a> Page {
     pub fn page(&'a self, state: &'a Ferrix) -> Element<'a, Message> {
         let page = match self {
             Self::Dashboard => dashboard::dashboard(&state.data).into(),
-            Self::SystemMonitor => sysmon::usage_charts_page(
-                &state.state,
-                &state.data.curr_proc_stat,
-                &state.data.prev_proc_stat,
-            )
-            .into(),
+            // Self::SystemMonitor => sysmon::usage_charts_page(
+            //     &state.state,
+            //     &state.data.curr_proc_stat,
+            //     &state.data.prev_proc_stat,
+            // )
+            // .into(),
+            Self::SystemMonitor => {
+                let sysmon = sysmon::SysmonPage::new(
+                    &state.data.curr_proc_stat,
+                    &state.data.prev_proc_stat,
+                    &state.state,
+                );
+                sysmon.view()
+            }
             Self::Processors => {
                 let cpu_page = cpu::ProcPage::new(&state.data.proc_data, state.state.selected_proc);
                 cpu_page.view()
