@@ -182,7 +182,7 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
         Card::new(fl!("dash-proc"), Message::SelectPage(Page::Processors)).widget(text(fl!(
             "dash-proc-info",
             name = proc_name,
-            threads = proc_threads
+            threads = format!("\n{}", proc_threads)
         ))),
         Card::new(
             fl!("dash-proc-usage"),
