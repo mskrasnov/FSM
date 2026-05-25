@@ -49,7 +49,7 @@ mod sysmon;
 mod system;
 mod systemd;
 mod users;
-mod vulnerabilities;
+pub mod vulnerabilities;
 
 pub use sysmon::*;
 
@@ -103,10 +103,14 @@ impl From<&str> for Page {
     fn from(value: &str) -> Self {
         match value {
             "dash" | "dashboard" => Self::Dashboard,
-            "sysmon" | "monitor" | "system" | "system-monitor" => Self::SystemMonitor,
-            "proc" | "cpu" | "processors" => Self::Processors,
-            "cpu-frequency" | "cpufreq" => Self::CPUFrequency,
-            "cpu-vuln" | "vulnerabilities" => Self::CPUVulnerabilities,
+            sysmon::SysmonPage::PAGE_ID | "monitor" | "system" | "system-monitor" => {
+                Self::SystemMonitor
+            }
+            cpu::ProcPage::PAGE_ID | "proc" | "processors" => Self::Processors,
+            cpu_freq::ProcFreqPage::PAGE_ID | "cpu-frequency" => Self::CPUFrequency,
+            vulnerabilities::VulnPage::PAGE_ID | "cpu-vuln" | "vulnerabilities" => {
+                Self::CPUVulnerabilities
+            }
             "memory" | "mem" | "ram" => Self::Memory,
             "fs" | "storage" => Self::FileSystems,
             "net" => Self::Network,
@@ -284,10 +288,10 @@ impl<'a> Page {
     pub fn page_id(&self) -> &'static str {
         match self {
             Self::Dashboard => "dash",
-            Self::Processors => "proc",
-            Self::CPUFrequency => "cpufreq",
-            Self::CPUVulnerabilities => "cpuvuln",
-            Self::SystemMonitor => "sysmon",
+            Self::Processors => cpu::ProcPage::PAGE_ID,
+            Self::CPUFrequency => cpu_freq::ProcFreqPage::PAGE_ID,
+            Self::CPUVulnerabilities => vulnerabilities::VulnPage::PAGE_ID,
+            Self::SystemMonitor => sysmon::SysmonPage::PAGE_ID,
             Self::Memory => "mem",
             Self::FileSystems => "fs",
             Self::Network => "net",
@@ -346,12 +350,6 @@ impl<'a> Page {
     pub fn page(&'a self, state: &'a Ferrix) -> Element<'a, Message> {
         let page = match self {
             Self::Dashboard => dashboard::dashboard(&state.data).into(),
-            // Self::SystemMonitor => sysmon::usage_charts_page(
-            //     &state.state,
-            //     &state.data.curr_proc_stat,
-            //     &state.data.prev_proc_stat,
-            // )
-            // .into(),
             Self::SystemMonitor => {
                 let sysmon = sysmon::SysmonPage::new(
                     &state.data.curr_proc_stat,
@@ -369,7 +367,8 @@ impl<'a> Page {
                 freq_page.view()
             }
             Self::CPUVulnerabilities => {
-                vulnerabilities::vulnerabilities_page(&state.data.cpu_vulnerabilities).into()
+                let vuln_page = vulnerabilities::VulnPage::new(&state.data.cpu_vulnerabilities);
+                vuln_page.view()
             }
             Self::Memory => ram::ram_page(&state.data.ram_data, &state.data.swap_data).into(),
             Self::FileSystems => storage::storage_page(&state.data.storages).into(),

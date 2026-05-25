@@ -20,29 +20,52 @@
 
 //! CPU Vulnerabilities page
 
-use crate::{DataLoadingState, Message, fl, messages::ButtonsMessage, widgets::table::hdr_name};
+use crate::{
+    Message, fl,
+    messages::{ButtonsMessage, DataReceiverMessage},
+    widgets::table::hdr_name,
+};
+use ferrix_data::load_state::{LoadState, ToLoadState};
 use ferrix_lib::vulnerabilities::Vulnerabilities;
 
 use iced::{
-    Length,
+    Element, Length, Task,
     widget::{Id, button, container, scrollable, table, text},
 };
 
-pub fn vulnerabilities_page<'a>(
-    vulnerabilities: &'a DataLoadingState<Vulnerabilities>,
-) -> container::Container<'a, Message> {
-    match vulnerabilities {
-        DataLoadingState::Loaded(vulns) => {
-            let vulns = &vulns.list;
-            let table = container(vuln_table(vulns)).style(container::rounded_box);
-            container(
-                scrollable(table)
-                    .spacing(5)
-                    .id(Id::new(super::Page::CPUVulnerabilities.page_id())),
-            )
+#[derive(Debug, Clone)]
+pub struct VulnPage<'a> {
+    pub vulnerabilities: &'a LoadState<Vulnerabilities>,
+}
+
+impl<'a> VulnPage<'a> {
+    pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "vulns";
+
+    pub fn new(vulnerabilities: &'a LoadState<Vulnerabilities>) -> Self {
+        Self { vulnerabilities }
+    }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let vuln = Vulnerabilities::new();
+                vuln.to_load_state()
+            },
+            |val| DataReceiverMessage::CPUVulnerabilitiesReveived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match self.vulnerabilities {
+            LoadState::Loaded(vulns) => {
+                let vulns = &vulns.list;
+                let table = container(vuln_table(vulns)).style(container::rounded_box);
+                container(scrollable(table).spacing(5).id(Id::new(Self::PAGE_ID))).into()
+            }
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
         }
-        DataLoadingState::Error(why) => super::error_page(why),
-        DataLoadingState::Loading => super::loading_page(),
     }
 }
 
@@ -66,19 +89,6 @@ impl VulnType {
             Self::Unknown
         }
     }
-
-    fn get_emoji(&self) -> &str {
-        match self {
-            Self::Safe => "🟢️",
-            Self::Warning => "🟠️",
-            Self::Danger => "🔴️",
-            Self::Unknown => "⚪️",
-        }
-    }
-
-    fn format(&self, descr: &str) -> String {
-        format!("{} {}", self.get_emoji(), descr)
-    }
 }
 
 fn vuln_table<'a>(rows: &'a [(String, String)]) -> table::Table<'a, Message> {
@@ -93,7 +103,7 @@ fn vuln_table<'a>(rows: &'a [(String, String)]) -> table::Table<'a, Message> {
             |row: &'a (String, String)| {
                 let s = row.1.trim();
                 let vuln_type = VulnType::detect(s);
-                let vuln_str = vuln_type.format(s);
+                let vuln_str = s.to_string();
 
                 button(
                     text(vuln_str.clone())

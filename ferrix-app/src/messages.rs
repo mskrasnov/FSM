@@ -290,16 +290,9 @@ impl DataReceiverMessage {
                 fd.cpu_vulnerabilities = state;
                 Task::none()
             }
-            Self::GetCPUVulnerabilities => Task::perform(
-                async move {
-                    let vuln = Vulnerabilities::new();
-                    match vuln {
-                        Ok(vuln) => DataLoadingState::Loaded(vuln),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::CPUVulnerabilitiesReveived(val)),
-            ),
+            Self::GetCPUVulnerabilities => {
+                crate::pages::vulnerabilities::VulnPage::get_data().map(Message::DataReceiver)
+            }
             Self::StorageDataReceived(state) => {
                 fd.storages = state;
                 Task::none()

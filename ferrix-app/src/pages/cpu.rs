@@ -42,6 +42,7 @@ pub struct ProcPage<'a> {
 
 impl<'a> ProcPage<'a> {
     pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "cpu";
 
     pub fn new(processors: &'a LoadState<Processors>, id: usize) -> Self {
         Self { processors, id }

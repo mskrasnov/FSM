@@ -44,6 +44,7 @@ pub struct SysmonPage<'a> {
 
 impl<'a> SysmonPage<'a> {
     pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "sysmon";
 
     pub fn new(
         current: &'a LoadState<Stat>,

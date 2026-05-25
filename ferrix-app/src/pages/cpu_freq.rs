@@ -41,6 +41,7 @@ pub struct ProcFreqPage<'a> {
 
 impl<'a> ProcFreqPage<'a> {
     pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "cpufreq";
 
     pub fn new(freq: &'a LoadState<CpuFreq>) -> Self {
         Self { cpu_freq: freq }
