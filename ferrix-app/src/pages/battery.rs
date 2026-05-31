@@ -124,6 +124,7 @@ fn bat_table<'a>(bat: &'a Battery) -> container::Container<'a, Message> {
                 }
             )),
         ),
+        InfoRow::new(fl!("bat-chtypes"), bat.charge_types.clone()),
         InfoRow::new(
             fl!("bat-estimated"),
             bat.estimated_time

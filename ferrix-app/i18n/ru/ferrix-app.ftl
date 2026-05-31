@@ -57,6 +57,7 @@ about-support = Поддержать меня!
 # BATTERY PAGE
 bat-header = Аккумулятор {$name}
 bat-unknown-name = <неизвестное имя>
+bat-chtypes = Типы зарядки
 bat-status = Статус
 bat-status-ful = Заряжен полностью
 bat-status-dis = Разряжается

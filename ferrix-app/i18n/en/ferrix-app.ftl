@@ -57,6 +57,7 @@ about-support = Support me!
 # BATTERY PAGE
 bat-header = Battery {$name}
 bat-unknown-name = <unknown name>
+bat-chtypes = Charge Types
 bat-status = Status
 bat-status-ful = Full
 bat-status-dis = Discharging
