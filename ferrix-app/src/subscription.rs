@@ -91,7 +91,7 @@ impl Ferrix {
         let mut scripts =
             vec![event::listen().map(|event| Message::Keyboard(KeyboardMessage::Event(event)))];
         let oscripts = [
-            self.cpu_basic_data(),
+            // self.cpu_basic_data(),
             self.cpu_stat_data(),
             self.ram_data(),
             self.swap_data(),
@@ -146,6 +146,7 @@ impl Ferrix {
         }
     }
 
+    #[deprecated]
     fn cpu_basic_data(&self) -> OScript<Message> {
         if ((self.current_page == Page::Dashboard || self.current_page == Page::Processors)
             && self.data.proc_data.is_none())
@@ -283,7 +284,9 @@ impl Ferrix {
     }
 
     fn dmi_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::DMI && !self.state.is_dmi_polkit && self.data.dmi_data.is_none())
+        if (self.current_page == Page::DMI
+            && !self.state.is_dmi_polkit
+            && self.data.dmi_data.is_none())
             || self.is_export_member(Page::DMI)
         {
             Some(

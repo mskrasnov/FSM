@@ -95,7 +95,12 @@ impl Ferrix {
         if page == Page::Export {
             self.export_manager.status = ExportStatus::LoadingData;
         }
-        Task::none()
+
+        if let Some(task) = page.get_data_single() {
+            task
+        } else {
+            Task::none()
+        }
     }
 }
 

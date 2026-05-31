@@ -24,7 +24,7 @@ use crate::{Message, ferrix::Ferrix, fl, icons::ERROR_ICON};
 use ferrix_widgets::headers::header_text;
 use iced::{
     Alignment::Center,
-    Element,
+    Element, Task,
     widget::{center, column, container, row, svg::Handle, text},
 };
 
@@ -344,6 +344,15 @@ impl<'a> Page {
             Self::About => fl!("page-about"),
             Self::Export => fl!("page-export"),
             Self::Todo => fl!("page-todo"),
+        }
+    }
+
+    pub fn get_data_single(&'a self) -> Option<Task<Message>> {
+        match self {
+            Self::Processors | Self::Dashboard => {
+                Some(cpu::ProcPage::get_data().map(Message::DataReceiver))
+            }
+            _ => None,
         }
     }
 
