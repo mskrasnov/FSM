@@ -217,6 +217,8 @@ drm-analog = Analogue
 drm-bit-depth = Bit depth
 drm-interface = Video interface
 drm-is-empty = Screens not found
+drm-disabled = <disabled>
+drm-unknown = <unknown>
 
 # GROUPS PAGE
 groups-group = Group #{$group_no}

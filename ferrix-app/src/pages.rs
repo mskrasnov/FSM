@@ -35,7 +35,7 @@ pub mod cpu_freq;
 mod dashboard;
 mod distro;
 mod dmi;
-mod drm;
+pub mod drm;
 mod env;
 mod export;
 mod groups;
@@ -385,7 +385,10 @@ impl<'a> Page {
             Self::Network => net::net_page(&state.data.networks).into(),
             Self::DMI => dmi::dmi_page(&state.data.dmi_data).into(),
             Self::Battery => battery::bat_page(&state.data.bat_data).into(),
-            Self::Screen => drm::drm_page(&state.data.drm_data).into(),
+            Self::Screen => {
+                let screen = drm::DRMPage::new(&state.data.drm_data, state.state.selected_screen);
+                screen.view()
+            }
             Self::Distro => distro::distro_page(&state.data.osrel_data).into(),
             Self::Kernel => kernel::kernel_page(&state.data.kernel_data).into(),
             Self::KModules => kernel::kmods_page(&state.data.kmods_data).into(),

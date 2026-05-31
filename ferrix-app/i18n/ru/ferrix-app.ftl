@@ -217,6 +217,8 @@ drm-analog = Аналоговый
 drm-bit-depth = Глубина цвета
 drm-interface = Видеоинтерфейс
 drm-is-empty = Экраны не найдены
+drm-disabled = <отключен>
+drm-unknown = <неизвестен>
 
 # GROUPS PAGE
 groups-group = Группа №{$group_no}

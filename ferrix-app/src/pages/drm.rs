@@ -21,41 +21,127 @@
 //! DRM Page
 
 use crate::{
-    DataLoadingState, Message, fl,
+    Message, fl,
+    load_state::{LoadState, ToLoadState},
+    messages::{ButtonsMessage, DataReceiverMessage},
     widgets::table::{InfoRow, fmt_val, kv_info_table},
 };
 use ferrix_lib::drm::{DRM, EDID, Video, VideoInputParams};
-use ferrix_widgets::headers::header;
-use iced::widget::{Id, center, column, container, scrollable, text};
+use ferrix_widgets::separated_view::SeparatedView;
+use iced::{
+    Element, Length, Task,
+    widget::{Column, button, center, column, container, text},
+};
 
-pub fn drm_page<'a>(video: &'a DataLoadingState<Video>) -> container::Container<'a, Message> {
-    match video {
-        DataLoadingState::Loaded(video) => {
-            if video.devices.is_empty() {
-                container(center(
-                    text(fl!("drm-is-empty")).size(16).style(text::secondary),
-                ))
-            } else {
-                let mut layout = column![].spacing(5);
-                let mut i = 1;
-                for device in &video.devices {
-                    layout = layout.push(screen_subpage(device, i));
-                    i += 1;
-                }
-                container(
-                    scrollable(layout)
-                        .spacing(5)
-                        .id(Id::new(super::Page::Screen.page_id())),
-                )
-            }
+#[derive(Debug, Clone)]
+pub struct DRMPage<'a> {
+    pub drm: &'a LoadState<Video>,
+    pub id: usize,
+}
+
+impl<'a> DRMPage<'a> {
+    pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "drm";
+
+    pub fn new(drm: &'a LoadState<Video>, id: usize) -> Self {
+        Self { drm, id }
+    }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let vid = Video::new();
+                vid.to_load_state()
+            },
+            |val| DataReceiverMessage::DRMDataReceived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match self.drm {
+            LoadState::Loaded(drm) => self.drm_page(drm),
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
         }
-        DataLoadingState::Error(why) => super::error_page(why),
-        DataLoadingState::Loading => super::loading_page(),
+    }
+
+    fn drm_page(&self, drm: &'a Video) -> Element<'a, Message> {
+        let vid_names = get_screens_names(drm);
+        let vid_list = {
+            let mut elements = Vec::with_capacity(vid_names.len());
+            for v in vid_names {
+                let b = button(text(v.1))
+                    .on_press(Message::Buttons(ButtonsMessage::ScreenSelected(v.0)))
+                    .style(if v.0 == self.id {
+                        button::subtle
+                    } else {
+                        button::text
+                    })
+                    .height(Length::Fill)
+                    .padding(2)
+                    .into();
+                elements.push(b);
+            }
+            elements
+        };
+        let first_panel = container(
+            column![
+                text("Video devices").style(text::secondary),
+                Column::from_vec(vid_list)
+            ]
+            .spacing(5),
+        )
+        .style(container::rounded_box)
+        .width(Length::Fill)
+        .padding(2);
+        let second_panel = screen_subpage(&drm.devices, self.id);
+
+        let view = SeparatedView::new(first_panel, second_panel)
+            .set_fpane_id(super::Page::Screen.scrolled_list_id().unwrap_or(""))
+            .set_spane_id(Self::PAGE_ID);
+        container(view.view()).into()
     }
 }
 
-fn screen_subpage<'a>(drm: &'a DRM, idx: usize) -> container::Container<'a, Message> {
-    let mut layout = column![header(fl!("drm-title", idx = idx)),].spacing(5);
+fn get_screens_names<'a>(video: &'a Video) -> Vec<(usize, String)> {
+    let mut i = 0;
+    let j = video.devices.len();
+    let mut v = Vec::with_capacity(j);
+    while i < j {
+        v.push((
+            i,
+            format!(
+                "{}: {}",
+                fl!("drm-title", idx = i),
+                get_screen_name(&video.devices[i]),
+            ),
+        ));
+        i += 1;
+    }
+    v
+}
+
+fn get_screen_name<'a>(screen: &'a ferrix_lib::drm::DRM) -> String {
+    if !screen.enabled {
+        fl!("drm-disabled")
+    } else {
+        match &screen.edid {
+            Some(edid) => format!("{} {:0x}", &edid.manufacturer, edid.product_code),
+            None => fl!("drm-unknown"),
+        }
+    }
+}
+
+fn screen_subpage<'a>(drm: &'a [DRM], idx: usize) -> container::Container<'a, Message> {
+    if drm.is_empty() {
+        return container(center(
+            text(fl!("drm-is-empty")).size(16).style(text::secondary),
+        ));
+    }
+
+    let drm = &drm[idx];
+
+    let mut layout = column![].spacing(5);
 
     layout = if drm.enabled {
         match &drm.edid {

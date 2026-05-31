@@ -366,16 +366,7 @@ impl DataReceiverMessage {
                 fd.drm_data = state;
                 Task::none()
             }
-            Self::GetDRMData => Task::perform(
-                async move {
-                    let drm = Video::new();
-                    match drm {
-                        Ok(drm) => DataLoadingState::Loaded(drm),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::DRMDataReceived(val)),
-            ),
+            Self::GetDRMData => crate::pages::drm::DRMPage::get_data().map(Message::DataReceiver),
             Self::RAMDataReceived(state) => {
                 fd.ram_data = state;
                 Task::none()
@@ -771,6 +762,7 @@ pub enum ButtonsMessage {
     ChangeLegendShow(bool),
     ProcessorSelected(usize),
     FrequencySelected(usize),
+    ScreenSelected(usize),
 }
 
 impl ButtonsMessage {
@@ -782,6 +774,7 @@ impl ButtonsMessage {
             Self::ChangeLegendShow(show) => fx.set_show_charts_legend(show),
             Self::ProcessorSelected(id) => fx.proc_selected(id),
             Self::FrequencySelected(id) => fx.freq_selected(id),
+            Self::ScreenSelected(id) => fx.screen_selected(id),
         }
     }
 }
@@ -815,6 +808,11 @@ impl Ferrix {
 
     fn freq_selected(&mut self, id: usize) -> Task<Message> {
         self.state.selected_freq = id;
+        Task::none()
+    }
+
+    fn screen_selected(&mut self, id: usize) -> Task<Message> {
+        self.state.selected_screen = id;
         Task::none()
     }
 }
