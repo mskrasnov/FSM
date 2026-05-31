@@ -60,83 +60,87 @@ impl<'a> ProcFreqPage<'a> {
 
     pub fn view(&self) -> Element<'a, Message> {
         match self.cpu_freq {
-            LoadState::Loaded(cpu_freq) => cpu_freq_page(&self, cpu_freq).into(),
+            LoadState::Loaded(cpu_freq) => self.cpu_freq_page(cpu_freq).into(),
             LoadState::Error(why) => super::error_page(why).into(),
             LoadState::Loading => super::loading_page().into(),
         }
     }
-}
 
-fn cpu_freq_page<'a>(
-    s: &ProcFreqPage<'a>,
-    cpu_freq: &'a CpuFreq,
-) -> container::Container<'a, Message> {
-    let proc_names = {
-        let mut names = Vec::with_capacity(cpu_freq.policy.len());
-        let mut i = 0;
-        while i < cpu_freq.policy.len() {
-            names.push((
-                i,
-                format!(
-                    "{}: {}",
-                    fl!("cpufreq-sum", cpu = i),
-                    fmt_freq(*(&cpu_freq.policy[i].scaling_cur_freq))
-                        .unwrap_or("N/A MHz".to_string()),
-                ),
-            ));
-            i += 1;
+    fn cpu_freq_page(&self, cpu_freq: &'a CpuFreq) -> container::Container<'a, Message> {
+        let mut policy_list = column![].spacing(5);
+        let rows = vec![InfoRow::new(
+            fl!("cpufreq-tboost"),
+            fmt_bool(cpu_freq.boost),
+        )];
+        policy_list = policy_list.push(
+            column![container(kv_info_table(rows)).style(container::rounded_box),].spacing(5),
+        );
+
+        if cpu_freq.policy.is_empty() {
+            policy_list = policy_list.push(text(fl!("cpufreq-notfound")).style(text::danger));
+            return container(scrollable(policy_list));
         }
-        names
-    };
-    let freq_list = {
-        let mut elements = Vec::with_capacity(cpu_freq.policy.len());
-        for f in proc_names {
-            let b = button(text(f.1))
-                .on_press(Message::Buttons(ButtonsMessage::FrequencySelected(f.0)))
-                .style(if f.0 == s.id {
-                    button::subtle
-                } else {
-                    button::text
-                })
-                .height(Length::Fill)
-                .padding(2)
-                .into();
-            elements.push(b);
-        }
-        elements
-    };
-
-    let first_panel = container(
-        column![
-            text(fl!("cpufreq-flist")).style(text::secondary),
-            Column::from_vec(freq_list),
-        ]
-        .spacing(5),
-    )
-    .style(container::rounded_box)
-    .width(Length::Fill)
-    .padding(2);
-    let second_panel = freq_view(s.id, &cpu_freq);
-
-    let cpu_freq_view = SeparatedView::new(first_panel, second_panel)
-        .set_fpane_id(super::Page::CPUFrequency.scrolled_list_id().unwrap_or(""))
-        .set_spane_id(ProcFreqPage::PAGE_ID)
-        .set_fpane_max_height(210.);
-
-    let mut policy_list = column![].spacing(5);
-    let rows = vec![InfoRow::new(
-        fl!("cpufreq-tboost"),
-        fmt_bool(cpu_freq.boost),
-    )];
-    policy_list = policy_list
-        .push(column![container(kv_info_table(rows)).style(container::rounded_box),].spacing(5));
-
-    if cpu_freq.policy.is_empty() {
-        policy_list = policy_list.push(text(fl!("cpufreq-notfound")).style(text::danger));
-        return container(scrollable(policy_list));
+        policy_list = policy_list.push(container(self.cpu_freq_list(cpu_freq)));
+        container(policy_list)
     }
-    policy_list = policy_list.push(container(cpu_freq_view.view()));
-    container(policy_list)
+
+    fn cpu_freq_list(&self, cpu_freq: &'a CpuFreq) -> Element<'a, Message> {
+        if cpu_freq.policy.is_empty() {
+            return container(text("cpufreq-notfound").style(text::danger)).into();
+        }
+        let proc_names = {
+            let mut names = Vec::with_capacity(cpu_freq.policy.len());
+            let mut i = 0;
+            while i < cpu_freq.policy.len() {
+                names.push((
+                    i,
+                    format!(
+                        "{}: {}",
+                        fl!("cpufreq-sum", cpu = i),
+                        fmt_freq(*(&cpu_freq.policy[i].scaling_cur_freq))
+                            .unwrap_or("N/A MHz".to_string()),
+                    ),
+                ));
+                i += 1;
+            }
+            names
+        };
+        let freq_list = {
+            let mut elements = Vec::with_capacity(cpu_freq.policy.len());
+            for f in proc_names {
+                let b = button(text(f.1))
+                    .on_press(Message::Buttons(ButtonsMessage::FrequencySelected(f.0)))
+                    .style(if f.0 == self.id {
+                        button::subtle
+                    } else {
+                        button::text
+                    })
+                    .height(Length::Fill)
+                    .padding(2)
+                    .into();
+                elements.push(b);
+            }
+            elements
+        };
+
+        let first_panel = container(
+            column![
+                text(fl!("cpufreq-flist")).style(text::secondary),
+                Column::from_vec(freq_list),
+            ]
+            .spacing(5),
+        )
+        .style(container::rounded_box)
+        .width(Length::Fill)
+        .padding(2);
+        let second_panel = freq_view(self.id, &cpu_freq);
+
+        let cpu_freq_view = SeparatedView::new(first_panel, second_panel)
+            .set_fpane_id(super::Page::CPUFrequency.scrolled_list_id().unwrap_or(""))
+            .set_spane_id(ProcFreqPage::PAGE_ID)
+            .set_fpane_max_height(210.);
+        cpu_freq_view.view()
+    }
 }
 
 fn freq_view<'a>(id: usize, freq: &'a CpuFreq) -> Element<'a, Message> {
