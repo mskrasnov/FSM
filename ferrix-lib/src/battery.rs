@@ -76,6 +76,7 @@ pub struct Battery {
     pub model_name: Option<String>,
     pub manufacturer: Option<String>,
     pub serial_number: Option<String>,
+    pub charge_types: Option<String>,
     pub health: Option<f32>,
     pub estimated_time: Option<f32>,
     pub charge_time: Option<f32>,
@@ -122,6 +123,7 @@ fn parse_chunks(bat: &mut Battery, key: &str, val: &str) {
         "POWER_SUPPLY_MODEL_NAME" => bat.model_name = Some(val.to_string()),
         "POWER_SUPPLY_MANUFACTURER" => bat.manufacturer = Some(val.to_string()),
         "POWER_SUPPLY_SERIAL_NUMBER" => bat.serial_number = Some(val.to_string()),
+        "POWER_SUPPLY_CHARGE_TYPES" => bat.charge_types = Some(val.to_string()),
         _ => {}
     }
 }
