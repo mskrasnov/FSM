@@ -96,6 +96,13 @@ impl Ferrix {
             self.export_manager.status = ExportStatus::LoadingData;
         }
 
+        if page == Page::Screen && self.state.selected_screen != 0 {
+            let idx = crate::pages::drm::get_first_active_screen(&self.data.drm_data);
+            if let Some(idx) = idx {
+                self.state.selected_screen = idx;
+            }
+        }
+
         if let Some(task) = page.get_data_single() {
             task
         } else {

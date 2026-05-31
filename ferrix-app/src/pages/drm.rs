@@ -132,6 +132,23 @@ fn get_screen_name<'a>(screen: &'a ferrix_lib::drm::DRM) -> String {
     }
 }
 
+pub fn get_first_active_screen<'a>(screens: &'a LoadState<Video>) -> Option<usize> {
+    match screens {
+        LoadState::Loaded(screens) => {
+            let mut i = 0;
+            let j = screens.devices.len();
+            while i < j {
+                if screens.devices[i].enabled {
+                    return Some(i);
+                }
+                i += 1;
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
 fn screen_subpage<'a>(drm: &'a [DRM], idx: usize) -> container::Container<'a, Message> {
     if drm.is_empty() {
         return container(center(
