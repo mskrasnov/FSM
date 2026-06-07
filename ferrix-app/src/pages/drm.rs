@@ -67,6 +67,11 @@ impl<'a> DRMPage<'a> {
 
     fn drm_page(&self, drm: &'a Video) -> Element<'a, Message> {
         let vid_names = get_screens_names(drm);
+
+        if vid_names.is_empty() {
+            return container(center(text(fl!("drm-is-empty")).size(16))).into();
+        }
+
         let vid_list = {
             let mut elements = Vec::with_capacity(vid_names.len());
             for v in vid_names {

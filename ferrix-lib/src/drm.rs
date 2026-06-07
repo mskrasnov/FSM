@@ -110,8 +110,10 @@ impl Video {
                     None => "",
                 };
                 if d.is_dir() && fname.contains("card") {
-                    // println!("Read drm data: {} ({fname})", d.display());
-                    devices.push(DRM::new(d)?);
+                    let drm = DRM::new(d)?;
+                    if !drm.is_empty_info() {
+                        devices.push(drm);
+                    }
                 }
             }
         }
@@ -168,6 +170,10 @@ impl DRM {
             },
             modes,
         })
+    }
+
+    pub fn is_empty_info(&self) -> bool {
+        !self.enabled && self.edid.is_none() && self.modes.is_empty()
     }
 }
 
