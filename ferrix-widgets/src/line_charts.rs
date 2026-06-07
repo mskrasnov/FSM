@@ -149,7 +149,7 @@ impl LineChart {
     }
 
     fn legend_columns(&self) -> usize {
-        let mut cols = self.series_count().ilog2() as usize;
+        let mut cols = self.series_count().ilog2().min(8) as usize;
         if cols % 2 != 0 {
             cols += 1;
         }
