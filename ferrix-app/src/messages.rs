@@ -359,16 +359,9 @@ impl DataReceiverMessage {
                 fd.bat_data = state;
                 Task::none()
             }
-            Self::GetBatInfo => Task::perform(
-                async move {
-                    let bat = BatInfo::new();
-                    match bat {
-                        Ok(bat) => DataLoadingState::Loaded(bat),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::BatInfoReceived(val)),
-            ),
+            Self::GetBatInfo => {
+                crate::pages::battery::BatPage::get_data().map(Message::DataReceiver)
+            }
             Self::DRMDataReceived(state) => {
                 fd.drm_data = state;
                 Task::none()

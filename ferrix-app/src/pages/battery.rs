@@ -21,73 +21,97 @@
 //! Battery page
 
 use crate::{
-    DataLoadingState, Message, fl,
+    Message, fl,
+    messages::DataReceiverMessage,
     widgets::table::{InfoRow, fmt_val, kv_info_table},
 };
+use ferrix_data::load_state::{LoadState, ToLoadState};
 use ferrix_lib::battery::{BatInfo, Battery, Level, Status};
 
 use iced::{
     Alignment::Center,
-    Length,
+    Element, Length, Task,
     widget::{
         Id, center, column, container, progress_bar, row, scrollable, space::horizontal, text,
     },
 };
 
-pub fn bat_page<'a>(bat_info: &'a DataLoadingState<BatInfo>) -> container::Container<'a, Message> {
-    match bat_info {
-        DataLoadingState::Loaded(bat_info) => {
-            let mut bat_list = column![].spacing(5);
-            if bat_info.bats.is_empty() {
-                bat_list = bat_list.push(center(
-                    column![text(fl!("bat-not-found")).style(text::secondary).size(16)].spacing(5),
-                ));
-                return container(bat_list);
-            }
+#[derive(Debug, Clone)]
+pub struct BatPage<'a> {
+    pub bat_info: &'a LoadState<BatInfo>,
+}
 
-            for bat in &bat_info.bats {
-                bat_list = bat_list.push(
-                    text(fl!(
-                        "bat-header",
-                        name = match &bat.name {
-                            Some(name) => name.to_string(),
-                            None => fl!("bat-unknown-name"),
-                        }
-                    ))
-                    .style(text::warning),
-                );
-                let capacity = bat.capacity.unwrap_or(0);
-                bat_list = bat_list.push(
-                    row![
-                        text(fl!("bat-capacity")),
-                        horizontal(),
-                        progress_bar(0.0..=100., capacity as f32)
-                            .length(Length::FillPortion(2))
-                            .style(move |t: &iced::Theme| {
-                                let p = t.palette();
-                                progress_bar::Style {
-                                    bar: iced::Background::Color(match capacity {
-                                        40..=100 => p.success,
-                                        21..40 => p.warning,
-                                        _ => p.danger,
-                                    }),
-                                    ..progress_bar::primary(t)
-                                }
-                            }),
-                    ]
-                    .spacing(5)
-                    .align_y(Center),
-                );
-                bat_list = bat_list.push(bat_table(bat));
-            }
-            container(
-                scrollable(bat_list)
-                    .spacing(5)
-                    .id(Id::new(super::Page::Battery.page_id())),
-            )
+impl<'a> BatPage<'a> {
+    pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "bat";
+
+    pub fn new(bat_info: &'a LoadState<BatInfo>) -> Self {
+        Self { bat_info }
+    }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let bat = BatInfo::new();
+                bat.to_load_state()
+            },
+            |val| DataReceiverMessage::BatInfoReceived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match &self.bat_info {
+            LoadState::Loaded(bat_info) => self.page(bat_info),
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
         }
-        DataLoadingState::Error(why) => super::error_page(why),
-        DataLoadingState::Loading => super::loading_page(),
+    }
+
+    fn page(&self, bat_info: &'a BatInfo) -> Element<'a, Message> {
+        let mut bat_list = column![].spacing(5);
+        if bat_info.bats.is_empty() {
+            bat_list = bat_list.push(center(
+                column![text(fl!("bat-not-found")).style(text::secondary).size(16)].spacing(5),
+            ));
+            return container(bat_list).into();
+        }
+
+        for bat in &bat_info.bats {
+            bat_list = bat_list.push(
+                text(fl!(
+                    "bat-header",
+                    name = match &bat.name {
+                        Some(name) => name.to_string(),
+                        None => fl!("bat-unknown-name"),
+                    }
+                ))
+                .style(text::warning),
+            );
+            let capacity = bat.capacity.unwrap_or(0);
+            bat_list = bat_list.push(
+                row![
+                    text(fl!("bat-capacity")),
+                    horizontal(),
+                    progress_bar(0.0..=100., capacity as f32)
+                        .length(Length::FillPortion(2))
+                        .style(move |t: &iced::Theme| {
+                            let p = t.palette();
+                            progress_bar::Style {
+                                bar: iced::Background::Color(match capacity {
+                                    40..=100 => p.success,
+                                    21..40 => p.warning,
+                                    _ => p.danger,
+                                }),
+                                ..progress_bar::primary(t)
+                            }
+                        }),
+                ]
+                .spacing(5)
+                .align_y(Center),
+            );
+            bat_list = bat_list.push(bat_table(bat));
+        }
+        container(scrollable(bat_list).spacing(5).id(Id::new(Self::PAGE_ID))).into()
     }
 }
 

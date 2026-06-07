@@ -29,7 +29,7 @@ use iced::{
 };
 
 mod about;
-mod battery;
+pub mod battery;
 pub mod cpu;
 pub mod cpu_freq;
 mod dashboard;
@@ -115,7 +115,7 @@ impl From<&str> for Page {
             "fs" | "storage" => Self::FileSystems,
             "net" => Self::Network,
             "dmi" => Self::DMI,
-            "battery" | "bat" => Self::Battery,
+            battery::BatPage::PAGE_ID | "battery" => Self::Battery,
             drm::DRMPage::PAGE_ID | "edid" | "screen" => Self::Screen,
             "distro" => Self::Distro,
             "users" => Self::Users,
@@ -296,7 +296,7 @@ impl<'a> Page {
             Self::FileSystems => "fs",
             Self::Network => "net",
             Self::DMI => "dmi",
-            Self::Battery => "bat",
+            Self::Battery => battery::BatPage::PAGE_ID,
             Self::Screen => drm::DRMPage::PAGE_ID,
             Self::Distro => "distro",
             Self::SystemMisc => "sys",
@@ -384,7 +384,10 @@ impl<'a> Page {
             Self::FileSystems => storage::storage_page(&state.data.storages).into(),
             Self::Network => net::net_page(&state.data.networks).into(),
             Self::DMI => dmi::dmi_page(&state.data.dmi_data).into(),
-            Self::Battery => battery::bat_page(&state.data.bat_data).into(),
+            Self::Battery => {
+                let battery = battery::BatPage::new(&state.data.bat_data);
+                battery.view()
+            }
             Self::Screen => {
                 let screen = drm::DRMPage::new(&state.data.drm_data, state.state.selected_screen);
                 screen.view()
