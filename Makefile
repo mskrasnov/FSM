@@ -54,7 +54,7 @@ install: build
 	fi
 	
 	@echo "$(GREEN)Ferrix installed successfully!$(NC)"
-	@echo "$(YELLOW)You can now run 'ferrix' from your application menu or terminal$(NC)"
+	@echo "$(YELLOW)You can now run 'ferrix-app' from your application menu or terminal$(NC)"
 
 uninstall:
 	@echo "$(YELLOW)Uninstalling Ferrix...$(NC)"
@@ -107,8 +107,8 @@ help:
 	@echo "  $(GREEN)help$(NC)      - Show this help message"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make install    # Build and install"
-	@echo "  make run        # Build and test locally"
-	@echo "  make uninstall  # Remove from system"
+	@echo "  make install           # Build and install"
+	@echo "  make run               # Build and test locally"
+	@echo "  make uninstall         # Remove from system"
 
 .DEFAULT_GOAL := help
