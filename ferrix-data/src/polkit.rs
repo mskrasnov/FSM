@@ -68,7 +68,7 @@ pub async fn get_data(data_type: String) -> LoadState<serde_json::Value> {
     };
     let fx_app = match fx_polkit_app() {
         Some(app) => app,
-        None => return LoadState::Error("No `ferrix-app` program found".to_string()),
+        None => return LoadState::Error("No `ferrix-polkit` program found".to_string()),
     };
 
     let output = tokio::task::spawn_blocking(move || {
