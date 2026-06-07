@@ -196,6 +196,7 @@ distro-def-host = Default hostname
 distro-sysext-lvl = System extensions level
 
 # DRM PAGE
+drm-fpanel = Video devices
 drm-title = Screen #{$idx}
 drm-summary = Summary
 drm-vparams = Video params

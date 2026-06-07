@@ -91,7 +91,7 @@ impl<'a> DRMPage<'a> {
         };
         let first_panel = container(
             column![
-                text("Video devices").style(text::secondary),
+                text(fl!("drm-fpanel")).style(text::secondary),
                 Column::from_vec(vid_list)
             ]
             .spacing(5),

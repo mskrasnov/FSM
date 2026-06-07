@@ -196,6 +196,7 @@ distro-def-host = Стандартное имя хоста
 distro-sysext-lvl = Уровень поддержки расширений
 
 # DRM PAGE
+drm-fpanel = Видеоустройства
 drm-title = Экран №{$idx}
 drm-summary = Общая информация
 drm-vparams = Параметры видео
