@@ -148,6 +148,14 @@ impl LineChart {
         self.show_legend = show;
     }
 
+    fn legend_columns(&self) -> usize {
+        let mut cols = self.series_count().ilog2() as usize;
+        if cols % 2 != 0 {
+            cols += 1;
+        }
+        cols
+    }
+
     pub fn legend_parameters<'a, Message>(&'a self) -> Element<'a, Message>
     where
         Message: 'a + Clone,
@@ -180,6 +188,10 @@ impl LineChart {
         }
 
         let mut gr = grid([]).columns(8).fluid(125.).height(iced::Length::Shrink);
+        if self.series_count() > 4 {
+            gr = gr.columns(self.legend_columns());
+        }
+
         for item in items {
             gr = gr.push(item);
         }
