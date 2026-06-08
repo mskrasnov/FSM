@@ -104,6 +104,12 @@ impl Ferrix {
                 return crate::pages::vulnerabilities::VulnPage::get_data()
                     .map(Message::DataReceiver);
             }
+            val if val == Page::Users && self.data.users_list.is_none() => {
+                return crate::pages::users::UsersPage::get_data().map(Message::DataReceiver);
+            }
+            val if val == Page::Groups && self.data.groups_list.is_none() => {
+                return crate::pages::groups::GroupsPage::get_data().map(Message::DataReceiver);
+            }
             _ => {}
         }
 
@@ -513,36 +519,16 @@ impl DataReceiverMessage {
                 fd.users_list = state;
                 Task::none()
             }
-            Self::GetUsersData => Task::perform(
-                async move {
-                    let users = Users::new();
-                    match users {
-                        Ok(mut users) => {
-                            users.users.sort_by_key(|usr| usr.uid);
-                            DataLoadingState::Loaded(users)
-                        }
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::UsersDataReceived(val)),
-            ),
+            Self::GetUsersData => {
+                crate::pages::users::UsersPage::get_data().map(Message::DataReceiver)
+            }
             Self::GroupsDataReceived(state) => {
                 fd.groups_list = state;
                 Task::none()
             }
-            Self::GetGroupsData => Task::perform(
-                async move {
-                    let groups = Groups::new();
-                    match groups {
-                        Ok(mut groups) => {
-                            groups.groups.sort_by_key(|grp| grp.gid);
-                            DataLoadingState::Loaded(groups)
-                        }
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::GroupsDataReceived(val)),
-            ),
+            Self::GetGroupsData => {
+                crate::pages::groups::GroupsPage::get_data().map(Message::DataReceiver)
+            }
             Self::SystemdServicesReceived((sysd_services, boot_time)) => {
                 fd.sysd_services_list = sysd_services;
                 // dbg!(&boot_time);

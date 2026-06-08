@@ -38,7 +38,7 @@ mod dmi;
 pub mod drm;
 mod env;
 mod export;
-mod groups;
+pub mod groups;
 mod kernel;
 mod net;
 mod ram;
@@ -48,7 +48,7 @@ mod storage;
 mod sysmon;
 mod system;
 mod systemd;
-mod users;
+pub mod users;
 pub mod vulnerabilities;
 
 pub use sysmon::*;
@@ -118,7 +118,7 @@ impl From<&str> for Page {
             battery::BatPage::PAGE_ID | "battery" => Self::Battery,
             drm::DRMPage::PAGE_ID | "edid" | "screen" => Self::Screen,
             "distro" => Self::Distro,
-            "users" => Self::Users,
+            users::UsersPage::PAGE_ID | "users" => Self::Users,
             "groups" => Self::Groups,
             "misc" => Self::SystemMisc,
             "init" | "sysd" | "systemd" => Self::SystemManager,
@@ -300,7 +300,7 @@ impl<'a> Page {
             Self::Screen => drm::DRMPage::PAGE_ID,
             Self::Distro => "distro",
             Self::SystemMisc => "sys",
-            Self::Users => "usr",
+            Self::Users => users::UsersPage::PAGE_ID,
             Self::Groups => "grp",
             Self::SystemManager => "sysd",
             Self::Software => soft::SoftPage::PAGE_ID,
@@ -396,8 +396,14 @@ impl<'a> Page {
             Self::Kernel => kernel::kernel_page(&state.data.kernel_data).into(),
             Self::KModules => kernel::kmods_page(&state.data.kmods_data).into(),
             Self::SystemMisc => system::system_page(&state.data.system).into(),
-            Self::Users => users::users_page(&state.data.users_list).into(),
-            Self::Groups => groups::groups_page(&state.data.groups_list).into(),
+            Self::Users => {
+                let usr = users::UsersPage::new(&state.data.users_list);
+                usr.view()
+            }
+            Self::Groups => {
+                let grp = groups::GroupsPage::new(&state.data.groups_list);
+                grp.view()
+            }
             Self::SystemManager => {
                 systemd::services_page(&state.data.boot_time, &state.data.sysd_services_list).into()
             }

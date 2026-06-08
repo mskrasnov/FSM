@@ -71,8 +71,6 @@ impl Ferrix {
             self.battery_subscription(),
             self.drm_subscription(),
             self.osrel_subscription(),
-            self.users_subscription(),  // TODO: remove this
-            self.groups_subscription(), // TODO: remove this
             self.sysd_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
@@ -98,8 +96,6 @@ impl Ferrix {
             self.battery_subscription(),
             self.drm_subscription(),
             self.osrel_subscription(),
-            self.users_subscription(),
-            self.groups_subscription(),
             self.sysd_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
@@ -316,32 +312,6 @@ impl Ferrix {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetOsReleaseData)),
-            )
-        } else {
-            None
-        }
-    }
-
-    fn users_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::Users && self.data.users_list.is_none())
-            || self.is_export_member(Page::Users)
-        {
-            Some(
-                time::every(Duration::from_millis(START_UPERIOD))
-                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetUsersData)),
-            )
-        } else {
-            None
-        }
-    }
-
-    fn groups_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::Groups && self.data.groups_list.is_none())
-            || self.is_export_member(Page::Groups)
-        {
-            Some(
-                time::every(Duration::from_millis(START_UPERIOD))
-                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetGroupsData)),
             )
         } else {
             None

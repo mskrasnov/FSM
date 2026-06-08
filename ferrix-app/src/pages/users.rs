@@ -22,40 +22,76 @@
 
 use crate::{
     Message, fl,
-    load_state::DataLoadingState,
+    messages::DataReceiverMessage,
     widgets::table::{InfoRow, fmt_val, kv_info_table},
 };
+use ferrix_data::load_state::LoadState;
 use ferrix_lib::sys::Users;
 
-use iced::widget::{Id, column, container, scrollable, text};
+use iced::{
+    Element, Task,
+    widget::{Id, column, container, scrollable, text},
+};
 
-pub fn users_page<'a>(users: &'a DataLoadingState<Users>) -> container::Container<'a, Message> {
-    match users {
-        DataLoadingState::Loaded(users) => {
-            let mut users_list = column![].spacing(5);
-            for usr in &users.users {
-                let rows = vec![
-                    InfoRow::new(fl!("users-name"), Some(usr.name.clone())),
-                    InfoRow::new(fl!("users-id"), fmt_val(Some(usr.uid))),
-                    InfoRow::new(fl!("users-gid"), fmt_val(Some(usr.gid))),
-                    InfoRow::new(fl!("users-gecos"), usr.gecos.clone()),
-                    InfoRow::new(fl!("users-home"), Some(usr.home_dir.clone())),
-                    InfoRow::new(fl!("users-shell"), Some(usr.login_shell.clone())),
-                ];
-                let usr_view = column![
-                    text(fl!("users-hdr", id = usr.uid)).style(text::warning),
-                    container(kv_info_table(rows)).style(container::rounded_box),
-                ]
-                .spacing(5);
-                users_list = users_list.push(usr_view);
-            }
-            container(
-                scrollable(users_list)
-                    .spacing(5)
-                    .id(Id::new(super::Page::Users.page_id())),
-            )
-        }
-        DataLoadingState::Error(why) => super::error_page(why),
-        DataLoadingState::Loading => super::loading_page(),
+#[derive(Debug, Clone)]
+pub struct UsersPage<'a> {
+    users: &'a LoadState<Users>,
+}
+
+impl<'a> UsersPage<'a> {
+    pub const PAGE_ID: &'static str = "usr";
+    pub const IS_SPECIAL: bool = false;
+
+    pub fn new(users: &'a LoadState<Users>) -> Self {
+        Self { users }
     }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let usr = Users::new();
+                match usr {
+                    Ok(mut usr) => {
+                        usr.users.sort_by_key(|usr| usr.uid);
+                        LoadState::Loaded(usr)
+                    }
+                    Err(why) => LoadState::Error(why.to_string()),
+                }
+            },
+            |val| DataReceiverMessage::UsersDataReceived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match &self.users {
+            LoadState::Loaded(users) => users_page(users).into(),
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
+        }
+    }
+}
+
+fn users_page<'a>(users: &'a Users) -> container::Container<'a, Message> {
+    let mut users_list = column![].spacing(5);
+    for usr in &users.users {
+        let rows = vec![
+            InfoRow::new(fl!("users-name"), Some(usr.name.clone())),
+            InfoRow::new(fl!("users-id"), fmt_val(Some(usr.uid))),
+            InfoRow::new(fl!("users-gid"), fmt_val(Some(usr.gid))),
+            InfoRow::new(fl!("users-gecos"), usr.gecos.clone()),
+            InfoRow::new(fl!("users-home"), Some(usr.home_dir.clone())),
+            InfoRow::new(fl!("users-shell"), Some(usr.login_shell.clone())),
+        ];
+        let usr_view = column![
+            text(fl!("users-hdr", id = usr.uid)).style(text::warning),
+            container(kv_info_table(rows)).style(container::rounded_box),
+        ]
+        .spacing(5);
+        users_list = users_list.push(usr_view);
+    }
+    container(
+        scrollable(users_list)
+            .spacing(5)
+            .id(Id::new(UsersPage::PAGE_ID)),
+    )
 }
