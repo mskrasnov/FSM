@@ -1,6 +1,6 @@
 /* app.rs
  *
- * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ pub fn main() -> iced::Result {
         .window(Settings {
             icon: Some(iced::window::icon::from_file_data(APP_LOGO, None).unwrap()),
             min_size: Some(Size {
-                width: 785.,
+                width: 780.,
                 height: 470.,
             }),
             ..Default::default()
