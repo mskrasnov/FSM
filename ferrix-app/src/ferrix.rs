@@ -31,6 +31,7 @@ use crate::{
 };
 use ferrix_data::FerrixData;
 use ferrix_widgets::line_charts::LineChart;
+use iced::Task;
 use std::collections::HashSet;
 
 #[derive(Debug)]
@@ -65,6 +66,13 @@ impl Default for Ferrix {
 }
 
 impl Ferrix {
+    pub fn boot() -> (Self, Task<Message>) {
+        (
+            Self::default(),
+            Task::batch([crate::pages::cpu::ProcPage::get_data().map(Message::DataReceiver)]),
+        )
+    }
+
     pub fn theme(&self) -> iced::Theme {
         self.settings.style.to_theme()
     }

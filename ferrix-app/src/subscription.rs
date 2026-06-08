@@ -61,20 +61,18 @@ impl Ferrix {
                 .map(|_| Message::DataReceiver(DataReceiverMessage::AddTotalRAMUsage)),
         ];
         let oscripts = [
-            self.cpu_basic_data(),
             self.cpu_stat_data(),
             self.ram_data(),
             self.swap_data(),
             self.cpu_freq_subscription(),
-            self.cpu_vuln_subscription(),
             self.storage_subscription(),
             self.networks_subscription(),
-            self.dmi_subscription(),
+            self.dmi_subscription(), // TODO: remove this
             self.battery_subscription(),
             self.drm_subscription(),
             self.osrel_subscription(),
-            self.users_subscription(),
-            self.groups_subscription(),
+            self.users_subscription(),  // TODO: remove this
+            self.groups_subscription(), // TODO: remove this
             self.sysd_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
@@ -90,12 +88,10 @@ impl Ferrix {
         let mut scripts =
             vec![event::listen().map(|event| Message::Keyboard(KeyboardMessage::Event(event)))];
         let oscripts = [
-            // self.cpu_basic_data(),
             self.cpu_stat_data(),
             self.ram_data(),
             self.swap_data(),
             self.cpu_freq_subscription(),
-            self.cpu_vuln_subscription(),
             self.storage_subscription(),
             self.networks_subscription(),
             self.dmi_subscription(),
@@ -105,7 +101,6 @@ impl Ferrix {
             self.users_subscription(),
             self.groups_subscription(),
             self.sysd_subscription(),
-            // self.soft_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
             self.kmods_subscription(),
@@ -142,21 +137,6 @@ impl Ferrix {
             Page::Kernel => e.kernel,
             Page::KModules => e.kmods,
             _ => false,
-        }
-    }
-
-    #[deprecated]
-    fn cpu_basic_data(&self) -> OScript<Message> {
-        if ((self.current_page == Page::Dashboard || self.current_page == Page::Processors)
-            && self.data.proc_data.is_none())
-            || self.is_export_member(Page::Processors)
-        {
-            Some(
-                time::every(Duration::from_millis(START_UPERIOD))
-                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetCPUData)),
-            )
-        } else {
-            None
         }
     }
 
@@ -225,20 +205,6 @@ impl Ferrix {
             Some(
                 time::every(Duration::from_secs(self.u()))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetCPUFrequency)),
-            )
-        } else {
-            None
-        }
-    }
-
-    fn cpu_vuln_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::CPUVulnerabilities
-            && self.data.cpu_vulnerabilities.is_none())
-            || self.is_export_member(Page::CPUVulnerabilities)
-        {
-            Some(
-                time::every(Duration::from_millis(START_UPERIOD))
-                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetCPUVulnerabilities)),
             )
         } else {
             None

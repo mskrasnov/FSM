@@ -28,7 +28,7 @@ pub fn main() -> iced::Result {
         panic!("Running this program as `root` is prohibited.");
     }
 
-    iced::application(Ferrix::default, Ferrix::update, Ferrix::view)
+    iced::application(Ferrix::boot, Ferrix::update, Ferrix::view)
         .settings(iced::Settings {
             default_text_size: iced::Pixels(12.),
             ..Default::default()

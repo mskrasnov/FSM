@@ -96,17 +96,15 @@ impl Ferrix {
             self.export_manager.status = ExportStatus::LoadingData;
         }
 
-        if page == Page::Screen && self.state.selected_screen != 0 {
-            let idx = crate::pages::drm::get_first_active_screen(&self.data.drm_data);
-            if let Some(idx) = idx {
-                self.state.selected_screen = idx;
+        match page {
+            val if val == Page::Software && self.data.installed_pkgs_list.is_none() => {
+                return crate::pages::soft::SoftPage::get_data().map(Message::DataReceiver);
             }
-        }
-
-        if page == Page::Software
-            && (self.data.installed_pkgs_list.is_none() || self.data.installed_pkgs_list.is_error())
-        {
-            return crate::pages::soft::SoftPage::get_data().map(Message::DataReceiver);
+            val if val == Page::CPUVulnerabilities && self.data.cpu_vulnerabilities.is_none() => {
+                return crate::pages::vulnerabilities::VulnPage::get_data()
+                    .map(Message::DataReceiver);
+            }
+            _ => {}
         }
 
         if let Some(task) = page.get_data_single() {
