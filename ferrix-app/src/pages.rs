@@ -414,7 +414,7 @@ impl<'a> Page {
             Self::Environment => env::env_page(&state.data.system).into(),
             Self::Settings => settings::settings_page(&state).into(),
             Self::Export => export::export_page(&state.export_manager).into(),
-            Self::About => about::about_page().into(),
+            Self::About => about::about_page(),
             _ => self.todo_page(),
         };
 

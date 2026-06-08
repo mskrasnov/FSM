@@ -45,6 +45,7 @@ page-todo-msg = This functionality has not been implemented yet
 about-hdr = FSM — yet another system profiler for Linux
 about-ferrix = Ferrix System Monitor version
 about-flib = ferrix-lib version
+about-sum = Summary
 about-author-hdr = Author:
 about-feedback-hdr = Feedback:
 about-source-hdr = Source code:

@@ -45,6 +45,7 @@ page-todo-msg = Этот функционал пока не реализован
 about-hdr = FSM — ещё один системный профайлер для Linux
 about-ferrix = Версия Ferrix System Monitor
 about-flib = Версия ferrix-lib
+about-sum = Общая информация
 about-author-hdr = Автор:
 about-feedback-hdr = Фидбек:
 about-source-hdr = Исходный код:
