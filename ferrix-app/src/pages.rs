@@ -43,7 +43,7 @@ mod kernel;
 mod net;
 mod ram;
 mod settings;
-mod soft;
+pub mod soft;
 mod storage;
 mod sysmon;
 mod system;
@@ -122,7 +122,7 @@ impl From<&str> for Page {
             "groups" => Self::Groups,
             "misc" => Self::SystemMisc,
             "init" | "sysd" | "systemd" => Self::SystemManager,
-            "software" | "soft" | "pkg" | "pkgs" => Self::Software,
+            soft::SoftPage::PAGE_ID | "software" | "soft" | "pkgs" => Self::Software,
             "env" => Self::Environment,
             "sensors" => Self::Sensors,
             "kernel" | "linux" => Self::Kernel,
@@ -303,7 +303,7 @@ impl<'a> Page {
             Self::Users => "usr",
             Self::Groups => "grp",
             Self::SystemManager => "sysd",
-            Self::Software => "pkg",
+            Self::Software => soft::SoftPage::PAGE_ID,
             Self::Environment => "env",
             Self::Sensors => "hwmon",
             Self::Kernel => "krn",
@@ -401,7 +401,10 @@ impl<'a> Page {
             Self::SystemManager => {
                 systemd::services_page(&state.data.boot_time, &state.data.sysd_services_list).into()
             }
-            Self::Software => soft::soft_page(&state.data.installed_pkgs_list).into(),
+            Self::Software => {
+                let soft = soft::SoftPage::new(&state.data.installed_pkgs_list);
+                soft.view()
+            }
             Self::Environment => env::env_page(&state.data.system).into(),
             Self::Settings => settings::settings_page(&state).into(),
             Self::Export => export::export_page(&state.export_manager).into(),

@@ -76,7 +76,6 @@ impl Ferrix {
             self.users_subscription(),
             self.groups_subscription(),
             self.sysd_subscription(),
-            self.soft_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
             self.kmods_subscription(),
@@ -106,7 +105,7 @@ impl Ferrix {
             self.users_subscription(),
             self.groups_subscription(),
             self.sysd_subscription(),
-            self.soft_subscription(),
+            // self.soft_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
             self.kmods_subscription(),
@@ -396,19 +395,6 @@ impl Ferrix {
             Some(
                 time::every(Duration::from_secs(self.u() * 10))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetSystemdServices)),
-            )
-        } else {
-            None
-        }
-    }
-
-    fn soft_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::Software && self.data.installed_pkgs_list.is_none())
-            || self.is_export_member(Page::Software)
-        {
-            Some(
-                time::every(Duration::from_millis(START_UPERIOD))
-                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetPackagesList)),
             )
         } else {
             None

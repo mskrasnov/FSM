@@ -103,6 +103,12 @@ impl Ferrix {
             }
         }
 
+        if page == Page::Software
+            && (self.data.installed_pkgs_list.is_none() || self.data.installed_pkgs_list.is_error())
+        {
+            return crate::pages::soft::SoftPage::get_data().map(Message::DataReceiver);
+        }
+
         if let Some(task) = page.get_data_single() {
             task
         } else {
@@ -588,16 +594,9 @@ impl DataReceiverMessage {
                 fd.system = state;
                 Task::none()
             }
-            Self::GetPackagesList => Task::perform(
-                async move {
-                    let pkglist = InstalledPackages::get();
-                    match pkglist {
-                        Ok(pkglist) => DataLoadingState::Loaded(pkglist),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::PackagesListReceived(val)),
-            ),
+            Self::GetPackagesList => {
+                crate::pages::soft::SoftPage::get_data().map(Message::DataReceiver)
+            }
             Self::PackagesListReceived(state) => {
                 fd.installed_pkgs_list = state;
                 Task::none()

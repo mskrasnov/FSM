@@ -20,41 +20,64 @@
 
 //! CPU page
 
-use crate::{DataLoadingState, Message, fl, messages::ButtonsMessage, widgets::table::hdr_name};
+use crate::{
+    Message, fl,
+    messages::{ButtonsMessage, DataReceiverMessage},
+    widgets::table::hdr_name,
+};
+use ferrix_data::load_state::{LoadState, ToLoadState};
 use ferrix_lib::soft::{InstalledPackages, Package};
 
 use iced::{
-    Length,
+    Element, Length, Task,
     widget::{
         Id, button, column, container, row as _row, scrollable, space::horizontal, table, text,
     },
 };
 
-pub fn soft_page<'a>(
-    software: &'a DataLoadingState<InstalledPackages>,
-) -> container::Container<'a, Message> {
-    container(scrollable(column![soft_list(software),].spacing(5)).spacing(5))
+#[derive(Debug, Clone)]
+pub struct SoftPage<'a> {
+    soft: &'a LoadState<InstalledPackages>,
 }
 
-fn soft_list<'a>(
-    software: &'a DataLoadingState<InstalledPackages>,
-) -> container::Container<'a, Message> {
-    match software {
-        DataLoadingState::Loaded(soft) => {
-            let pkgs = &soft.packages;
-            let table = container(soft_table(pkgs)).style(container::rounded_box);
-            let services_count = text(fl!("soft-total", total = pkgs.len()));
+impl<'a> SoftPage<'a> {
+    pub const PAGE_ID: &'static str = "pkg";
+    pub const IS_SPECIAL: bool = false;
 
-            let layout = column![services_count, table].spacing(5);
-            container(
-                scrollable(layout)
-                    .spacing(5)
-                    .id(Id::new(super::Page::Software.page_id())),
-            )
-        }
-        DataLoadingState::Error(why) => super::error_page(why),
-        DataLoadingState::Loading => super::loading_page(),
+    pub fn new(soft: &'a LoadState<InstalledPackages>) -> Self {
+        Self { soft }
     }
+
+    pub fn get_data() -> Task<DataReceiverMessage> {
+        Task::perform(
+            async move {
+                let pkgs = InstalledPackages::get();
+                pkgs.to_load_state()
+            },
+            |val| DataReceiverMessage::PackagesListReceived(val),
+        )
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match self.soft {
+            LoadState::Loaded(soft) => container(scrollable(soft_list(soft)).spacing(5.)).into(),
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
+        }
+    }
+}
+
+fn soft_list<'a>(soft: &'a InstalledPackages) -> container::Container<'a, Message> {
+    let pkgs = &soft.packages;
+    let table = container(soft_table(pkgs)).style(container::rounded_box);
+    let services_count = text(fl!("soft-total", total = pkgs.len()));
+
+    let layout = column![services_count, table].spacing(5);
+    container(
+        scrollable(layout)
+            .spacing(5)
+            .id(Id::new(super::Page::Software.page_id())),
+    )
 }
 
 fn soft_table<'a>(rows: &'a [Package]) -> table::Table<'a, Message> {
