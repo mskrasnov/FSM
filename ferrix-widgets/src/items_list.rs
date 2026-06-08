@@ -88,3 +88,13 @@ where
     .spacing(5)
     .align_y(Center)
 }
+
+pub fn simple_list_header<'a, T, Message>(header: T) -> row::Row<'a, Message>
+where
+    T: text::IntoFragment<'a>,
+    Message: 'a + Clone,
+{
+    row![text(header).size(16), rule::horizontal(1.)]
+        .spacing(5)
+        .align_y(Center)
+}
