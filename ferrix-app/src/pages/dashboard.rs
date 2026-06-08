@@ -158,17 +158,17 @@ pub fn dashboard<'a>(fx: &'a FerrixData) -> container::Container<'a, Message> {
             for b in &bat.bats {
                 let status = match &b.status {
                     Some(status) => match status {
-                        Status::Charging => "⚡️",
-                        Status::Discharging => "🔋️",
-                        Status::NotCharging => "🚫️",
-                        Status::Full => "🟢️",
-                        _ => "❔️",
+                        Status::Charging => fl!("bat-status-cha"),
+                        Status::Discharging => fl!("bat-status-dis"),
+                        Status::NotCharging => fl!("bat-status-noc"),
+                        Status::Full => fl!("bat-status-ful"),
+                        _ => "?".to_string(),
                     },
-                    None => "❔️",
+                    None => "?".to_string(),
                 };
 
                 let name = match &b.name {
-                    Some(name) => format!("{} {}", status, name),
+                    Some(name) => format!("{name}\n{status}"),
                     None => fl!("dash-unk-bat"),
                 };
                 bats.push((name, b.capacity.unwrap_or(0)));
