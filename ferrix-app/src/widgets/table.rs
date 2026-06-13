@@ -71,7 +71,7 @@ where
     V: ToString + 'a,
 {
     match val {
-        Some(val) if !val.to_string().is_empty() && !val.to_string().contains("http") => {
+        Some(val) if !val.to_string().is_empty() && !val.to_string().starts_with("http") => {
             button(text(val.to_string()))
                 .style(button::text)
                 .padding(0)
