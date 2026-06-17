@@ -32,6 +32,7 @@ page-env = Environment
 page-sensors = Sensors
 page-kernel = Kernel
 page-kmods = Kernel Modules
+page-frmwr = Firmware
 page-dev = Development
 page-sysmisc = Misc
 page-settings = Settings
@@ -246,6 +247,12 @@ kernel-user-evs = User events, max.
 kernel-avail-enthropy = Available enthropy
 kernel-mods-hdr = Loaded kernel modules
 kernel-mods-is-empty = Kernel modules are not loaded
+
+# FIRMWARE PAGE
+frmwr-name = Name
+frmwr-val = Value
+frmwr-pval = Possible values
+frmwr-type = Type
 
 # NETWORK PAGE
 net-adp = Interface: {$adp}

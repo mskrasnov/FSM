@@ -63,6 +63,7 @@ pub fn sidebar<'a>(cur_page: Page) -> Element<'a, Message> {
         Item::Group(fl!("sidebar-system")),
         Item::Page(Page::Kernel),
         Item::Page(Page::KModules),
+        Item::Page(Page::Firmware),
         Item::Page(Page::SystemMisc),
         Item::Group(fl!("sidebar-manage")),
         Item::Page(Page::Settings),

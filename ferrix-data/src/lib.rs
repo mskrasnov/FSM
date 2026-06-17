@@ -21,6 +21,7 @@
 //! Data from `ferrix-lib`
 
 pub mod dmi;
+pub mod firmware;
 pub mod kmods;
 pub mod load_state;
 pub mod polkit;
@@ -45,7 +46,7 @@ use ferrix_lib::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{dmi::DMIData, kmods::KResult, load_state::LoadState};
+use crate::{dmi::DMIData, firmware::FResult, kmods::KResult, load_state::LoadState};
 
 #[derive(Debug, Serialize)]
 pub struct FerrixData {
@@ -67,6 +68,7 @@ pub struct FerrixData {
 
     pub kernel_data: LoadState<Kernel>,
     pub kmods_data: LoadState<KResult>,
+    pub firmware_data: LoadState<FResult>,
 
     pub users_list: LoadState<Users>,
     pub groups_list: LoadState<Groups>,
@@ -93,8 +95,11 @@ impl Default for FerrixData {
             bat_data: LoadState::default(),
             drm_data: LoadState::default(),
             osrel_data: LoadState::default(),
+
             kernel_data: LoadState::default(),
             kmods_data: LoadState::default(),
+            firmware_data: LoadState::default(),
+
             users_list: LoadState::default(),
             groups_list: LoadState::default(),
             sysd_services_list: LoadState::default(),

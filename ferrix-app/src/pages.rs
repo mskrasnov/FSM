@@ -38,6 +38,7 @@ mod dmi;
 pub mod drm;
 mod env;
 mod export;
+pub mod firmware;
 pub mod groups;
 mod kernel;
 mod net;
@@ -88,6 +89,7 @@ pub enum Page {
      ************************************/
     Kernel,
     KModules,
+    Firmware,
     Development,
 
     /************************************
@@ -127,6 +129,7 @@ impl From<&str> for Page {
             "sensors" => Self::Sensors,
             "kernel" | "linux" => Self::Kernel,
             "kmods" | "mod" | "modules" => Self::KModules,
+            firmware::FirmwarePage::PAGE_ID | "firmware" | "frmwr" => Self::Firmware,
             "dev" => Self::Development,
             "settings" => Self::Settings,
             "about" | "version" | "--version" | "-V" | "-v" => {
@@ -201,6 +204,7 @@ impl<'a> Page {
         Self::Software,
         Self::Kernel,
         Self::KModules,
+        Self::Firmware,
         Self::SystemMisc,
         Self::Export,
         Self::Settings,
@@ -308,6 +312,7 @@ impl<'a> Page {
             Self::Sensors => "hwmon",
             Self::Kernel => "krn",
             Self::KModules => "kmds",
+            Self::Firmware => firmware::FirmwarePage::PAGE_ID,
             Self::Development => "dev",
             Self::Settings => "set",
             Self::About => "about",
@@ -338,6 +343,7 @@ impl<'a> Page {
             Self::Sensors => fl!("page-sensors"),
             Self::Kernel => fl!("page-kernel"),
             Self::KModules => fl!("page-kmods"),
+            Self::Firmware => fl!("page-frmwr"),
             Self::Development => fl!("page-dev"),
             Self::SystemMisc => fl!("page-sysmisc"),
             Self::Settings => fl!("page-settings"),
@@ -395,6 +401,10 @@ impl<'a> Page {
             Self::Distro => distro::distro_page(&state.data.osrel_data).into(),
             Self::Kernel => kernel::kernel_page(&state.data.kernel_data).into(),
             Self::KModules => kernel::kmods_page(&state.data.kmods_data).into(),
+            Self::Firmware => {
+                let firmware = firmware::FirmwarePage::new(&state.data.firmware_data);
+                firmware.view()
+            }
             Self::SystemMisc => system::system_page(&state.data.system).into(),
             Self::Users => {
                 let usr = users::UsersPage::new(&state.data.users_list);

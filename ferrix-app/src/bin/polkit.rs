@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use ferrix_data::{dmi::DMIData, kmods::KResult};
+use ferrix_data::{dmi::DMIData, firmware::FResult, kmods::KResult};
 use std::env;
 
 fn print_error_mode() {
@@ -40,6 +40,9 @@ fn main() {
                 println!("{}", data.to_json().unwrap());
             } else if &mode == "kmods" {
                 let data = KResult::new();
+                println!("{}", data.to_json().unwrap());
+            } else if &mode == "firmware" {
+                let data = FResult::new();
                 println!("{}", data.to_json().unwrap());
             } else {
                 print_error_mode();

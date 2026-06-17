@@ -32,6 +32,7 @@ page-env = Окружение
 page-sensors = Сенсоры
 page-kernel = Ядро
 page-kmods = Модули ядра
+page-frmwr = Прошивка
 page-dev = Разработка
 page-sysmisc = Разное
 page-settings = Настройки
@@ -246,6 +247,12 @@ kernel-user-evs = Макс. число user events
 kernel-avail-enthropy = Доступная энтропия
 kernel-mods-hdr = Загруженные модули ядра
 kernel-mods-is-empty = Модули ядра не загружены
+
+# FIRMWARE PAGE
+frmwr-name = Имя
+frmwr-val = Значение
+frmwr-pval = Возможные значения
+frmwr-type = Тип
 
 # NETWORK PAGE
 net-adp = Интерфейс: {$adp}

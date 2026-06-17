@@ -97,6 +97,8 @@ impl Ferrix {
 pub struct FerrixState {
     pub is_dmi_polkit: bool,
     pub is_kmods_polkit: bool,
+    pub is_firmware_polkit: bool,
+
     pub selected_proc: usize,
     pub selected_freq: usize,
     pub selected_screen: usize,
@@ -114,6 +116,8 @@ impl Default for FerrixState {
         Self {
             is_dmi_polkit: false,
             is_kmods_polkit: false,
+            is_firmware_polkit: false,
+
             selected_proc: 0,
             selected_freq: 0,
             selected_screen: 0,

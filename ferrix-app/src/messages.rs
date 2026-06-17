@@ -29,7 +29,7 @@ use crate::{
     styles::CPU_CHARTS_COLORS,
     utils::{ToColor, get_home},
 };
-use ferrix_data::{FerrixData, System, dmi::DMIData, kmods::KResult};
+use ferrix_data::{FerrixData, System, dmi::DMIData, firmware::FResult, kmods::KResult};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
@@ -110,6 +110,9 @@ impl Ferrix {
             val if val == Page::Groups && self.data.groups_list.is_none() => {
                 return crate::pages::groups::GroupsPage::get_data().map(Message::DataReceiver);
             }
+            val if val == Page::Firmware && self.data.firmware_data.is_none() => {
+                return crate::pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver);
+            }
             _ => {}
         }
 
@@ -171,6 +174,9 @@ pub enum DataReceiverMessage {
 
     GetKModsData,
     KModsDataReceived(DataLoadingState<KResult>),
+
+    GetFirmwareData,
+    FirmwareDataReceived(LoadState<FResult>),
 
     GetUsersData,
     UsersDataReceived(DataLoadingState<Users>),
@@ -511,6 +517,21 @@ impl DataReceiverMessage {
                         async move { ferrix_data::kmods::get_kmods_list().await },
                         |val| Message::DataReceiver(Self::KModsDataReceived(val)),
                     )
+                } else {
+                    Task::none()
+                }
+            }
+            Self::FirmwareDataReceived(state) => {
+                fd.firmware_data = state;
+                Task::none()
+            }
+            Self::GetFirmwareData => {
+                if !fs.is_firmware_polkit
+                    && fd.firmware_data.is_none()
+                    && cur_page == Page::Firmware
+                {
+                    fs.is_firmware_polkit = true;
+                    crate::pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
                 } else {
                     Task::none()
                 }
