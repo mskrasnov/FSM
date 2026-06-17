@@ -30,26 +30,14 @@ use std::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Firmware {
-    pub attributes: AttributesList,
-}
-
-impl Firmware {
-    pub fn new() -> Result<Self> {
-        let attributes = AttributesList::read()?;
-        Ok(Self { attributes })
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AttributesList {
     pub driver_name: String,
     pub attributes: Vec<Attribute>,
 }
 
-impl AttributesList {
+impl Firmware {
     const FIRMWARE_DIR: &'static str = "/sys/class/firmware-attributes/";
 
-    pub fn read() -> Result<Self> {
+    pub fn new() -> Result<Self> {
         let mut firmware_dir_contents = read_dir(Self::FIRMWARE_DIR)?;
         let driver_dir = firmware_dir_contents
             .next()
