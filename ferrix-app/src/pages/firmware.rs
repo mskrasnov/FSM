@@ -88,7 +88,9 @@ fn frmwr_table<'a>(rows: &'a [Attribute]) -> table::Table<'a, Message> {
             text(&row.possible_values).wrapping(text::Wrapping::WordOrGlyph)
         })
         .width(Length::FillPortion(1)),
-        table::column(hdr_name(fl!("frmwr-type")), |row: &'a Attribute| text(&row.param_type)),
+        table::column(hdr_name(fl!("frmwr-type")), |row: &'a Attribute| {
+            text(&row.param_type)
+        }),
     ];
     table(columns, rows).padding(2).width(Length::Fill)
 }
