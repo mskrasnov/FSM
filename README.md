@@ -33,6 +33,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
     - Linux kernel information;
     - Kernel modules list;
     - Desktop environment name;
+    - UEFI Settings (tested on Lenovo ThinkBook);
 
 **TODO:**
 
@@ -62,6 +63,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 | Battery health        | 🟢️                    | 🔴️        | 🟢️           |
 | systemd services list | 🟢️                    | 🔴️        | 🟢️           |
 | DMI Tables            | ⚪️ (more data than Hardinfo) | ⚪️ (less data than FSM) | 🔴️ |
+| UEFI Settings         | 🟢️                    | 🔴️        | 🔴️           |
 
 - 🟢️ - yes;
 - 🔴️ - no;
