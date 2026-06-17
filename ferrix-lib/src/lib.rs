@@ -48,6 +48,7 @@ pub mod cpu;
 pub mod cpu_freq;
 pub mod dmi;
 pub mod drm;
+pub mod firmware;
 pub mod init;
 pub mod net;
 pub mod parts;
