@@ -253,6 +253,9 @@ frmwr-name = Имя
 frmwr-val = Значение
 frmwr-pval = Возможные значения
 frmwr-type = Тип
+frmwr-drv = Драйвер
+frmwr-gen = Общее
+frmwr-params = Параметры
 
 # NETWORK PAGE
 net-adp = Интерфейс: {$adp}

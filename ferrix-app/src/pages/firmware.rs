@@ -24,13 +24,13 @@ use crate::{
     fl,
     load_state::LoadState,
     messages::{DataReceiverMessage, Message},
-    widgets::table::hdr_name,
+    widgets::table::{InfoRow, hdr_name, kv_info_table},
 };
 use ferrix_data::firmware::FResult;
 use ferrix_lib::firmware::Attribute;
 use iced::{
     Element, Length, Task,
-    widget::{container, scrollable, table, text},
+    widget::{column, container, scrollable, table, text},
 };
 
 #[derive(Debug, Clone)]
@@ -56,12 +56,24 @@ impl<'a> FirmwarePage<'a> {
     pub fn view(&self) -> Element<'a, Message> {
         match self.firmware {
             LoadState::Loaded(firmware) => match firmware {
-                FResult::Ok { data } => scrollable(
-                    container(frmwr_table(&data.attributes)).style(container::rounded_box),
-                )
-                .spacing(5)
-                .into(),
-                FResult::Err { error } => text(error.to_string()).into(),
+                FResult::Ok { data } => {
+                    let rows = vec![InfoRow::new(
+                        fl!("frmwr-drv"),
+                        Some(data.driver_name.clone()),
+                    )];
+                    scrollable(
+                        column![
+                            text(fl!("frmwr-gen")).style(text::warning),
+                            container(kv_info_table(rows)).style(container::rounded_box),
+                            text(fl!("frmwr-params")).style(text::warning),
+                            container(frmwr_table(&data.attributes)).style(container::rounded_box),
+                        ]
+                        .spacing(5),
+                    )
+                    .spacing(5)
+                    .into()
+                }
+                FResult::Err { error } => super::error_page(error).into(),
             },
             LoadState::Loading => super::loading_page().into(),
             LoadState::Error(why) => super::error_page(why).into(),
