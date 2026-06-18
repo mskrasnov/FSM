@@ -70,7 +70,6 @@ impl Ferrix {
             self.dmi_subscription(), // TODO: remove this
             self.battery_subscription(),
             self.drm_subscription(),
-            self.osrel_subscription(),
             self.sysd_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
@@ -95,7 +94,6 @@ impl Ferrix {
             self.dmi_subscription(),
             self.battery_subscription(),
             self.drm_subscription(),
-            self.osrel_subscription(),
             self.sysd_subscription(),
             self.env_and_sys_subscription(),
             self.kernel_subscription(),
@@ -298,20 +296,6 @@ impl Ferrix {
             Some(
                 time::every(Duration::from_secs(self.u()))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetDRMData)),
-            )
-        } else {
-            None
-        }
-    }
-
-    fn osrel_subscription(&self) -> OScript<Message> {
-        if ((self.current_page == Page::Dashboard || self.current_page == Page::Distro)
-            && self.data.osrel_data.is_none())
-            || self.is_export_member(Page::Distro)
-        {
-            Some(
-                time::every(Duration::from_millis(START_UPERIOD))
-                    .map(|_| Message::DataReceiver(DataReceiverMessage::GetOsReleaseData)),
             )
         } else {
             None

@@ -69,7 +69,10 @@ impl Ferrix {
     pub fn boot() -> (Self, Task<Message>) {
         (
             Self::default(),
-            Task::batch([crate::pages::cpu::ProcPage::get_data().map(Message::DataReceiver)]),
+            Task::batch([
+                crate::pages::cpu::ProcPage::get_data().map(Message::DataReceiver),
+                crate::pages::distro::OsRelPage::get_data().map(Message::DataReceiver),
+            ]),
         )
     }
 

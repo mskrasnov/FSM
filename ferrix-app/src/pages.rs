@@ -33,7 +33,7 @@ pub mod battery;
 pub mod cpu;
 pub mod cpu_freq;
 mod dashboard;
-mod distro;
+pub mod distro;
 mod dmi;
 pub mod drm;
 mod env;
@@ -119,7 +119,7 @@ impl From<&str> for Page {
             "dmi" => Self::DMI,
             battery::BatPage::PAGE_ID | "battery" => Self::Battery,
             drm::DRMPage::PAGE_ID | "edid" | "screen" => Self::Screen,
-            "distro" => Self::Distro,
+            distro::OsRelPage::PAGE_ID | "distro" => Self::Distro,
             users::UsersPage::PAGE_ID | "users" => Self::Users,
             "groups" => Self::Groups,
             "misc" => Self::SystemMisc,
@@ -302,7 +302,7 @@ impl<'a> Page {
             Self::DMI => "dmi",
             Self::Battery => battery::BatPage::PAGE_ID,
             Self::Screen => drm::DRMPage::PAGE_ID,
-            Self::Distro => "distro",
+            Self::Distro => distro::OsRelPage::PAGE_ID,
             Self::SystemMisc => "sys",
             Self::Users => users::UsersPage::PAGE_ID,
             Self::Groups => "grp",
@@ -398,7 +398,10 @@ impl<'a> Page {
                 let screen = drm::DRMPage::new(&state.data.drm_data, state.state.selected_screen);
                 screen.view()
             }
-            Self::Distro => distro::distro_page(&state.data.osrel_data).into(),
+            Self::Distro => {
+                let distro = distro::OsRelPage::new(&state.data.osrel_data);
+                distro.view()
+            }
             Self::Kernel => kernel::kernel_page(&state.data.kernel_data).into(),
             Self::KModules => kernel::kmods_page(&state.data.kmods_data).into(),
             Self::Firmware => {

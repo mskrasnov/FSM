@@ -113,6 +113,9 @@ impl Ferrix {
             val if val == Page::Firmware && self.data.firmware_data.is_none() => {
                 return crate::pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver);
             }
+            val if val == Page::Distro && self.data.osrel_data.is_none() => {
+                return crate::pages::distro::OsRelPage::get_data().map(Message::DataReceiver);
+            }
             _ => {}
         }
 
@@ -476,16 +479,9 @@ impl DataReceiverMessage {
                 fd.osrel_data = state;
                 Task::none()
             }
-            Self::GetOsReleaseData => Task::perform(
-                async move {
-                    let osrel = OsRelease::new();
-                    match osrel {
-                        Ok(osrel) => DataLoadingState::Loaded(osrel),
-                        Err(why) => DataLoadingState::Error(why.to_string()),
-                    }
-                },
-                |val| Message::DataReceiver(Self::OsReleaseDataReceived(val)),
-            ),
+            Self::GetOsReleaseData => {
+                crate::pages::distro::OsRelPage::get_data().map(Message::DataReceiver)
+            }
             Self::KernelDataReceived(state) => {
                 fd.kernel_data = state;
                 Task::none()
