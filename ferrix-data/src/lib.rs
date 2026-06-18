@@ -38,8 +38,8 @@ use ferrix_lib::{
     ram::{RAM, Swaps},
     soft::InstalledPackages,
     sys::{
-        Groups, Kernel, LoadAVG, OsRelease, Uptime, Users, current_user, get_current_desktop,
-        get_env_vars, get_hostname, get_lang,
+        Groups, Kernel, LoadAVG, OsRelease, Shell, Uptime, Users, current_user,
+        get_current_desktop, get_env_vars, get_hostname, get_lang,
     },
     vulnerabilities::Vulnerabilities,
 };
@@ -119,6 +119,7 @@ pub struct System {
     pub language: Option<String>,
     pub env_vars: Vec<(String, String)>,
     pub current_user: Option<String>,
+    pub shell: Option<Shell>,
 }
 
 impl System {
@@ -131,6 +132,7 @@ impl System {
             language: get_lang(),
             env_vars: get_env_vars(),
             current_user: current_user(),
+            shell: Some(Shell::new()?),
         })
     }
 }
@@ -145,6 +147,7 @@ impl Default for System {
             language: Some("Unknown locale".to_string()),
             env_vars: Vec::new(),
             current_user: None,
+            shell: None,
         }
     }
 }
