@@ -1,6 +1,6 @@
 /* sys.rs
  *
- * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,9 @@ use crate::utils::read_to_string;
 use crate::{traits::*, utils::Size};
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
-use std::env::{var, vars};
+use std::env::{self, var, vars};
+use std::fmt::Display;
+use std::process::Command;
 
 /// A structure containing all collected information about
 /// installed system
@@ -277,6 +279,35 @@ fn parse_osrelease(osr: &mut OsRelease, chunk: (Option<String>, Option<String>))
             }
         }
         _ => {}
+    }
+}
+
+/// System command shell
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Shell {
+    pub path: String,
+    pub version: String,
+}
+
+impl Shell {
+    pub fn new() -> Result<Self> {
+        let path = env::var("SHELL")?;
+        let version = {
+            let stdout = Command::new(&path).arg("--version").output()?.stdout;
+            String::from_utf8(stdout)?
+                .lines()
+                .next()
+                .unwrap_or("")
+                .to_string()
+        };
+
+        Ok(Self { path, version })
+    }
+}
+
+impl Display for Shell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ({})", &self.version, &self.path)
     }
 }
 
