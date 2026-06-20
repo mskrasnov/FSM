@@ -2,32 +2,14 @@
 version: 1
 AppDir:
   # NOTE: REPLACE THIS PATH TO CORRECT IN YOUR SYSTEM
-  path: /home/misha/Ferrix/AppDir
+  path: /home/misha/fsm/AppDir
   app_info:
     id: com.mskrasnov.FSM
     name: Ferrix System Monitor
     icon: com.mskrasnov.Ferrix
-    version: v0.6.0
+    version: v0.7.0
     exec: usr/bin/ferrix-app
     exec_args: $@
-  apt:
-    arch:
-    - amd64
-    allow_unauthenticated: true
-    sources:
-    - sourceline: deb http://mirror.yandex.ru/linuxmint-packages faye main 
-        upstream import backport
-    - sourceline: deb http://mirror.mephi.ru/debian bookworm main contrib 
-        non-free non-free-firmware
-    - sourceline: deb http://mirror.mephi.ru/debian bookworm-updates main 
-        contrib non-free non-free-firmware
-    - sourceline: deb http://security.debian.org/ bookworm-security main contrib
-        non-free non-free-firmware
-    - sourceline: deb http://mirror.mephi.ru/debian bookworm-backports main 
-        contrib non-free non-free-firmware
-    include:
-    - liblzma5:amd64
-    - libtinfo6:amd64
   files:
     include:
     - /lib/x86_64-linux-gnu/libEGL_mesa.so.0
