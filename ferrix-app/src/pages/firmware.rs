@@ -109,7 +109,7 @@ fn frmwr_table<'a>(rows: &'a [Attribute]) -> table::Table<'a, Message> {
         })
         .width(Length::FillPortion(1)),
         table::column(hdr_name(fl!("frmwr-pval")), |row: &'a Attribute| {
-            button(text(&row.possible_values))
+            button(text(&row.possible_values).wrapping(text::Wrapping::WordOrGlyph))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
