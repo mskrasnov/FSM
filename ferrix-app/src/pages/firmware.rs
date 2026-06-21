@@ -23,14 +23,14 @@
 use crate::{
     fl,
     load_state::LoadState,
-    messages::{DataReceiverMessage, Message},
+    messages::{ButtonsMessage, DataReceiverMessage, Message},
     widgets::table::{InfoRow, hdr_name, kv_info_table},
 };
 use ferrix_data::firmware::FResult;
 use ferrix_lib::firmware::Attribute;
 use iced::{
     Element, Length, Task,
-    widget::{column, container, scrollable, table, text},
+    widget::{button, column, container, scrollable, table, text},
 };
 
 #[derive(Debug, Clone)]
@@ -84,24 +84,46 @@ impl<'a> FirmwarePage<'a> {
 fn frmwr_table<'a>(rows: &'a [Attribute]) -> table::Table<'a, Message> {
     let columns = [
         table::column(hdr_name(fl!("frmwr-name")), |row: &'a Attribute| {
-            text(&row.display_name)
+            button(text(&row.display_name))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.display_name.clone(),
+                )))
         }),
         table::column(hdr_name(fl!("frmwr-val")), |row: &'a Attribute| {
-            text(&row.current_value)
-                .wrapping(text::Wrapping::WordOrGlyph)
-                .style(match &row.current_value as &str {
-                    "Enable" => text::success,
-                    "Disable" => text::danger,
-                    _ => text::default,
-                })
+            button(
+                text(&row.current_value)
+                    .wrapping(text::Wrapping::WordOrGlyph)
+                    .style(match &row.current_value as &str {
+                        "Enable" => text::success,
+                        "Disable" => text::danger,
+                        _ => text::default,
+                    }),
+            )
+            .style(button::text)
+            .padding(0)
+            .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                row.current_value.clone(),
+            )))
         })
         .width(Length::FillPortion(1)),
         table::column(hdr_name(fl!("frmwr-pval")), |row: &'a Attribute| {
-            text(&row.possible_values).wrapping(text::Wrapping::WordOrGlyph)
+            button(text(&row.possible_values))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.possible_values.clone(),
+                )))
         })
         .width(Length::FillPortion(1)),
         table::column(hdr_name(fl!("frmwr-type")), |row: &'a Attribute| {
-            text(&row.param_type)
+            button(text(&row.param_type))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.param_type.clone(),
+                )))
         }),
     ];
     table(columns, rows).padding(2).width(Length::Fill)
