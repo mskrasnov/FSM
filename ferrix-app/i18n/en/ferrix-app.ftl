@@ -19,6 +19,7 @@ page-vuln = CPU Vulnerabilities
 page-memory = Memory
 page-fsystems = Filesystems
 page-net = Network Interfaces
+page-nstat = Network Statistics
 page-dmi = DMI Tables
 page-battery = Battery
 page-screen = Screen
@@ -263,6 +264,7 @@ net-os = Operstate
 net-addr = MAC Address
 net-bcast = Broadcast
 net-mtu = MTU
+net-int = Interface
 
 # RAM PAGE
 ram-total = Total

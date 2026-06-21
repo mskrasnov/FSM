@@ -19,6 +19,7 @@ page-vuln = Уязвимости ЦП
 page-memory = Память
 page-fsystems = Файловые системы
 page-net = Сетевые интерфейсы
+page-nstat = Статистика сети
 page-dmi = Таблицы DMI
 page-battery = Аккумулятор
 page-screen = Экран
@@ -263,6 +264,7 @@ net-os = Состояние
 net-addr = MAC адрес
 net-bcast = Broadcast
 net-mtu = MTU
+net-int = Интерфейс
 
 # RAM PAGE
 ram-total = Всего

@@ -41,8 +41,9 @@ mod export;
 pub mod firmware;
 pub mod groups;
 mod kernel;
-mod net;
+pub mod net;
 mod ram;
+pub mod session;
 mod settings;
 pub mod soft;
 mod storage;
@@ -68,6 +69,7 @@ pub enum Page {
     Memory,
     FileSystems,
     Network,
+    NetStat,
     DMI,
     Battery,
     Screen,
@@ -77,6 +79,7 @@ pub enum Page {
      ************************************/
     Distro,
     SystemMisc,
+    Session,
     Users,
     Groups,
     SystemManager,
@@ -116,6 +119,7 @@ impl From<&str> for Page {
             "memory" | "mem" | "ram" => Self::Memory,
             "fs" | "storage" => Self::FileSystems,
             "net" => Self::Network,
+            net::NetStatPage::PAGE_ID => Self::NetStat,
             "dmi" => Self::DMI,
             battery::BatPage::PAGE_ID | "battery" => Self::Battery,
             drm::DRMPage::PAGE_ID | "edid" | "screen" => Self::Screen,
@@ -123,6 +127,7 @@ impl From<&str> for Page {
             users::UsersPage::PAGE_ID | "users" => Self::Users,
             "groups" => Self::Groups,
             "misc" => Self::SystemMisc,
+            session::SessionPage::PAGE_ID => Self::Session,
             "init" | "sysd" | "systemd" => Self::SystemManager,
             soft::SoftPage::PAGE_ID | "software" | "soft" | "pkgs" => Self::Software,
             "env" => Self::Environment,
@@ -193,6 +198,7 @@ impl<'a> Page {
         Self::Memory,
         Self::FileSystems,
         Self::Network,
+        Self::NetStat,
         Self::DMI,
         Self::Battery,
         Self::Screen,
@@ -299,11 +305,13 @@ impl<'a> Page {
             Self::Memory => "mem",
             Self::FileSystems => "fs",
             Self::Network => "net",
+            Self::NetStat => net::NetStatPage::PAGE_ID,
             Self::DMI => "dmi",
             Self::Battery => battery::BatPage::PAGE_ID,
             Self::Screen => drm::DRMPage::PAGE_ID,
             Self::Distro => distro::OsRelPage::PAGE_ID,
             Self::SystemMisc => "sys",
+            Self::Session => session::SessionPage::PAGE_ID,
             Self::Users => users::UsersPage::PAGE_ID,
             Self::Groups => "grp",
             Self::SystemManager => "sysd",
@@ -331,6 +339,7 @@ impl<'a> Page {
             Self::Memory => fl!("page-memory"),
             Self::FileSystems => fl!("page-fsystems"),
             Self::Network => fl!("page-net"),
+            Self::NetStat => fl!("page-nstat"),
             Self::DMI => fl!("page-dmi"),
             Self::Battery => fl!("page-battery"),
             Self::Screen => fl!("page-screen"),
@@ -346,6 +355,7 @@ impl<'a> Page {
             Self::Firmware => fl!("page-frmwr"),
             Self::Development => fl!("page-dev"),
             Self::SystemMisc => fl!("page-sysmisc"),
+            Self::Session => "Session".to_string(),
             Self::Settings => fl!("page-settings"),
             Self::About => fl!("page-about"),
             Self::Export => fl!("page-export"),
@@ -389,6 +399,10 @@ impl<'a> Page {
             Self::Memory => ram::ram_page(&state.data.ram_data, &state.data.swap_data).into(),
             Self::FileSystems => storage::storage_page(&state.data.storages).into(),
             Self::Network => net::net_page(&state.data.networks).into(),
+            Self::NetStat => {
+                let nstat = net::NetStatPage::new(&state.data.networks);
+                nstat.view()
+            }
             Self::DMI => dmi::dmi_page(&state.data.dmi_data).into(),
             Self::Battery => {
                 let battery = battery::BatPage::new(&state.data.bat_data);
@@ -401,6 +415,10 @@ impl<'a> Page {
             Self::Distro => {
                 let distro = distro::OsRelPage::new(&state.data.osrel_data);
                 distro.view()
+            }
+            Self::Session => {
+                let session = session::SessionPage::new(&state.data.session);
+                session.view()
             }
             Self::Kernel => kernel::kernel_page(&state.data.kernel_data).into(),
             Self::KModules => kernel::kmods_page(&state.data.kmods_data).into(),

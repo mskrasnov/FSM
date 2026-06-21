@@ -225,14 +225,14 @@ impl Ferrix {
     }
 
     fn networks_subscription(&self) -> OScript<Message> {
-        if (self.current_page == Page::Network && self.data.networks.is_none())
-            || self.is_export_member(Page::Network)
+        if (self.current_page == Page::Network || self.current_page == Page::NetStat)
+            && self.data.networks.is_none()
         {
             Some(
                 time::every(Duration::from_millis(START_UPERIOD))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetNetworksData)),
             )
-        } else if self.current_page == Page::Network {
+        } else if self.current_page == Page::Network || self.current_page == Page::NetStat {
             Some(
                 time::every(Duration::from_secs(self.u()))
                     .map(|_| Message::DataReceiver(DataReceiverMessage::GetNetworksData)),

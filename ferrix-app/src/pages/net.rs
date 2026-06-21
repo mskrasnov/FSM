@@ -23,12 +23,136 @@
 use crate::{
     fl,
     load_state::LoadState,
-    messages::Message,
-    widgets::table::{InfoRow, kv_info_table},
+    messages::{ButtonsMessage, Message},
+    widgets::table::{InfoRow, hdr_name, kv_info_table},
 };
-use ferrix_lib::net::Networks;
+use ferrix_lib::net::{Network, Networks};
 
-use iced::widget::{column, container, scrollable, text};
+use iced::{
+    Element, Length,
+    widget::{button, column, container, scrollable, table, text},
+};
+
+#[derive(Debug, Clone)]
+pub struct NetStatPage<'a> {
+    net: &'a LoadState<Networks>,
+}
+
+impl<'a> NetStatPage<'a> {
+    pub const IS_SPECIAL: bool = false;
+    pub const PAGE_ID: &'static str = "nstat";
+
+    pub fn new(net: &'a LoadState<Networks>) -> Self {
+        Self { net }
+    }
+
+    pub fn view(&self) -> Element<'a, Message> {
+        match self.net {
+            LoadState::Loaded(net) => {
+                scrollable(container(net_stat_table(&net.networks)).style(container::rounded_box))
+                    .spacing(5)
+                    .id(Self::PAGE_ID)
+                    .into()
+            }
+            LoadState::Error(why) => super::error_page(why).into(),
+            LoadState::Loading => super::loading_page().into(),
+        }
+    }
+}
+
+fn net_stat_table<'a>(rows: &'a [Network]) -> table::Table<'a, Message> {
+    let columns = [
+        table::column(hdr_name(fl!("net-int")), |row: &'a Network| {
+            button(text(&row.name).wrapping(text::Wrapping::WordOrGlyph))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.name.clone(),
+                )))
+        }),
+        table::column(hdr_name("RX Bytes"), |row: &'a Network| {
+            button(text(row.statistics.rx_bytes))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.rx_bytes.to_string(),
+                )))
+        }),
+        table::column(hdr_name("RX Comp"), |row: &'a Network| {
+            button(text(row.statistics.rx_compressed))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.rx_compressed.to_string(),
+                )))
+        }),
+        table::column(hdr_name("RX Pkt"), |row: &'a Network| {
+            button(text(row.statistics.rx_packets))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.rx_packets.to_string(),
+                )))
+        }),
+        table::column(hdr_name("RX Err"), |row: &'a Network| {
+            button(text(row.statistics.rx_errors))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.rx_errors.to_string(),
+                )))
+        }),
+        table::column(hdr_name("RX Drop"), |row: &'a Network| {
+            button(text(row.statistics.rx_dropped))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.rx_dropped.to_string(),
+                )))
+        }),
+        table::column(hdr_name("TX Bytes"), |row: &'a Network| {
+            button(text(row.statistics.tx_bytes))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.tx_bytes.to_string(),
+                )))
+        }),
+        table::column(hdr_name("TX Comp"), |row: &'a Network| {
+            button(text(row.statistics.tx_compressed))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.tx_compressed.to_string(),
+                )))
+        }),
+        table::column(hdr_name("TX Pkt"), |row: &'a Network| {
+            button(text(row.statistics.tx_packets))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.tx_packets.to_string(),
+                )))
+        }),
+        table::column(hdr_name("TX Err"), |row: &'a Network| {
+            button(text(row.statistics.tx_errors))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.tx_errors.to_string(),
+                )))
+        }),
+        table::column(hdr_name("TX Drop"), |row: &'a Network| {
+            button(text(row.statistics.tx_dropped))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                    row.statistics.tx_dropped.to_string(),
+                )))
+        }),
+    ];
+    table(columns, rows).padding(2).width(Length::Fill)
+}
 
 pub fn net_page<'a>(net: &'a LoadState<Networks>) -> container::Container<'a, Message> {
     match net {
