@@ -80,8 +80,14 @@ impl Ferrix {
         self.settings.style.to_theme()
     }
 
+    #[cfg(not(feature = "appimage"))]
     pub fn title(&self) -> String {
         "Ferrix System Monitor".to_string()
+    }
+
+    #[cfg(feature = "appimage")]
+    pub fn title(&self) -> String {
+        "Ferrix System Monitor [portable]".to_string()
     }
 
     pub fn update(&mut self, message: Message) -> iced::Task<Message> {
