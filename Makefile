@@ -26,6 +26,13 @@ build:
 	cargo build --release --target=$(TARGET)
 	@echo -e "$(GREEN)Build completed successfully!$(NC)"
 
+appimage:
+	@echo -e "$(YELLOW)Building Ferrix in release mode...$(NC)"
+	cargo build --release --target=$(TARGET) --features appimage
+	@echo -e "$(GREEN)Build completed successfully!$(NC)"
+	sudo cp -v ./target/$(TARGET)/release/ferrix-* ./AppDir/usr/bin/
+	appimage-builder --recipe ./AppImageBuilder.yml
+
 deb:
 	cargo deb --target=$(TARGET)
 

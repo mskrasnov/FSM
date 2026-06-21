@@ -27,6 +27,8 @@ pub mod styles;
 pub mod utils;
 pub mod widgets;
 
+pub mod appimage;
+
 // REFACTORED MODULES
 pub mod ferrix;
 pub mod log;

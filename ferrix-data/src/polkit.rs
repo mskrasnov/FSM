@@ -50,6 +50,7 @@ pub fn auth_app() -> Option<String> {
 }
 
 /// Returns the `ferrix-polkit` application path
+#[cfg(not(feature = "appimage"))]
 pub fn fx_polkit_app() -> Option<String> {
     let bin_dirs = &PATH;
     for dir in bin_dirs.as_slice() {
@@ -59,6 +60,13 @@ pub fn fx_polkit_app() -> Option<String> {
         }
     }
     None
+}
+
+#[cfg(feature = "appimage")]
+pub fn fx_polkit_app() -> Option<String> {
+    let mut pkit = env::var("HOME").ok()?;
+    pkit.push_str("/.local/bin/ferrix-polkit");
+    Some(pkit)
 }
 
 pub async fn get_data(data_type: String) -> LoadState<serde_json::Value> {

@@ -23,10 +23,24 @@ use iced::{Size, window::Settings};
 
 const APP_LOGO: &[u8] = include_bytes!("../../data/icons/hicolor/scalable/apps/win_logo.png");
 
+#[cfg(feature = "appimage")]
+fn appimage() {
+    println!("Some preparations before start...");
+    match ferrix_app::appimage::copy_fx_polkit() {
+        Ok(_) => println!("OK"),
+        Err(why) => eprintln!("Failed to copy `ferrix-polkit` binary: {why}"),
+    }
+}
+
+#[cfg(not(feature = "appimage"))]
+fn appimage() {}
+
 pub fn main() -> iced::Result {
     if &(std::env::var("USER").unwrap_or("".to_string())) == "root" {
         panic!("Running this program as `root` is prohibited.");
     }
+
+    appimage();
 
     iced::application(Ferrix::boot, Ferrix::update, Ferrix::view)
         .settings(iced::Settings {
