@@ -34,6 +34,7 @@ use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
     cpu_freq::CpuFreq,
+    desktop::SessionInfo,
     drm::Video,
     init::{BootTimestamps, Connection, SystemdServices},
     net::Networks,
@@ -115,6 +116,9 @@ impl Ferrix {
             }
             val if val == Page::Distro && self.data.osrel_data.is_none() => {
                 return crate::pages::distro::OsRelPage::get_data().map(Message::DataReceiver);
+            }
+            val if val == Page::Session && self.data.session.is_none() => {
+                return crate::pages::session::SessionPage::get_data().map(Message::DataReceiver);
             }
             _ => {}
         }
@@ -200,6 +204,9 @@ pub enum DataReceiverMessage {
 
     GetSystemData,
     SystemDataReceived(DataLoadingState<System>),
+
+    GetSessionData,
+    SessionDataReceived(LoadState<SessionInfo>),
 }
 
 impl DataReceiverMessage {
@@ -612,6 +619,13 @@ impl DataReceiverMessage {
                 },
                 |val| Message::DataReceiver(Self::SystemDataReceived(val)),
             ),
+            Self::GetSessionData => {
+                crate::pages::session::SessionPage::get_data().map(Message::DataReceiver)
+            }
+            Self::SessionDataReceived(state) => {
+                fd.session = state;
+                Task::none()
+            }
         }
     }
 }

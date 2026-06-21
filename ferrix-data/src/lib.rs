@@ -31,6 +31,7 @@ use ferrix_lib::{
     battery::BatInfo,
     cpu::{Processors, Stat},
     cpu_freq::CpuFreq,
+    desktop::SessionInfo,
     drm::Video,
     init::{BootTimestamps, SystemdServices},
     net::Networks,
@@ -76,6 +77,7 @@ pub struct FerrixData {
     pub boot_time: LoadState<BootTimestamps>,
     pub installed_pkgs_list: LoadState<InstalledPackages>,
     pub system: LoadState<System>,
+    pub session: LoadState<SessionInfo>,
 }
 
 impl Default for FerrixData {
@@ -106,6 +108,7 @@ impl Default for FerrixData {
             boot_time: LoadState::default(),
             installed_pkgs_list: LoadState::default(),
             system: LoadState::default(),
+            session: LoadState::default(),
         }
     }
 }

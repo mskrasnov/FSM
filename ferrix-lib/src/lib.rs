@@ -46,6 +46,7 @@
 pub mod battery;
 pub mod cpu;
 pub mod cpu_freq;
+pub mod desktop;
 pub mod dmi;
 pub mod drm;
 pub mod firmware;
