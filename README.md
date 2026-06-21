@@ -64,6 +64,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 | systemd services list | 🟢️                    | 🔴️        | 🟢️           |
 | DMI Tables            | ⚪️ (more data than Hardinfo) | ⚪️ (less data than FSM) | 🔴️ |
 | UEFI Settings         | 🟢️                    | 🔴️        | 🔴️           |
+| Official AppImage builds | 🟢️                 | 🔴️        | 🟢️           |
 
 - 🟢️ - yes;
 - 🔴️ - no;
