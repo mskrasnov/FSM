@@ -82,12 +82,12 @@ impl Ferrix {
 
     #[cfg(not(feature = "appimage"))]
     pub fn title(&self) -> String {
-        "Ferrix System Monitor".to_string()
+        format!("Ferrix System Monitor v{}", env!("CARGO_PKG_VERSION"))
     }
 
     #[cfg(feature = "appimage")]
     pub fn title(&self) -> String {
-        "Ferrix System Monitor [portable]".to_string()
+        format!("Ferrix System Monitor v{} [portable]", env!("CARGO_PKG_VERSION"))
     }
 
     pub fn update(&mut self, message: Message) -> iced::Task<Message> {
