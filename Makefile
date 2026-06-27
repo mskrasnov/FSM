@@ -75,6 +75,7 @@ uninstall:
 	
 	sudo rm -f $(DESKTOP_DIR)/FSM.desktop
 	sudo rm -f $(ICON_DIR)/com.mskrasnov.Ferrix.svg
+	sudo rm -rf $(SHARE_DIR)
 	@echo -e "$(GREEN)Desktop integration removed$(NC)"
 	
 	@if command -v gtk-update-icon-cache >/dev/null 2>&1; then \
