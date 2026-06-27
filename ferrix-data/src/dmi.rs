@@ -44,6 +44,7 @@ pub struct DMIData {
     pub baseboard: LoadState<Baseboard>,
     pub chassis: LoadState<Chassis>,
     pub processor: LoadState<Processor>,
+    // pub memory_devices: LoadState<MemoryDevices>,
 }
 
 impl DMIData {
@@ -53,6 +54,7 @@ impl DMIData {
             baseboard: Baseboard::new().to_load_state(),
             chassis: Chassis::new().to_load_state(),
             processor: Processor::new().to_load_state(),
+            // memory_devices: MemoryDevices::new().to_load_state(),
         }
     }
 

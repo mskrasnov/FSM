@@ -3254,6 +3254,7 @@ impl MemoryArray {
 impl ToJson for MemoryArray {}
 
 /// Information about all installed memory devices
+// #[derive(Debug, Clone, Deserialize, Serialize)]
 #[derive(Debug, Serialize)]
 pub struct MemoryDevices {
     pub memory: Vec<MemoryDevice>,
@@ -3289,13 +3290,13 @@ impl ToJson for MemoryDevices {}
 pub struct MemoryDevice {
     /// Handle or instance number, associated with the physical
     /// memory array to which this device belongs
-    pub physical_memory_array_handle: Option<smbioslib::Handle>,
+    pub physical_memory_array_handle: Option<Handle>,
 
     /// Handle or instance number, associated with any error that
     /// was previously detected for the device. If the system does
     /// not provide the error information structure, the field
     /// containes FFFEH
-    pub memory_error_information_handle: Option<smbioslib::Handle>,
+    pub memory_error_information_handle: Option<Handle>,
 
     /// Total width, in bits, of this memory device, including any
     /// check or error-correction bits
@@ -3305,10 +3306,10 @@ pub struct MemoryDevice {
     pub data_width: Option<u16>,
 
     /// Size of memory device
-    pub size: Option<smbioslib::MemorySize>,
+    pub size: Option<MemorySize>,
 
     /// Form factor for this memory device
-    pub form_factor: Option<smbioslib::MemoryFormFactorData>,
+    pub form_factor: Option<MemoryFormFactorData>,
 
     /// Identifies when the Memory Device is one of a set of
     /// Memory Devices that must be populated with all devices
@@ -3435,12 +3436,20 @@ pub struct MemoryDevice {
 impl<'a> From<smbioslib::SMBiosMemoryDevice<'a>> for MemoryDevice {
     fn from(value: smbioslib::SMBiosMemoryDevice) -> Self {
         Self {
-            physical_memory_array_handle: value.physical_memory_array_handle(),
-            memory_error_information_handle: value.memory_error_information_handle(),
+            physical_memory_array_handle: Handle::from_opt(value.physical_memory_array_handle()),
+            memory_error_information_handle: Handle::from_opt(
+                value.memory_error_information_handle(),
+            ),
             total_width: value.total_width(),
             data_width: value.data_width(),
-            size: value.size(),
-            form_factor: value.form_factor(),
+            size: match value.size() {
+                Some(size) => Some(MemorySize::from(size)),
+                _ => None,
+            },
+            form_factor: match value.form_factor() {
+                Some(ff) => Some(MemoryFormFactorData::from(ff)),
+                _ => None,
+            },
             device_set: value.device_set(),
             device_locator: value.device_locator().ok(),
             bank_locator: value.bank_locator().ok(),
@@ -3478,4 +3487,137 @@ impl<'a> From<smbioslib::SMBiosMemoryDevice<'a>> for MemoryDevice {
         }
     }
 }
+
 impl ToJson for MemoryDevice {}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum MemorySize {
+    NotInstalled,
+    Unknown,
+    SeeExtendedSize,
+    Kilobytes(u16),
+    Megabytes(u16),
+}
+
+impl From<smbioslib::MemorySize> for MemorySize {
+    fn from(value: smbioslib::MemorySize) -> Self {
+        match value {
+            smbioslib::MemorySize::NotInstalled => Self::NotInstalled,
+            smbioslib::MemorySize::Unknown => Self::Unknown,
+            smbioslib::MemorySize::SeeExtendedSize => Self::SeeExtendedSize,
+            smbioslib::MemorySize::Kilobytes(kb) => Self::Kilobytes(kb),
+            smbioslib::MemorySize::Megabytes(mb) => Self::Megabytes(mb),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct MemoryFormFactorData {
+    pub raw: u8,
+    pub value: MemoryFormFactor,
+}
+
+impl From<smbioslib::MemoryFormFactorData> for MemoryFormFactorData {
+    fn from(value: smbioslib::MemoryFormFactorData) -> Self {
+        Self {
+            raw: value.raw,
+            value: MemoryFormFactor::from(value.value),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum MemoryFormFactor {
+    Other,
+    Unknown,
+    Simm,
+    Sip,
+    Chip,
+    Dip,
+    Zip,
+    ProprietaryCard,
+    Dimm,
+    Tsop,
+    RowOfChips,
+    Rimm,
+    Sodimm,
+    Srimm,
+    Fbdimm,
+    Die,
+    Camm,
+    Cudimm,
+    Csodimm,
+    None,
+}
+
+impl From<smbioslib::MemoryFormFactor> for MemoryFormFactor {
+    fn from(value: smbioslib::MemoryFormFactor) -> Self {
+        match value {
+            smbioslib::MemoryFormFactor::Other => Self::Other,
+            smbioslib::MemoryFormFactor::Unknown => Self::Unknown,
+            smbioslib::MemoryFormFactor::Simm => Self::Simm,
+            smbioslib::MemoryFormFactor::Sip => Self::Sip,
+            smbioslib::MemoryFormFactor::Chip => Self::Chip,
+            smbioslib::MemoryFormFactor::Dip => Self::Dip,
+            smbioslib::MemoryFormFactor::Zip => Self::Zip,
+            smbioslib::MemoryFormFactor::ProprietaryCard => Self::ProprietaryCard,
+            smbioslib::MemoryFormFactor::Dimm => Self::Dimm,
+            smbioslib::MemoryFormFactor::Tsop => Self::Tsop,
+            smbioslib::MemoryFormFactor::RowOfChips => Self::RowOfChips,
+            smbioslib::MemoryFormFactor::Rimm => Self::Rimm,
+            smbioslib::MemoryFormFactor::Sodimm => Self::Sodimm,
+            smbioslib::MemoryFormFactor::Srimm => Self::Srimm,
+            smbioslib::MemoryFormFactor::Fbdimm => Self::Fbdimm,
+            smbioslib::MemoryFormFactor::Die => Self::Dip,
+            // smbioslib::MemoryFormFactor::Camm => Self::Camm,
+            // smbioslib::MemoryFormFactor::Cudimm => Self::Cudimm,
+            // smbioslib::MemoryFormFactor::Csodimm => Self::Csodimm,
+            smbioslib::MemoryFormFactor::None => Self::None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct MemoryDeviceTypeData {
+    pub raw: u8,
+    pub value: MemoryDeviceType,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum MemoryDeviceType {
+    Other,
+    Unknown,
+    Dram,
+    Edram,
+    Vram,
+    Sram,
+    Ram,
+    Rom,
+    Flash,
+    Eeprom,
+    Feprom,
+    Eprom,
+    Cdram,
+    ThreeDram,
+    Sdram,
+    Sgram,
+    Rdram,
+    Ddr,
+    Ddr2,
+    Ddr2Fbdimm,
+    Ddr3,
+    Fbd2,
+    Ddr4,
+    Lpddr,
+    Lpddr2,
+    Lpddr3,
+    Lpddr4,
+    LogicalNonVolatileDevice,
+    Hbm,
+    Hbm2,
+    Ddr5,
+    Lpddr5,
+    Hbm3,
+    Mrdimm,
+    None,
+}
