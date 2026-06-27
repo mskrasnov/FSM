@@ -40,7 +40,7 @@ use ferrix_lib::{
     soft::InstalledPackages,
     sys::{
         Groups, Kernel, LoadAVG, OsRelease, Shell, Uptime, Users, current_user,
-        get_current_desktop, get_env_vars, get_hostname, get_lang,
+        get_current_desktop, get_env_vars, get_hostname, get_lang, get_machine_id,
     },
     vulnerabilities::Vulnerabilities,
 };
@@ -123,6 +123,7 @@ pub struct System {
     pub env_vars: Vec<(String, String)>,
     pub current_user: Option<String>,
     pub shell: Option<Shell>,
+    pub machine_id: Option<String>,
 }
 
 impl System {
@@ -136,6 +137,7 @@ impl System {
             env_vars: get_env_vars(),
             current_user: current_user(),
             shell: Some(Shell::new()?),
+            machine_id: get_machine_id(),
         })
     }
 }
@@ -151,6 +153,7 @@ impl Default for System {
             env_vars: Vec::new(),
             current_user: None,
             shell: None,
+            machine_id: None,
         }
     }
 }

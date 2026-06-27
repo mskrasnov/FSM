@@ -673,3 +673,7 @@ pub fn get_env_vars() -> Vec<(String, String)> {
     vars.sort_by_key(|v| v.0.clone());
     vars
 }
+
+pub fn get_machine_id() -> Option<String> {
+    read_to_string("/etc/machine-id").ok()
+}

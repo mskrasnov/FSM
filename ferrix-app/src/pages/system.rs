@@ -55,6 +55,7 @@ pub fn system_page<'a>(system: &'a DataLoadingState<System>) -> container::Conta
                     fl!("misc-shell"),
                     sys.shell.as_ref().map(|shell| format!("{shell}")),
                 ),
+                InfoRow::new("Machine ID".to_string(), sys.machine_id.clone()),
             ];
 
             let sys_table = container(kv_info_table(rows)).style(container::rounded_box);
