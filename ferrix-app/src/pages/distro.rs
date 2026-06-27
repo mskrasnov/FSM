@@ -21,7 +21,8 @@
 //! Page with information about installed Linux distro
 
 use crate::{
-    Message, fl,
+    Message, fl, log,
+    log::log_path,
     messages::DataReceiverMessage,
     widgets::table::{InfoRow, kv_info_table},
 };
@@ -48,7 +49,13 @@ impl<'a> OsRelPage<'a> {
 
     pub fn get_data() -> Task<DataReceiverMessage> {
         Task::perform(
-            async move { OsRelease::new().to_load_state() },
+            async move {
+                let osrel = OsRelease::new().to_load_state();
+                if let LoadState::Loaded(os) = &osrel {
+                    heh(&os.name);
+                }
+                osrel
+            },
             DataReceiverMessage::OsReleaseDataReceived,
         )
     }
@@ -94,5 +101,19 @@ impl<'a> OsRelPage<'a> {
                 .id(Id::new(super::Page::Distro.page_id())),
         )
         .into()
+    }
+}
+
+fn heh(os_name: &str) {
+    let os_name = os_name.to_lowercase();
+    if os_name.contains("astra") {
+        log!(
+            log_path(),
+            "Astra Linux? И где вы только берёте эту гадость..."
+        );
+    } else if os_name.contains("arch") {
+        log!(log_path(), "Странно, что этот ваш Archlinux всё ещё жив");
+    } else if os_name.contains("fedora") {
+        log!(log_path(), "Ммм, моя любимая система");
     }
 }
