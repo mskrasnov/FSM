@@ -54,7 +54,7 @@ about-source-hdr = Source code:
 about-blog = Blog:
 about-author = (C) 2025, 2026 Michail Krasnov
 about-donate = Can you support me?
-about-donate-lbl = Donate me on Boosty!
+about-donate-lbl = Donate to me on Boosty!
 about-support = Support me!
 
 # BATTERY PAGE
