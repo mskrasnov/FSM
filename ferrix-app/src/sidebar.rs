@@ -56,7 +56,7 @@ pub fn sidebar<'a>(cur_page: Page) -> Element<'a, Message> {
         Item::Page(Page::Sensors),
         Item::Group(fl!("sidebar-admin")),
         Item::Page(Page::Distro),
-        Item::Page(Page::Session),
+        // Item::Page(Page::Session),
         Item::Page(Page::Users),
         Item::Page(Page::Groups),
         Item::Page(Page::Environment),
