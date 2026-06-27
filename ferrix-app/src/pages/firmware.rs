@@ -71,6 +71,7 @@ impl<'a> FirmwarePage<'a> {
                         .spacing(5),
                     )
                     .spacing(5)
+                    .id(Self::PAGE_ID)
                     .into()
                 }
                 FResult::Err { error } => super::error_page(error).into(),
