@@ -21,7 +21,7 @@ path = "src/bin/polkit.rs"
 
 [package.metadata.deb]
 maintainer = "Michail Krasnov <mskrasnov07@ya.ru>"
-copyright = "2025, Michail Krasnov <mskrasnov07@ya.ru>"
+copyright = "2025-2026, Michail Krasnov <mskrasnov07@ya.ru>"
 license-file = ["LICENSE", "0"]
 extended-description = """\
 Ferrix is a program for obtaining information about computer hardware and software. It is designed to work in modern Linux OS distributions, written in Rust using iced.
@@ -45,7 +45,7 @@ assets = [
 
 [dependencies]
 ferrix-data = { path = "../ferrix-data", version = "0.1.0" }
-ferrix-export = { path = "../ferrix-export", version = "0.1.0" }
+# ferrix-export = { path = "../ferrix-export", version = "0.1.0" }
 ferrix-lib = { path = "../ferrix-lib", version = "0.4.1" }
 ferrix-widgets = { path = "../ferrix-widgets", version = "0.1.0" }
 
