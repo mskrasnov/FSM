@@ -356,7 +356,7 @@ sysd-hdr-load = Loaded
 sysd-hdr-actv = Active
 sysd-hdr-work = Work
 sysd-total = Total services: {$total}
-sysd-btime = Startup finished in {$firm} (firmware) + {$ldr} (loader) + {$krn} (kernel) + {$uspc} (userspace) = {$total}
+sysd-btime = Startup finished in {$firm} (firmware) + {$ldr} (loader) + {$krn} (kernel) + {$uspc} (userspace)
 sysd-btime-ldng = Startup time: loading...
 sysd-btime-err = Startup time: error: {$err}
 sysd-btime-unk = Startup time: unknown

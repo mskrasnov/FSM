@@ -72,15 +72,13 @@ fn boot_time<'a>(usec: &'a DataLoadingState<BootTimestamps>) -> text::Text<'a> {
                 let loader = fmt_dur(usec.loader);
                 let kernel = fmt_dur(usec.kernel);
                 let userspace = fmt_dur(usec.userspace);
-                let total = fmt_dur(usec.total);
 
                 text(fl!(
                     "sysd-btime",
                     firm = firmware,
                     ldr = loader,
                     krn = kernel,
-                    uspc = userspace,
-                    total = total
+                    uspc = userspace
                 ))
             }
             false => text(fl!("sysd-btime-unk")),
