@@ -20,6 +20,12 @@
 
 //! Logging functions
 
+use std::path::PathBuf;
+
+pub fn log_path() -> PathBuf {
+    crate::utils::get_home().join(".fsm.log")
+}
+
 #[macro_export]
 macro_rules! log {
     ($path:expr, $fmt:expr) => {{
@@ -32,7 +38,7 @@ macro_rules! log {
             .create(true)
             .append(true)
             .open($path)
-            .expect(format!("Failed to open log file (path: {})!", $path).as_str());
+            .expect(format!("Failed to open log file (path: {:?})!", $path).as_str());
 
         writeln!(f, $fmt).expect("Failed to write to the log file!");
     }};
@@ -48,7 +54,7 @@ macro_rules! log {
             .create(true)
             .append(true)
             .open($path)
-            .expect(format!("Failed to open log file (path: {})!", $path).as_str());
+            .expect(format!("Failed to open log file (path: {:?})!", $path).as_str());
 
         writeln!(f, $fmt, $($arg)*)
             .expect("Failed to write to the log file!");
