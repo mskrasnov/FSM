@@ -5,7 +5,7 @@
 
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github)](https://github.com/mskrasnov/ferrix/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
-  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png"> <img src="https://mskrasnov.github.io/ferrix/screens/proc-vuln.png">
+  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png">
   <small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small>
 </div>
 
