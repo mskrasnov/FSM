@@ -53,7 +53,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 | GUI                   | `iced`                | GTK3      | Qt5/Qt6      |
 | License               | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
 | Key features          | <ul><li><b>Deep system analisys:</b> systemd services, installed packages, DMI, EDID, etc.;</li><li>Beautiful CPU and RAM utilization charts;</li><li>Simple and clean UI;</li></ul> | <ul><li><b>Hardware benchmarks:</b> CPU, GPU, disks, memory;</li><li>Hardware ratings;</li><li>Export data to HTML/plain text;</li></ul> | <ul><li>System cleaner (caches, logs, packages);</li><li>Real-time resource monitoring;</li><li><tt>systemd</tt>-services management;</li></ul> |
-| Data accuracy         | 🟢️ | ⚪️ (incorrect battery information) | ⚪️ (stacer is outdated software) |
+| Data accuracy         | 🟢️ | ⚪️ ([incorrect battery information](https://raw.githubusercontent.com/mskrasnov/mskrasnov.github.io/refs/heads/master/ferrix/assets/hardinfo2.png)) | ⚪️ (stacer is outdated software) |
 | Target audience       | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
 | Processor topology    | 🟢️                    | 🟢️        | 🔴️           |
 | Processor frequencies | 🟢️                    | ⚪️        | ?            |
