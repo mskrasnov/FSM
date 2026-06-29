@@ -176,7 +176,7 @@ fn get_proc_colors(proc_cnt: usize) -> Vec<Color> {
 }
 
 fn generate_color(idx: usize) -> Color {
-    let hue = ((idx * 17) as f32 * 137.50776) % 360.;
+    let hue = ((idx * 20) as f32 * 137.50776) % 360.;
     hsv_to_rgb(hue, 0.75, 0.9)
 }
 
