@@ -112,7 +112,7 @@ export WAYLAND_DISPLAY=
 ferrix-app
 ```
 
-### Cross compilation (Debian x86_64 glibc -> i686/AArch64 glibc)
+### Cross compilation (Debian 12 x86_64 glibc -> i686/AArch64 glibc)
 
 Install the cross-compilator:
 
@@ -135,6 +135,32 @@ Build Ferrix:
 cargo build [--release] --target={i686/aarch64}-unknown-linux-gnu
 # or:
 make TARGET={i686/aarch64}-unknown-linux-gnu build
+```
+
+### Docker build
+
+Prepare:
+
+```bash
+docker build -t fsm-builder .
+```
+
+Build `*.deb` packages for `amd64`, `i686` and `aarch64` targets:
+
+```bash
+docker run --rm            \
+    -v "${PWD}:/workspace" \
+    fsm-builder            \
+    packaging/debian/build.sh
+```
+
+Build `*.AppImage` package (only for `amd64` target):
+
+```bash
+docker run --rm            \
+    -v "${PWD}:/workspace" \
+    fsm-builder            \
+    packaging/debian/appimage.sh
 ```
 
 ## Technology stack

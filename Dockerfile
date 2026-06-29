@@ -1,3 +1,5 @@
+# (C) 2026 Michail Krasnov <mskrasnov07@ya.ru>
+
 FROM debian:11
 
 ENV DEBIAN_FRONTEND=noninteractive
