@@ -29,7 +29,7 @@ use crate::{
 use ferrix_lib::net::{Network, Networks};
 
 use iced::{
-    Element, Length,
+    Element, Font, Length,
     widget::{button, column, container, scrollable, table, text},
 };
 
@@ -63,12 +63,16 @@ impl<'a> NetStatPage<'a> {
 fn net_stat_table<'a>(rows: &'a [Network]) -> table::Table<'a, Message> {
     let columns = [
         table::column(hdr_name(fl!("net-int")), |row: &'a Network| {
-            button(text(&row.name).wrapping(text::Wrapping::WordOrGlyph))
-                .style(button::text)
-                .padding(0)
-                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
-                    row.name.clone(),
-                )))
+            button(
+                text(&row.name)
+                    .wrapping(text::Wrapping::WordOrGlyph)
+                    .font(Font::MONOSPACE),
+            )
+            .style(button::text)
+            .padding(0)
+            .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
+                row.name.clone(),
+            )))
         }),
         table::column(hdr_name("RX Bytes"), |row: &'a Network| {
             button(text(row.statistics.rx_bytes))
