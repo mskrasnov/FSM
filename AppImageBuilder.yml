@@ -12,17 +12,7 @@ AppDir:
     exec_args: $@
   files:
     include:
-    - /lib/x86_64-linux-gnu/libEGL_mesa.so.0
-    #- /lib/x86_64-linux-gnu/libLLVM-15.so.1
-    - /lib/x86_64-linux-gnu/libVkLayer_MESA_device_select.so
-    - /lib/x86_64-linux-gnu/libXcursor.so.1
-    - /lib/x86_64-linux-gnu/libXi.so.6
-    - /lib/x86_64-linux-gnu/libelf.so.1
-    #- /lib/x86_64-linux-gnu/libsensors.so.5
-    - /lib/x86_64-linux-gnu/libvulkan.so.1
-    - /lib/x86_64-linux-gnu/libxkbcommon-x11.so.0
-    #- /lib/x86_64-linux-gnu/libzstd.so.1
-    - /usr/lib/locale/locale-archive
+    - /lib64/ld-linux-x86-64.so.2
     exclude:
     - usr/share/man
     - usr/share/doc/*/README.*
