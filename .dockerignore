@@ -1,0 +1,16 @@
+.git
+.github
+
+target/
+build/
+builds/
+appimage-build/
+AppDir/
+
+*.deb
+*.rpm
+*.tar
+*.AppImage
+*.AppImage.*
+
+Dockerfile
