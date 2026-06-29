@@ -7,7 +7,7 @@ AppDir:
     id: com.mskrasnov.FSM
     name: Ferrix System Monitor
     icon: com.mskrasnov.Ferrix
-    version: v0.7.0
+    version: v0.8.0
     exec: usr/bin/ferrix-app
     exec_args: $@
   files:
