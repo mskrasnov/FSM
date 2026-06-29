@@ -144,7 +144,7 @@ cpu-see-freq = См. страницу «Частоты ЦП»
 cpufreq-tboost = Поддержка CPU Turbo Boost
 cpufreq-flist = Список частот ЦП
 cpufreq-notfound = Отсутствует информация о частотах ЦП.
-cpufreq-sum = Частота ЦП №{$cpu}
+cpufreq-sum = ЦП №{$cpu}
 cpufreq-summary = Обзор
 cpufreq-bios-limit = Лимит BIOS
 cpufreq-cpb = Core Performance Boost
@@ -159,7 +159,6 @@ cpufreq-avail_freq = Доступные частоты
 cpufreq-scaling_drv = Драйвер
 cpufreq-trans_lat = Задержка переключения
 cpufreq-set_speed = Заданная частота
-cpufreq-policy = Управление частотами ЦП №{$cpu}
 
 # DASHBOARD PAGE
 dash-proc = Процессор

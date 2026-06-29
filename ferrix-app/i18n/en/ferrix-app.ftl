@@ -144,7 +144,7 @@ cpu-see-freq = See "CPU Frequencies" page
 cpufreq-tboost = CPU Turbo Boost support
 cpufreq-flist = CPU Frequency List
 cpufreq-notfound = No CPU policy list found.
-cpufreq-sum = CPU #{$cpu} frequency
+cpufreq-sum = CPU #{$cpu}
 cpufreq-summary = Summary
 cpufreq-bios-limit = BIOS Limit
 cpufreq-cpb = Core Performance Boost
@@ -159,7 +159,6 @@ cpufreq-avail_freq = Available Frequencies
 cpufreq-scaling_drv = Scaling Driver
 cpufreq-trans_lat = Transition Latency
 cpufreq-set_speed = Set Speed
-cpufreq-policy = Frequency Policy for CPU #{$cpu}
 
 # DASHBOARD PAGE
 dash-proc = Processor
