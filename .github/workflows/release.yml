@@ -1,4 +1,4 @@
-name: Build and attach .deb packages to release
+name: Build and attach binary packages to release
 
 on:
   release:
@@ -14,7 +14,9 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - name: Prepare build environment
-        run: docker build -t fsm-builder -f ./Dockerfile .
+        run: |
+          docker build -t fsm-builder -f ./Dockerfile . \
+            && docker build -t fsm-rpm -f ./packaging/fedora/Dockerfile .
 
       - name: Build .deb packages (Debian 11)
         run: |
@@ -30,6 +32,14 @@ jobs:
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             fsm-builder packaging/debian/appimage.sh
+
+      - name: Build .rpm package (Fedora 42)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            fsm-rpm packaging/fedora/build.sh \
+            -f ./packaging/fedora/Dockerfile
 
       - name: Upload .deb as artifact
         uses: actions/upload-artifact@v4
