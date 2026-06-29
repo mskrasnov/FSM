@@ -5,60 +5,34 @@ on:
     types: [published]
 
 jobs:
-  build-deb:
-    strategy:
-      matrix:
-        include:
-          - target: x86_64-unknown-linux-gnu
-            arch: amd64
-            docker_platform: linux/amd64
-          - target: i686-unknown-linux-gnu
-            arch: i386
-            docker_platform: linux/386
-          - target: aarch64-unknown-linux-gnu
-            arch: arm64
-            docker_platform: linux/arm64
-
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up QEMU for multi‑architecture support
-        uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Build .deb inside Debian 12 container
+      - name: Prepare build environment
+        run: docker build -t fsm-builder -f ./Dockerfile .
+
+      - name: Build .deb packages (Debian 11)
         run: |
+          mkdir -pv builds &&
           docker run --rm \
-            --platform ${{ matrix.docker_platform }} \
-            -v "${{ github.workspace }}":/workspace \
+            -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
-            debian:12 \
-            bash -c "
-              apt update &&
-              apt install -y curl build-essential pkg-config \
-                libssl-dev libx11-dev libxrandr-dev libxinerama-dev \
-                libxcursor-dev libxi-dev libgl1-mesa-dev libasound2-dev \
-                libudev-dev libdbus-1-dev make &&
-              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &&
-              . \$HOME/.cargo/env &&
-              rustup target add ${{ matrix.target }} &&
-              cargo install cargo-deb &&
-              cargo deb --target=${{ matrix.target }}
-            "
-
-      - name: Fix permissions on host
-        run: sudo chown -R runner:runner target
+            fsm-builder
 
       - name: Upload .deb as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ferrix_app-${{ matrix.arch }}.deb
-          path: target/debian/*.deb
+          name: release-packages
+          path: builds/*
 
       - name: Attach .deb to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: target/debian/*.deb
+          files: builds/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
