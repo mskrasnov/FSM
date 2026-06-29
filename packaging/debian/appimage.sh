@@ -28,6 +28,7 @@ make DESTDIR=${PWD}/AppDir install
 
 echo -e "\e[1;32m[debian/appimage.sh] Generate appimage...\e[0m"
 
+export APPIMAGE_EXTRACT_AND_RUN=1 # NOTE: remove if not work
 appimage-builder --recipe ./AppImageBuilder.yml
 
 mv -v *.AppImage   ./builds/
