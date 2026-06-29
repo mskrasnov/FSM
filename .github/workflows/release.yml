@@ -22,7 +22,14 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
-            fsm-builder
+            fsm-builder packaging/debian/build.sh
+
+      - name: Build .AppImage package (Debian 11)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            fsm-builder packaging/debian/appimage.sh
 
       - name: Upload .deb as artifact
         uses: actions/upload-artifact@v4
