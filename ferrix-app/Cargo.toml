@@ -43,6 +43,16 @@ assets = [
     ["data/com.ferrix.policy", "/usr/share/polkit-1/actions/", "644"],
 ]
 
+[package.metadata.generate-rpm]
+assets = [
+    {source = "../target/x86_64-unknown-linux-gnu/release/ferrix-app", dest = "/usr/bin/ferrix-app", mode = "755"},
+    {source = "../target/x86_64-unknown-linux-gnu/release/ferrix-polkit", dest = "/usr/bin/ferrix-polkit", mode = "755"},
+    {source = "data/FSM.desktop", dest = "/usr/share/applications/FSM.desktop", mode = "644"},
+    {source = "data/com.mskrasnov.Ferrix.svg", dest = "/usr/share/icons/hicolor/scalable/apps/com.mskrasnov.Ferrix.svg", mode = "644"},
+    {source = "data/com.mskrasnov.Ferrix.svg", dest = "/usr/share/Ferrix/com.mskrasnov.Ferrix.svg", mode = "644"},
+    {source = "data/com.ferrix.policy", dest = "/usr/share/polkit-1/actions/com.ferrix.policy", mode = "644"},
+]
+
 [dependencies]
 ferrix-data = { path = "../ferrix-data", version = "0.1.0" }
 # ferrix-export = { path = "../ferrix-export", version = "0.1.0" }
