@@ -30,31 +30,29 @@ appimage:
 	@echo -e "$(YELLOW)Building Ferrix in release mode...$(NC)"
 	cargo build --release --target=$(TARGET) --features appimage
 	@echo -e "$(GREEN)Build completed successfully!$(NC)"
-	sudo cp -v ./target/$(TARGET)/release/ferrix-* ./AppDir/usr/bin/
-	appimage-builder --recipe ./AppImageBuilder.yml
 
 deb:
 	cargo deb --target=$(TARGET)
 
-install: build
+install:
 	@echo -e "$(YELLOW)Installing Ferrix...$(NC)"
 	
-	sudo install -Dm755 $(RELEASE_DIR)/$(POLKIT_BINARY) $(INSTALL_DIR)/$(POLKIT_BINARY)
-	sudo install -Dm755 $(RELEASE_DIR)/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
+	install -Dm755 $(RELEASE_DIR)/$(POLKIT_BINARY) $(INSTALL_DIR)/$(POLKIT_BINARY)
+	install -Dm755 $(RELEASE_DIR)/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
 	@echo -e "$(GREEN)Binaries installed to $(INSTALL_DIR)$(NC)"
 	
-	sudo install -Dm644 $(DATA_DIR)/com.ferrix.policy $(POLICY_DIR)/com.ferrix.policy
+	install -Dm644 $(DATA_DIR)/com.ferrix.policy $(POLICY_DIR)/com.ferrix.policy
 	@echo -e "$(GREEN)Polkit policy installed$(NC)"
 	
-	sudo install -Dm644 $(DATA_DIR)/FSM.desktop $(DESKTOP_DIR)/FSM.desktop
-	sudo install -Dm644 $(DATA_DIR)/com.mskrasnov.Ferrix.svg $(ICON_DIR)/com.mskrasnov.Ferrix.svg
-	sudo install -Dm644 $(DATA_DIR)/com.mskrasnov.Ferrix.svg $(SHARE_DIR)/com.mskrasnov.Ferrix.svg
+	install -Dm644 $(DATA_DIR)/FSM.desktop $(DESKTOP_DIR)/FSM.desktop
+	install -Dm644 $(DATA_DIR)/com.mskrasnov.Ferrix.svg $(ICON_DIR)/com.mskrasnov.Ferrix.svg
+	install -Dm644 $(DATA_DIR)/com.mskrasnov.Ferrix.svg $(SHARE_DIR)/com.mskrasnov.Ferrix.svg
 	@echo -e "$(GREEN)Desktop integration installed$(NC)"
 	
 	# Update icon cache (if gtk-update-icon-cache is available)
 	@if command -v gtk-update-icon-cache >/dev/null 2>&1; then \
 		echo -e "$(YELLOW)Updating icon cache...$(NC)"; \
-		sudo gtk-update-icon-cache -q -t -f $(ICON_DIR)/../; \
+		gtk-update-icon-cache -q -t -f $(ICON_DIR)/../; \
 		echo -e "$(GREEN)Icon cache updated$(NC)"; \
 	else \
 		echo -e "$(YELLOW)gtk-update-icon-cache not found, skipping icon cache update$(NC)"; \
