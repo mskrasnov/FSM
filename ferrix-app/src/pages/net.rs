@@ -78,14 +78,6 @@ fn net_stat_table<'a>(rows: &'a [Network]) -> table::Table<'a, Message> {
                     row.statistics.rx_bytes.to_string(),
                 )))
         }),
-        table::column(hdr_name("RX Comp"), |row: &'a Network| {
-            button(text(row.statistics.rx_compressed))
-                .style(button::text)
-                .padding(0)
-                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
-                    row.statistics.rx_compressed.to_string(),
-                )))
-        }),
         table::column(hdr_name("RX Pkt"), |row: &'a Network| {
             button(text(row.statistics.rx_packets))
                 .style(button::text)
@@ -116,14 +108,6 @@ fn net_stat_table<'a>(rows: &'a [Network]) -> table::Table<'a, Message> {
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.tx_bytes.to_string(),
-                )))
-        }),
-        table::column(hdr_name("TX Comp"), |row: &'a Network| {
-            button(text(row.statistics.tx_compressed))
-                .style(button::text)
-                .padding(0)
-                .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
-                    row.statistics.tx_compressed.to_string(),
                 )))
         }),
         table::column(hdr_name("TX Pkt"), |row: &'a Network| {
