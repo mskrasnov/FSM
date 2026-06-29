@@ -8,6 +8,7 @@
 /AppDir
 /*.AppImage*
 /appimage-build
+/builds
 
 # Directory with local crates
 /vendor/
