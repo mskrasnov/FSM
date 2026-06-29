@@ -1,7 +1,7 @@
 [package]
 name = "ferrix-lib"
 description = "A library for obtaining information about the software and hardware of a computer running Linux"
-version = "0.4.2"
+version = "0.4.3"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
