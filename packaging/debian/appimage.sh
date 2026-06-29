@@ -26,6 +26,8 @@ echo -e "\e[1;32m[debian/appimage.sh] Start building...\e[0m"
 make appimage
 make DESTDIR=${PWD}/AppDir install
 
+cargo clean
+
 echo -e "\e[1;32m[debian/appimage.sh] Generate appimage...\e[0m"
 
 export APPIMAGE_EXTRACT_AND_RUN=1 # NOTE: remove if not work

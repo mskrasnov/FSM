@@ -14,4 +14,6 @@ done
 mkdir -pv ./builds/
 cp -v ./target/debian/*.deb ./builds/
 
+cargo clean
+
 echo -e "\e[1;32m[debian/build.sh] OK\e[0m"
