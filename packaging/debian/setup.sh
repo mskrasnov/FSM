@@ -31,7 +31,8 @@ apt install -y \
     libxext-dev \
     libssl-dev \
     unzip \
-    libfuse2
+    libfuse2 \
+    wget
 
 dpkg --add-architecture arm64
 dpkg --add-architecture i686
