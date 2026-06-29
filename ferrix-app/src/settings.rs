@@ -19,7 +19,7 @@
  */
 
 use anyhow::Result;
-use iced::{Theme, color};
+use iced::{Color, Theme, color};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display, fs, path::Path};
 
@@ -143,6 +143,63 @@ impl Display for ChartLineThickness {
 pub struct ChartColors {
     pub colors: HashMap<String, (u8, u8, u8)>,
     // pub default_colors: Vec<(u8, u8, u8)>,
+}
+
+impl ChartColors {
+    pub fn with_colors(proc_cnt: usize) -> Self {
+        Self {
+            colors: {
+                let mut colors = HashMap::new();
+                let mut i = 0;
+                let cols = get_proc_colors(proc_cnt);
+                for color in cols {
+                    let c = color.into_rgba8();
+                    let c = (c[0], c[1], c[2]);
+                    colors.insert(format!("CPU #{i}"), c);
+                    i += 1;
+                }
+                colors
+            }
+        }
+    }
+}
+
+fn get_proc_colors(proc_cnt: usize) -> Vec<Color> {
+    let mut colors = Vec::with_capacity(proc_cnt);
+    colors.extend(CPU_CHARTS_COLORS.iter().copied().take(proc_cnt));
+
+    for i in CPU_CHARTS_COLORS.len()..proc_cnt {
+        colors.push(generate_color(i));
+    }
+
+    colors
+}
+
+fn generate_color(idx: usize) -> Color {
+    let hue = ((idx * 17) as f32 * 137.50776) % 360.;
+    hsv_to_rgb(hue, 0.75, 0.9)
+}
+
+fn hsv_to_rgb(h: f32, s: f32, v: f32) -> Color {
+    let c = v * s;
+    let x = c * (1. - (((h / 60.) % 2.) - 1.).abs());
+    let m = v - c;
+
+    let (r, g, b) = match h {
+        h if h < 60. => (c, x, 0.),
+        h if h < 120. => (x, c, 0.),
+        h if h < 180. => (0., c, x),
+        h if h < 240. => (0., x, c),
+        h if h < 300. => (x, 0., c),
+        _ => (c, 0., x),
+    };
+
+    Color {
+        r: r + m,
+        g: g + m,
+        b: b + m,
+        a: 1.,
+    }
 }
 
 impl Default for ChartColors {

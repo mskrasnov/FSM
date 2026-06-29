@@ -72,11 +72,14 @@ pub fn settings_page<'a>(state: &'a Ferrix) -> Element<'a, Message> {
         |thickness| Message::Settings(SettingsMessage::ChangeChartLineThickness(thickness)),
     )
     .padding(3);
+    let chart_auto_gen_colors =
+        button("Generate").on_press(Message::Buttons(ButtonsMessage::AutoGenerateProcColors));
 
     let theme_changer = items_group(
         column![
             list_item(fl!("settings-look-select"), theme_selector),
             list_item(fl!("settings-look-thick"), chart_line_thick_selector),
+            list_item("Chart colors", chart_auto_gen_colors),
         ]
         .spacing(5),
     );

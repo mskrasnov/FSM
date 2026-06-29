@@ -25,7 +25,7 @@ use crate::{
     export::{ExportData, ExportFormat, ExportMode, ExportStatus},
     ferrix::{ExportManager, Ferrix, FerrixState},
     load_state::LoadState,
-    settings::{ChartLineThickness, FXSettings, Style},
+    settings::{ChartColors, ChartLineThickness, FXSettings, Style},
     styles::CPU_CHARTS_COLORS,
     utils::{ToColor, get_home},
 };
@@ -777,6 +777,8 @@ pub enum ButtonsMessage {
     ProcessorSelected(usize),
     FrequencySelected(usize),
     ScreenSelected(usize),
+
+    AutoGenerateProcColors,
 }
 
 impl ButtonsMessage {
@@ -789,6 +791,7 @@ impl ButtonsMessage {
             Self::ProcessorSelected(id) => fx.proc_selected(id),
             Self::FrequencySelected(id) => fx.freq_selected(id),
             Self::ScreenSelected(id) => fx.screen_selected(id),
+            Self::AutoGenerateProcColors => fx.auto_generate_proc_colors(),
         }
     }
 }
@@ -828,6 +831,15 @@ impl Ferrix {
     fn screen_selected(&mut self, id: usize) -> Task<Message> {
         self.state.selected_screen = id;
         Task::none()
+    }
+
+    fn auto_generate_proc_colors(&mut self) -> Task<Message> {
+        let proc_cnt = match &self.data.proc_data {
+            LoadState::Loaded(proc) => proc.entries.len(),
+            _ => 36, // some default value...
+        };
+        self.settings.chart_colors = ChartColors::with_colors(proc_cnt);
+        self.save_settings()
     }
 }
 
