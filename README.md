@@ -139,7 +139,7 @@ make TARGET={i686/aarch64}-unknown-linux-gnu build
 
 ### Docker build
 
-Prepare:
+Prepare for `*.deb` or `*.AppImage`:
 
 ```bash
 docker build -t fsm-builder .
@@ -161,6 +161,22 @@ docker run --rm            \
     -v "${PWD}:/workspace" \
     fsm-builder            \
     packaging/debian/appimage.sh
+```
+
+Prepare for `*.rpm`:
+
+```bash
+docker build -t fsm-rpm -f packaging/fedora/Dockerfile
+```
+
+Build `*.rpm` package (only for `amd64` target):
+
+```bash
+docker build -t fsm-rpm -f ./packaging/fedora/Dockerfile
+docker run -- rm           \
+    -v "${PWD}:/workspace" \
+    fsm-rpm                \
+    packaging/fedora/build.sh
 ```
 
 ## Technology stack
