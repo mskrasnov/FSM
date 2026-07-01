@@ -30,6 +30,7 @@ use ferrix_lib::net::{Network, Networks};
 
 use iced::{
     Element, Font, Length,
+    alignment::Horizontal,
     widget::{button, column, container, scrollable, table, text},
 };
 
@@ -75,71 +76,83 @@ fn net_stat_table<'a>(rows: &'a [Network]) -> table::Table<'a, Message> {
             )))
         }),
         table::column(hdr_name("RX Bytes"), |row: &'a Network| {
-            button(text(row.statistics.rx_bytes))
+            button(num_item(row.statistics.rx_bytes))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.rx_bytes.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("RX Pkt"), |row: &'a Network| {
-            button(text(row.statistics.rx_packets))
+            button(num_item(row.statistics.rx_packets))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.rx_packets.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("RX Err"), |row: &'a Network| {
-            button(text(row.statistics.rx_errors))
+            button(num_item(row.statistics.rx_errors))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.rx_errors.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("RX Drop"), |row: &'a Network| {
-            button(text(row.statistics.rx_dropped))
+            button(num_item(row.statistics.rx_dropped))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.rx_dropped.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("TX Bytes"), |row: &'a Network| {
-            button(text(row.statistics.tx_bytes))
+            button(num_item(row.statistics.tx_bytes))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.tx_bytes.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("TX Pkt"), |row: &'a Network| {
-            button(text(row.statistics.tx_packets))
+            button(num_item(row.statistics.tx_packets))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.tx_packets.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("TX Err"), |row: &'a Network| {
-            button(text(row.statistics.tx_errors))
+            button(num_item(row.statistics.tx_errors))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.tx_errors.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
         table::column(hdr_name("TX Drop"), |row: &'a Network| {
-            button(text(row.statistics.tx_dropped))
+            button(num_item(row.statistics.tx_dropped))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::Buttons(ButtonsMessage::CopyButtonPressed(
                     row.statistics.tx_dropped.to_string(),
                 )))
-        }),
+        })
+        .align_x(Horizontal::Right),
     ];
     table(columns, rows).padding(2).width(Length::Fill)
+}
+
+fn num_item<'a>(num: u64) -> text::Text<'a> {
+    text(num).font(Font::MONOSPACE)
 }
 
 pub fn net_page<'a>(net: &'a LoadState<Networks>) -> container::Container<'a, Message> {
