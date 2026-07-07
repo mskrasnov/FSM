@@ -11,12 +11,37 @@ categories = ["os"]
 
 [dependencies]
 anyhow.workspace = true
-libc.workspace = true
+libc = { workspace = true, optional = true }
 #futures = "0.3.31"
 serde.workspace = true
 serde_json.workspace = true
-smbios-lib.workspace = true
+smbios-lib = { workspace = true, optional = true }
 #tokio = { version = "1.46.1", features = ["full"] }
 xml_serde.workspace = true
-zbus.workspace = true
-zbus_systemd.workspace = true
+zbus = { workspace = true, optional = true }
+zbus_systemd = { workspace = true, optional = true }
+
+[features]
+default = [
+  "battery", "cpu", "desktop",
+  "dmi", "drm", "firmware",
+  "init", "mem", "net",
+  "parts", "resources", "soft",
+  "sys", "cpu_freq", "vulnerabilities",
+]
+
+battery = []
+cpu = []
+cpu_freq = ["cpu"]
+desktop = []
+dmi = ["dep:smbios-lib"]
+drm = []
+firmware = []
+init = ["dep:zbus", "dep:zbus_systemd"]
+mem = []
+net = []
+parts = ["dep:libc"]
+resources = []
+soft = []
+sys = []
+vulnerabilities = ["cpu"]

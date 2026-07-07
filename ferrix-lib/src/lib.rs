@@ -43,21 +43,37 @@
 //! let pjson_str = data.to_json_pretty()?;
 //! ```
 
+#[cfg(feature = "battery")]
 pub mod battery;
+#[cfg(feature = "cpu")]
 pub mod cpu;
+#[cfg(feature = "cpu_freq")]
 pub mod cpu_freq;
+#[cfg(feature = "desktop")]
 pub mod desktop;
+#[cfg(feature = "dmi")]
 pub mod dmi;
+#[cfg(feature = "drm")]
 pub mod drm;
+#[cfg(feature = "firmware")]
 pub mod firmware;
+#[cfg(feature = "init")]
 pub mod init;
+#[cfg(feature = "net")]
 pub mod net;
+#[cfg(feature = "parts")]
 pub mod parts;
+#[cfg(feature = "mem")]
 pub mod ram;
+#[cfg(feature = "resources")]
 pub mod resources;
+#[cfg(feature = "soft")]
 pub mod soft;
+#[cfg(feature = "sys")]
 pub mod sys;
+#[cfg(feature = "mem")]
 pub mod vmstat;
+#[cfg(feature = "vulnerabilities")]
 pub mod vulnerabilities;
 
 pub mod traits;
