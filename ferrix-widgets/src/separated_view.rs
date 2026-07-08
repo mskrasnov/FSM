@@ -21,7 +21,7 @@
 //! Two-pane view
 
 use iced::{
-    Element, Length, Pixels,
+    Element, Length,
     widget::{Id, column, container, scrollable},
 };
 
