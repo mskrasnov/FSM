@@ -22,7 +22,8 @@ use iced::{Element, Subscription, Task, color, widget::row};
 use std::time::Duration;
 
 use crate::{
-    message::Message,
+    message::{DataReceiver, KeyboardAndMouse, Message},
+    navigation,
     pages::{self, PageData, PageVariant},
 };
 
@@ -61,7 +62,12 @@ impl Ferrix {
 
     pub fn select_page(&mut self, page: PageVariant) -> Task<Message> {
         self.active_page = page;
-        Task::none()
+        match page {
+            PageVariant::Processors if self.proc_page.proc_data.is_none() => {
+                pages::proc::ProcPage::get_data().map(Message::DataReceiver)
+            }
+            _ => Task::none(),
+        }
     }
 
     pub fn message(&mut self, msg: Message) -> Task<Message> {
@@ -80,11 +86,9 @@ impl Ferrix {
     pub fn subscription(&self) -> Subscription<Message> {
         let scripts = vec![
             iced::event::listen()
-                .map(|event| Message::KeyboardAndMouse(crate::message::KeyboardAndMouse::Event(event))),
+                .map(|event| Message::KeyboardAndMouse(KeyboardAndMouse::Event(event))),
             iced::time::every(Duration::from_secs_f32(1.))
-                .map(|_| Message::DataReceiver(crate::message::DataReceiver::GetProcData)),
-            iced::time::every(Duration::from_secs_f32(1.))
-                .map(|_| Message::DataReceiver(crate::message::DataReceiver::GetRAMData)),
+                .map(|_| Message::DataReceiver(DataReceiver::GetRAMData)),
         ];
         Subscription::batch(scripts)
     }
@@ -92,7 +96,7 @@ impl Ferrix {
     pub fn view<'a>(&'a self) -> Element<'a, Message> {
         let page = self.active_page.view(&self);
 
-        row![crate::navigation::sidebar(self.active_page), page]
+        row![navigation::sidebar(self.active_page), page]
             .spacing(5)
             .padding(5)
             .into()
