@@ -160,9 +160,7 @@ impl<'a> PageView<'a> for ProcPage {
         match &self.proc_data {
             LoadState::Loaded(proc) => self.loaded_view(proc),
             LoadState::Loading => super::loading_page(),
-            LoadState::Error(why) => {
-                super::error_page::error(why, DataReceiver::GetProcData).map(Message::DataReceiver)
-            }
+            LoadState::Error(why) => super::error_page::error(why, DataReceiver::GetProcData),
         }
     }
 }
