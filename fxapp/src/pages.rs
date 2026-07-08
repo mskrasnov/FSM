@@ -7,7 +7,7 @@ pub mod proc;
 use iced::{
     Alignment::Center,
     Element, Length, Task,
-    widget::{column, row, rule, scrollable, space, text},
+    widget::{Id, column, row, rule, scrollable, space, text},
 };
 
 use crate::message::{DataReceiver, Message};
@@ -59,7 +59,7 @@ pub trait PageData {
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 pub enum PageVariant {
     #[default]
-    Dashboard,
+    SystemPassport,
     SystemMonitor,
     Processors,
     CPUFrequencies,
@@ -92,7 +92,7 @@ pub enum PageVariant {
 impl PageVariant {
     pub const ALL: &'static [Self] = &[
         // General
-        Self::Dashboard,
+        Self::SystemPassport,
         Self::SystemMonitor,
         // Hardware
         Self::Processors,
@@ -124,7 +124,7 @@ impl PageVariant {
 
     pub fn group(&self) -> GroupVariant {
         match self {
-            Self::Dashboard => GroupVariant::General,
+            Self::SystemPassport => GroupVariant::General,
             Self::SystemMonitor => GroupVariant::General,
             Self::Processors => proc::ProcPage::page_group(),
             Self::CPUFrequencies => GroupVariant::Hardware,
@@ -152,6 +152,14 @@ impl PageVariant {
         }
     }
 
+    pub fn id(&self) -> Id {
+        Id::new(match self {
+            Self::Processors => proc::ProcPage::page_id(),
+            Self::Memory => mem::MemoryPage::page_id(),
+            _ => "",
+        })
+    }
+
     pub fn title(&self) -> String {
         match self {
             Self::Processors => proc::ProcPage::page_title(),
@@ -166,6 +174,18 @@ impl PageVariant {
             Self::Memory => fx.mem_page.view(),
             _ => todo_page::todo(),
         }
+    }
+
+    fn page_idx(&self) -> usize {
+        Self::ALL.iter().position(|p| p == self).unwrap()
+    }
+
+    pub fn next_page(&self) -> Self {
+        Self::ALL[(self.page_idx() + 1) % Self::ALL.len()]
+    }
+
+    pub fn prev_page(&self) -> Self {
+        Self::ALL[(self.page_idx() + Self::ALL.len() - 1) % Self::ALL.len()]
     }
 }
 

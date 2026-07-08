@@ -36,7 +36,7 @@ pub fn sidebar<'a>(current: PageVariant) -> Element<'a, Message> {
         }
     }
 
-    container(scrollable(col).spacing(5))
+    container(scrollable(col).spacing(5).id("sidebar"))
         .padding(5)
         .height(Length::Fill)
         .style(container::bordered_box)

@@ -1,4 +1,6 @@
-use iced::{Element, Task, widget::row};
+use std::time::Duration;
+
+use iced::{Element, Subscription, Task, widget::row};
 
 use crate::{
     message::Message,
@@ -32,6 +34,11 @@ impl Ferrix {
         )
     }
 
+    fn select_page(&mut self, page: PageVariant) -> Task<Message> {
+        self.active_page = page;
+        Task::none()
+    }
+
     fn message(&mut self, msg: Message) -> Task<Message> {
         match msg {
             Message::DataReceiver(drm) => match drm {
@@ -54,8 +61,20 @@ impl Ferrix {
                 self.active_page = page;
                 Task::none()
             }
+            Message::Keyboard(key) => key.update(self),
             _ => Task::none(),
         }
+    }
+
+    fn subscription(&self) -> Subscription<Message> {
+        let scripts = vec![
+            iced::event::listen().map(|event| Message::Keyboard(message::Keyboard::Event(event))),
+            iced::time::every(Duration::from_secs_f32(1.))
+                .map(|_| Message::DataReceiver(message::DataReceiver::GetProcData)),
+            iced::time::every(Duration::from_secs_f32(1.))
+                .map(|_| Message::DataReceiver(message::DataReceiver::GetRAMData)),
+        ];
+        Subscription::batch(scripts)
     }
 
     fn view<'a>(&'a self) -> Element<'a, Message> {
@@ -69,5 +88,7 @@ impl Ferrix {
 }
 
 fn main() -> iced::Result {
-    iced::application(Ferrix::new, Ferrix::message, Ferrix::view).run()
+    iced::application(Ferrix::new, Ferrix::message, Ferrix::view)
+        .subscription(Ferrix::subscription)
+        .run()
 }
