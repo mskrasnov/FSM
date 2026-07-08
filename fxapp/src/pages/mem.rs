@@ -31,7 +31,7 @@ impl<'a> PageView<'a> for MemoryPage {
     }
 
     fn page_group() -> super::GroupVariant {
-        super::GroupVariant::Hardware
+        super::GroupVariant::System
     }
 
     fn page_title_controls(&'a self) -> Option<iced::Element<'a, Message>> {

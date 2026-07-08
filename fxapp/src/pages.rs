@@ -91,7 +91,6 @@ impl PageVariant {
         Self::Processors,
         Self::CPUFrequencies,
         Self::CPUVulnerabilities,
-        Self::Memory,
         Self::FileSystems,
         Self::DMITables,
         Self::Battery,
@@ -109,6 +108,7 @@ impl PageVariant {
         Self::SystemManager,
         Self::Software,
         // System
+        Self::Memory,
         Self::Kernel,
         Self::KernelModules,
         Self::FirmwareAttributes,
