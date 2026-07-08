@@ -20,10 +20,13 @@
 
 use crate::{
     Ferrix,
-    pages::{PageData, PageVariant, proc::ProcPageMessage},
+    pages::{PageData, PageVariant, mem::MemoryPageMessage, proc::ProcPageMessage},
 };
 use ferrix_data::load_state::LoadState;
-use ferrix_lib::{cpu::Processors, ram::RAM};
+use ferrix_lib::{
+    cpu::Processors,
+    ram::{RAM, Swaps},
+};
 use iced::{
     Event, Task,
     keyboard::{Event as Kevent, Key, Modifiers, key},
@@ -49,7 +52,7 @@ pub enum DataReceiver {
     ProcDataReceived(LoadState<Processors>),
 
     GetRAMData,
-    RAMDataReceived(LoadState<RAM>),
+    RAMDataReceived((LoadState<RAM>, LoadState<Swaps>)),
 }
 
 impl DataReceiver {
@@ -66,7 +69,7 @@ impl DataReceiver {
                 crate::pages::mem::MemoryPage::get_data().map(Message::DataReceiver)
             }
             Self::RAMDataReceived(val) => {
-                fx.mem_page.ram_data = val;
+                (fx.mem_page.ram_data, fx.mem_page.swap_data) = val;
                 Task::none()
             }
         }
@@ -76,12 +79,14 @@ impl DataReceiver {
 #[derive(Debug, Clone)]
 pub enum PageMessage {
     ProcPage(ProcPageMessage),
+    MemPage(MemoryPageMessage),
 }
 
 impl PageMessage {
     pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
         match self {
             Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
+            Self::MemPage(mm) => mm.update(&mut fx.mem_page),
         }
     }
 }
