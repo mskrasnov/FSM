@@ -7,6 +7,7 @@ sidebar-settings = Настройки
 sidebar-about = О программе
 sidebar-basic = Основное
 sidebar-hardware = Оборудование
+sidebar-network = Сеть
 sidebar-admin = Администрирование
 sidebar-system = Система
 sidebar-manage = Обслуживание
@@ -106,6 +107,8 @@ ldr-page-tooltip = Загрузка данных...
 
 # ERROR PAGE
 err-page-tooltip = Ошибка загрузки данных!
+err-page-update = Обновить
+err-page-backend = Ответ от бекенда (нажать сюда, чтобы скопировать):
 
 # CPU PAGE
 cpu-vendor = Производитель

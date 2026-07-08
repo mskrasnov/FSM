@@ -5,8 +5,9 @@
 sidebar-export = Export
 sidebar-settings = Settings
 sidebar-about = About
-sidebar-basic = Basic
+sidebar-basic = General
 sidebar-hardware = Hardware
+sidebar-network = Network
 sidebar-admin = Administration
 sidebar-system = System
 sidebar-manage = Management
@@ -106,6 +107,8 @@ ldr-page-tooltip = Loading data...
 
 # ERROR PAGE
 err-page-tooltip = Data loading error!
+err-page-update = Update
+err-page-backend = Backend response (click here to copy):
 
 # CPU PAGE
 cpu-vendor = Vendor

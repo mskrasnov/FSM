@@ -18,11 +18,49 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use crate::message::DataReceiver;
-use iced::widget::{button, center, column, text};
+use crate::{
+    fl,
+    message::{DataReceiver, KeyboardAndMouse, Message},
+};
+use ferrix_widgets::icons::ERROR_ICON;
+use iced::{
+    Alignment::Center,
+    Font,
+    widget::{button, center, column, container, row, scrollable, svg, text},
+};
 
-pub fn error<'a>(etext: &'a str, message: DataReceiver) -> iced::Element<'a, DataReceiver> {
-    let update_btn = button("Update").on_press(message).style(button::danger);
+pub fn error<'a>(etext: &'a str, message: DataReceiver) -> iced::Element<'a, Message> {
+    let update_btn = button(text(fl!("err-page-update")))
+        .on_press(Message::DataReceiver(message))
+        .style(button::danger);
+    let err_icon = svg(svg::Handle::from_memory(ERROR_ICON))
+        .width(20)
+        .height(20);
 
-    center(column![text("Error!").size(26), text(etext), update_btn,].spacing(5)).into()
+    let err_text = format!("{}\n\n{etext}", fl!("err-page-backend"),);
+    let err_body = container(scrollable(
+        button(text(err_text.clone()).font(Font::MONOSPACE))
+            .style(button::text)
+            .padding(0)
+            .on_press(Message::KeyboardAndMouse(
+                KeyboardAndMouse::CopyButtonPressed(err_text),
+            )),
+    ))
+    .max_width(440)
+    .max_height(320)
+    .width(440)
+    .height(320)
+    .padding(5)
+    .style(container::rounded_box);
+
+    let err_header = row![err_icon, text(fl!("err-page-tooltip")).size(20),]
+        .spacing(5)
+        .align_y(Center);
+
+    center(
+        column![err_header, err_body, update_btn]
+            .spacing(5)
+            .align_x(Center),
+    )
+    .into()
 }
