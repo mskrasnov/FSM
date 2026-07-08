@@ -19,10 +19,11 @@
  */
 
 use iced::widget::{center, text};
+use crate::fl;
 
 pub fn todo<'a>() -> iced::Element<'a, crate::message::Message> {
     center(
-        text("This function is not implemented yet")
+        text(fl!("page-todo-msg"))
             .size(18)
             .style(text::secondary),
     )
