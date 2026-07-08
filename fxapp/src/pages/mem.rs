@@ -38,6 +38,8 @@ impl<'a> PageView<'a> for MemoryPage {
         Some(
             button("GET")
                 .on_press(Message::DataReceiver(DataReceiver::GetRAMData))
+                .style(button::subtle)
+                .padding(2)
                 .into(),
         )
     }
