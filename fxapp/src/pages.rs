@@ -33,8 +33,7 @@ use iced::{
     Element, Task,
     widget::{Id, column, row, rule, space, text},
 };
-
-use crate::message::{DataReceiver, Message};
+use crate::{fl, message::{DataReceiver, Message}};
 
 pub trait PageView<'a> {
     fn page_id() -> &'static str;
@@ -226,12 +225,12 @@ impl GroupVariant {
 
     pub fn title(&self) -> String {
         match self {
-            Self::General => "General",
-            Self::Hardware => "Hardware",
-            Self::Network => "Network",
-            Self::Admin => "Administration",
-            Self::System => "System",
-            Self::Other => "Other",
+            Self::General => fl!("sidebar-basic"),
+            Self::Hardware => fl!("sidebar-hardware"),
+            Self::Network => fl!("sidebar-network"),
+            Self::Admin => fl!("sidebar-admin"),
+            Self::System => fl!("sidebar-system"),
+            Self::Other => fl!("sidebar-manage"),
         }
         .to_string()
     }
