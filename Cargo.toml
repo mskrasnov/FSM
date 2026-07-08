@@ -1,5 +1,5 @@
 [workspace]
-members=["ferrix-app", "ferrix-data", "ferrix-export", "ferrix-lib", "ferrix-widgets"]
+members=["ferrix-app", "ferrix-data", "ferrix-export", "ferrix-lib", "ferrix-widgets", "fxapp"]
 # members=["ferrix-app", "ferrix-data", "ferrix-export", "ferrix-lib"]
 resolver="2"
 

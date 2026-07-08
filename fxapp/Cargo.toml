@@ -1,0 +1,31 @@
+[package]
+name = "fxapp"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+exclude.workspace = true
+
+[dependencies]
+ferrix-data = { path = "../ferrix-data", version = "0.2.0" }
+ferrix-lib = { path = "../ferrix-lib", version = "0.4.2" }
+ferrix-widgets = { path = "../ferrix-widgets", version = "0.1.0" }
+
+anyhow.workspace = true
+async-std.workspace = true
+i18n-embed.workspace = true
+i18n-embed-fl.workspace = true
+iced.workspace = true
+lazy_static.workspace = true
+plotters.workspace = true
+plotters-iced2.workspace = true
+rust-embed.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+toml.workspace = true
+
+[features]
+appimage = []
