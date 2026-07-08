@@ -38,7 +38,7 @@ pub enum Message {
     SelectPage(PageVariant),
     DataReceiver(DataReceiver),
     PageMessage(PageMessage),
-    Keyboard(Keyboard),
+    KeyboardAndMouse(KeyboardAndMouse),
 
     Dummy,
 }
@@ -87,11 +87,13 @@ impl PageMessage {
 }
 
 #[derive(Debug, Clone)]
-pub enum Keyboard {
+pub enum KeyboardAndMouse {
     Event(Event),
+    LinkButtonPressed(String),
+    CopyButtonPressed(String),
 }
 
-impl Keyboard {
+impl KeyboardAndMouse {
     pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
         match self {
             Self::Event(event) => match event {
@@ -146,6 +148,10 @@ impl Keyboard {
                 }),
                 _ => Task::none(),
             },
+            Self::LinkButtonPressed(_url) => {
+                todo!()
+            }
+            Self::CopyButtonPressed(text) => iced::clipboard::write(text),
         }
     }
 }

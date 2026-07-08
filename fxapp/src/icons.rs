@@ -1,6 +1,6 @@
-/* main.rs
+/* icons.rs
  *
- * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +18,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-pub mod ferrix;
-pub mod icons;
-pub mod message;
-pub mod navigation;
-pub mod pages;
-pub mod widgets;
-pub mod i18n;
+//! Icons embedded to the binary
 
-use ferrix::Ferrix;
-
-fn main() -> iced::Result {
-    iced::application(Ferrix::new, Ferrix::message, Ferrix::view)
-        .subscription(Ferrix::subscription)
-        .settings(iced::Settings {
-            default_text_size: iced::Pixels(12.),
-            ..Default::default()
-        })
-        .theme(Ferrix::theme)
-        .run()
-}
+pub const ERROR_ICON: &[u8] =
+    include_bytes!("../data/icons/hicolor/symbolic/actions/ferrix-error.svg");
+pub const SETTINGS_ICON: &[u8] =
+    include_bytes!("../data/icons/hicolor/symbolic/actions/ferrix-settings.svg");
+pub const ABOUT_ICON: &[u8] =
+    include_bytes!("../data/icons/hicolor/symbolic/actions/ferrix-about.svg");
+pub const EXPORT_ICON: &[u8] =
+    include_bytes!("../data/icons/hicolor/symbolic/actions/ferrix-export.svg");
+pub const FERRIX_ICON: &[u8] =
+    include_bytes!("../data/icons/hicolor/scalable/apps/com.mskrasnov.Ferrix.svg");

@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use iced::{Element, Subscription, Task, widget::row};
+use iced::{Element, Subscription, Task, color, widget::row};
 use std::time::Duration;
 
 use crate::{
@@ -49,6 +49,16 @@ impl Ferrix {
         )
     }
 
+    pub fn theme(&self) -> iced::Theme {
+        let mut palette = iced::Theme::GruvboxDark.palette();
+        palette.success = color!(0x98971a);
+        palette.danger = color!(0xfb4934);
+        palette.warning = color!(0xfabd2f);
+        palette.primary = color!(0xfabd2f);
+
+        iced::Theme::custom("Ferrix Dark Theme", palette)
+    }
+
     pub fn select_page(&mut self, page: PageVariant) -> Task<Message> {
         self.active_page = page;
         Task::none()
@@ -57,7 +67,7 @@ impl Ferrix {
     pub fn message(&mut self, msg: Message) -> Task<Message> {
         match msg {
             Message::DataReceiver(drm) => drm.update(self),
-            Message::Keyboard(key) => key.update(self),
+            Message::KeyboardAndMouse(key) => key.update(self),
             Message::PageMessage(page) => page.update(self),
             Message::SelectPage(page) => {
                 self.active_page = page;
@@ -70,7 +80,7 @@ impl Ferrix {
     pub fn subscription(&self) -> Subscription<Message> {
         let scripts = vec![
             iced::event::listen()
-                .map(|event| Message::Keyboard(crate::message::Keyboard::Event(event))),
+                .map(|event| Message::KeyboardAndMouse(crate::message::KeyboardAndMouse::Event(event))),
             iced::time::every(Duration::from_secs_f32(1.))
                 .map(|_| Message::DataReceiver(crate::message::DataReceiver::GetProcData)),
             iced::time::every(Duration::from_secs_f32(1.))

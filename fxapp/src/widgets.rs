@@ -1,4 +1,4 @@
-/* main.rs
+/* widgets.rs
  *
  * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
@@ -18,23 +18,22 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-pub mod ferrix;
-pub mod icons;
-pub mod message;
-pub mod navigation;
-pub mod pages;
-pub mod widgets;
-pub mod i18n;
+pub mod table;
 
-use ferrix::Ferrix;
+use crate::message::{KeyboardAndMouse, Message};
+use ferrix_widgets::tooltip::{tooltip, tooltip_txt};
+use iced::widget::{Tooltip, button, text, text::IntoFragment};
 
-fn main() -> iced::Result {
-    iced::application(Ferrix::new, Ferrix::message, Ferrix::view)
-        .subscription(Ferrix::subscription)
-        .settings(iced::Settings {
-            default_text_size: iced::Pixels(12.),
-            ..Default::default()
-        })
-        .theme(Ferrix::theme)
-        .run()
+pub fn link_button<'a, N, L>(name: N, link: L) -> Tooltip<'a, Message>
+where
+    N: IntoFragment<'a>,
+    L: ToString + IntoFragment<'a> + 'a,
+{
+    let btn = button(text(name))
+        .style(button::danger)
+        .padding(0)
+        .on_press(Message::KeyboardAndMouse(
+            KeyboardAndMouse::LinkButtonPressed(link.to_string()),
+        ));
+    tooltip(btn, tooltip_txt(link))
 }

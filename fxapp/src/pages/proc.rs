@@ -23,10 +23,14 @@ use ferrix_lib::cpu::Processors;
 use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
     Length, Task,
-    widget::{Column, button, column, container, scrollable, text},
+    widget::{Column, button, column, container, text},
 };
 
-use crate::message::{DataReceiver, Message};
+use crate::{
+    fl,
+    message::{DataReceiver, Message},
+    widgets::table::{InfoRow, fmt_bool, fmt_val, fmt_vec, kv_info_table},
+};
 
 use super::{PageData, PageView};
 
@@ -73,7 +77,7 @@ impl ProcPage {
         let proc_list = self.get_proc_list(proc, proc_names);
         let first_panel = container(
             column![
-                text("Processors").style(text::secondary),
+                text(fl!("page-procs")).style(text::secondary),
                 Column::from_vec(proc_list),
             ]
             .spacing(5),
@@ -82,7 +86,7 @@ impl ProcPage {
         .width(Length::Fill)
         .height(Length::Shrink)
         .padding(2);
-        let second_panel = self.proc_info(proc, self.id);
+        let second_panel = container(self.proc_info(proc, self.id)).style(container::rounded_box);
 
         let view = SeparatedView::new(first_panel, second_panel)
             .set_fpane_id("aa")
@@ -95,14 +99,33 @@ impl ProcPage {
 
     fn proc_info<'a>(&'a self, proc: &'a Processors, id: usize) -> iced::Element<'a, Message> {
         let proc = &proc.entries[id];
-        container(
-            scrollable(text(format!("{proc:#?}")))
-                .width(Length::Fill)
-                .spacing(5)
-                .id(Self::page_id()),
-        )
-        .style(container::rounded_box)
-        .into()
+        let rows = vec![
+            InfoRow::new(fl!("cpu-model"), proc.model_name.clone()),
+            InfoRow::new(fl!("cpu-vendor"), proc.vendor_id.clone()),
+            InfoRow::new(fl!("cpu-physical-id"), fmt_val(proc.physical_id)),
+            InfoRow::new(fl!("cpu-core-id"), fmt_val(proc.core_id)),
+            InfoRow::new(fl!("cpu-apicid"), fmt_val(proc.apicid)),
+            InfoRow::new(fl!("cpu-iapicid"), fmt_val(proc.initial_apicid)),
+            InfoRow::new(fl!("cpu-family"), fmt_val(proc.cpu_family)),
+            InfoRow::new(fl!("cpu-stepping"), fmt_val(proc.stepping)),
+            InfoRow::new(fl!("cpu-microcode"), proc.microcode.clone()),
+            InfoRow::new(fl!("cpu-freq"), Some(fl!("cpu-see-freq"))),
+            InfoRow::new(fl!("cpu-cache"), fmt_val(proc.cache_size)),
+            InfoRow::new(fl!("cpu-siblings"), fmt_val(proc.siblings)),
+            InfoRow::new(fl!("cpu-cpu-cores"), fmt_val(proc.cpu_cores)),
+            InfoRow::new(fl!("cpu-fpu"), fmt_bool(proc.fpu)),
+            InfoRow::new(fl!("cpu-fpu-e"), fmt_bool(proc.fpu_exception)),
+            InfoRow::new(fl!("cpu-cpuid-lvl"), fmt_val(proc.cpuid_level)),
+            InfoRow::new(fl!("cpu-wp"), fmt_bool(proc.wp)),
+            InfoRow::new(fl!("cpu-flags"), fmt_vec(&proc.flags)),
+            InfoRow::new(fl!("cpu-bugs"), fmt_vec(&proc.bugs)),
+            InfoRow::new(fl!("cpu-bogomips"), fmt_val(proc.bogomips)),
+            InfoRow::new(fl!("cpu-clflush"), fmt_val(proc.clflush_size)),
+            InfoRow::new(fl!("cpu-cache-align"), fmt_val(proc.cache_alignment)),
+            InfoRow::new(fl!("cpu-address-size"), proc.address_sizes.clone()),
+            InfoRow::new(fl!("cpu-power"), proc.power_management.clone()),
+        ];
+        kv_info_table(rows).into()
     }
 }
 
@@ -112,7 +135,7 @@ impl<'a> PageView<'a> for ProcPage {
     }
 
     fn page_title() -> String {
-        "Processors".to_string()
+        fl!("page-procs")
     }
 
     fn page_group() -> super::GroupVariant {

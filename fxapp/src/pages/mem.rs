@@ -26,7 +26,10 @@ use iced::{
 };
 
 use super::{PageData, PageView};
-use crate::message::{DataReceiver, Message};
+use crate::{
+    fl,
+    message::{DataReceiver, Message},
+};
 
 #[derive(Debug, Clone)]
 pub struct MemoryPage {
@@ -47,7 +50,7 @@ impl<'a> PageView<'a> for MemoryPage {
     }
 
     fn page_title() -> String {
-        "Memory".to_string()
+        fl!("page-memory")
     }
 
     fn page_group() -> super::GroupVariant {
