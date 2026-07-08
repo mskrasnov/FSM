@@ -30,8 +30,12 @@ impl<'a> PageView<'a> for ProcPage {
         "Processors".to_string()
     }
 
+    fn page_group() -> super::GroupVariant {
+        super::GroupVariant::Hardware
+    }
+
     fn page_contents_view(&'a self) -> iced::Element<'a, Message> {
-        text(format!("{:#?}", &self.proc_data)).into()
+        text(format!("{:?}", &self.proc_data)).into()
     }
 }
 

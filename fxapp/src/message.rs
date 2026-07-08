@@ -1,6 +1,6 @@
 use crate::pages::PageVariant;
 use ferrix_data::load_state::LoadState;
-use ferrix_lib::cpu::Processors;
+use ferrix_lib::{cpu::Processors, ram::RAM};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -15,6 +15,9 @@ pub enum Message {
 pub enum DataReceiver {
     GetProcData,
     ProcDataReceived(LoadState<Processors>),
+
+    GetRAMData,
+    RAMDataReceived(LoadState<RAM>),
 }
 
 #[derive(Debug, Clone)]
