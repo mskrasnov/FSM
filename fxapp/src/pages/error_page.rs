@@ -43,7 +43,7 @@ pub fn error<'a>(etext: &'a str, message: DataReceiver) -> iced::Element<'a, Mes
             .style(button::text)
             .padding(0)
             .on_press(Message::KeyboardAndMouse(
-                KeyboardAndMouse::CopyButtonPressed(err_text),
+                KeyboardAndMouse::CopyButtonPressed(etext.to_string()),
             )),
     ))
     .max_width(440)
