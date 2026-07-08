@@ -44,7 +44,7 @@ pub trait PageView<'a> {
     fn page_title_view(&'a self) -> Element<'a, Message> {
         column![
             row![
-                text(Self::page_title()).size(16),
+                text(Self::page_title()).size(20),
                 space::horizontal(),
                 self.page_title_controls().unwrap_or(row![].into()),
             ]
@@ -176,7 +176,7 @@ impl PageVariant {
         match self {
             Self::Processors => proc::ProcPage::page_title(),
             Self::Memory => mem::MemoryPage::page_title(),
-            _ => format!("{:?}", self),
+            _ => format!("[???] {:?}", self),
         }
     }
 
