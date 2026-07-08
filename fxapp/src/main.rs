@@ -23,7 +23,7 @@ impl Ferrix {
     fn new() -> (Self, Task<Message>) {
         (
             Self {
-                active_page: PageVariant::Memory,
+                active_page: PageVariant::Processors,
                 proc_page: pages::proc::ProcPage::new(),
                 mem_page: pages::mem::MemoryPage::new(),
             },
@@ -76,5 +76,9 @@ impl Ferrix {
 fn main() -> iced::Result {
     iced::application(Ferrix::new, Ferrix::message, Ferrix::view)
         .subscription(Ferrix::subscription)
+        .settings(iced::Settings {
+            default_text_size: iced::Pixels(12.),
+            ..Default::default()
+        })
         .run()
 }

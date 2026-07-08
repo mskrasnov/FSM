@@ -60,12 +60,15 @@ impl ProcPage {
         )
         .style(container::rounded_box)
         .width(Length::Fill)
+        .height(Length::Shrink)
         .padding(2);
         let second_panel = self.proc_info(proc, self.id);
 
         let view = SeparatedView::new(first_panel, second_panel)
             .set_fpane_id("aa")
-            .set_spane_id(Self::page_id());
+            .set_spane_id(Self::page_id())
+            .set_fpane_max_height(Length::Fixed(170.))
+            .set_spane_max_height(Length::Fill);
 
         view.view().into()
     }

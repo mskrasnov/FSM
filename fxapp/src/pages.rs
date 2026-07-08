@@ -24,7 +24,7 @@ pub trait PageView<'a> {
     fn page_title_view(&'a self) -> Element<'a, Message> {
         column![
             row![
-                text(Self::page_title()).size(26),
+                text(Self::page_title()).size(16),
                 space::horizontal(),
                 self.page_title_controls().unwrap_or(row![].into()),
             ]
@@ -32,7 +32,6 @@ pub trait PageView<'a> {
             .spacing(5),
             rule::horizontal(1),
         ]
-        .spacing(5)
         .into()
     }
 
