@@ -18,9 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+use ferrix_widgets::button::icon_button;
 use iced::{
     Element, Length,
-    widget::{button, column, container, scrollable, text},
+    widget::{button, column, container, row, scrollable, text},
 };
 
 use crate::{
@@ -29,7 +30,7 @@ use crate::{
 };
 
 pub fn sidebar<'a>(current: PageVariant) -> Element<'a, Message> {
-    let mut col = column![].spacing(5);
+    let mut col = column![].spacing(2);
     let mut last_i = 0;
     let j = PageVariant::ALL.len();
 
@@ -45,8 +46,9 @@ pub fn sidebar<'a>(current: PageVariant) -> Element<'a, Message> {
             col = col.push(
                 button(text(page.title()))
                     .on_press(Message::SelectPage(page))
+                    .padding(5)
                     .style(if current == page {
-                        button::primary
+                        button::secondary
                     } else {
                         button::subtle
                     }),
@@ -56,9 +58,20 @@ pub fn sidebar<'a>(current: PageVariant) -> Element<'a, Message> {
         }
     }
 
-    container(scrollable(col).spacing(5).id("sidebar"))
+    container(column![buttons_bar(), scrollable(col).spacing(5).id("sidebar")].spacing(5))
         .padding(5)
         .height(Length::Fill)
         .style(container::bordered_box)
         .into()
+}
+
+fn buttons_bar<'a>() -> Element<'a, Message> {
+    row![
+        icon_button("export", "Export").on_press(Message::SelectPage(PageVariant::ExportData)),
+        icon_button("settings", "Settings")
+            .on_press(Message::SelectPage(PageVariant::ProgramSettings)),
+        icon_button("about", "About").on_press(Message::SelectPage(PageVariant::ProgramAbout)),
+    ]
+    .spacing(5)
+    .into()
 }
