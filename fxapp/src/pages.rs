@@ -20,9 +20,13 @@
 
 pub mod error_page;
 pub mod todo_page;
+pub mod loading_page;
 
 pub mod mem;
 pub mod proc;
+
+pub use loading_page::loading_page;
+pub use todo_page::todo;
 
 use iced::{
     Alignment::Center,
