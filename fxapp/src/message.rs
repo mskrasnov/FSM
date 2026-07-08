@@ -166,7 +166,7 @@ const SCROLL_DOWN: f32 = 20.;
 
 fn get_id(page: PageVariant, m: Modifiers) -> Id {
     if m.shift() {
-        Id::new("") // TODO
+        page.scrolled_id().unwrap_or(Id::new(""))
     } else {
         page.id()
     }

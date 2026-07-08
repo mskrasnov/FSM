@@ -89,7 +89,7 @@ impl ProcPage {
         let second_panel = container(self.proc_info(proc, self.id)).style(container::rounded_box);
 
         let view = SeparatedView::new(first_panel, second_panel)
-            .set_fpane_id("aa")
+            .set_fpane_id(Self::scrolled_page_id().unwrap_or(""))
             .set_spane_id(Self::page_id())
             .set_fpane_max_height(Length::Fixed(170.))
             .set_spane_max_height(Length::Fill);
@@ -146,6 +146,10 @@ impl ProcPage {
 impl<'a> PageView<'a> for ProcPage {
     fn page_id() -> &'static str {
         "proc"
+    }
+
+    fn scrolled_page_id() -> Option<&'static str> {
+        Some("proc-scrolled")
     }
 
     fn page_title() -> String {

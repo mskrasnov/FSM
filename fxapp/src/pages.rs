@@ -19,8 +19,8 @@
  */
 
 pub mod error_page;
-pub mod todo_page;
 pub mod loading_page;
+pub mod todo_page;
 
 pub mod mem;
 pub mod proc;
@@ -28,15 +28,23 @@ pub mod proc;
 pub use loading_page::loading_page;
 pub use todo_page::todo;
 
+use crate::{
+    fl,
+    message::{DataReceiver, Message},
+};
 use iced::{
     Alignment::Center,
     Element, Task,
     widget::{Id, column, row, rule, space, text},
 };
-use crate::{fl, message::{DataReceiver, Message}};
 
 pub trait PageView<'a> {
     fn page_id() -> &'static str;
+
+    fn scrolled_page_id() -> Option<&'static str> {
+        None
+    }
+
     fn page_title() -> String;
     fn page_group() -> GroupVariant;
 
@@ -173,6 +181,13 @@ impl PageVariant {
             Self::Memory => mem::MemoryPage::page_id(),
             _ => "",
         })
+    }
+
+    pub fn scrolled_id(&self) -> Option<Id> {
+        match self {
+            Self::Processors => proc::ProcPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
+            _ => None,
+        }
     }
 
     pub fn title(&self) -> String {
