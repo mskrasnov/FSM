@@ -1,4 +1,7 @@
-use crate::{Ferrix, pages::PageVariant};
+use crate::{
+    Ferrix,
+    pages::{PageData, PageVariant},
+};
 use ferrix_data::load_state::LoadState;
 use ferrix_lib::{cpu::Processors, ram::RAM};
 use iced::{
@@ -27,6 +30,27 @@ pub enum DataReceiver {
 
     GetRAMData,
     RAMDataReceived(LoadState<RAM>),
+}
+
+impl DataReceiver {
+    pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
+        match self {
+            Self::GetProcData => {
+                crate::pages::proc::ProcPage::get_data().map(Message::DataReceiver)
+            }
+            Self::ProcDataReceived(val) => {
+                fx.proc_page.proc_data = val;
+                Task::none()
+            }
+            Self::GetRAMData => {
+                crate::pages::mem::MemoryPage::get_data().map(Message::DataReceiver)
+            }
+            Self::RAMDataReceived(val) => {
+                fx.mem_page.ram_data = val;
+                Task::none()
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

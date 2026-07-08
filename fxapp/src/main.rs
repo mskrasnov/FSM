@@ -41,27 +41,12 @@ impl Ferrix {
 
     fn message(&mut self, msg: Message) -> Task<Message> {
         match msg {
-            Message::DataReceiver(drm) => match drm {
-                message::DataReceiver::GetProcData => {
-                    pages::proc::ProcPage::get_data().map(Message::DataReceiver)
-                }
-                message::DataReceiver::ProcDataReceived(val) => {
-                    self.proc_page.proc_data = val;
-                    Task::none()
-                }
-                message::DataReceiver::GetRAMData => {
-                    pages::mem::MemoryPage::get_data().map(Message::DataReceiver)
-                }
-                message::DataReceiver::RAMDataReceived(val) => {
-                    self.mem_page.ram_data = val;
-                    Task::none()
-                }
-            },
+            Message::DataReceiver(drm) => drm.update(self),
+            Message::Keyboard(key) => key.update(self),
             Message::SelectPage(page) => {
                 self.active_page = page;
                 Task::none()
             }
-            Message::Keyboard(key) => key.update(self),
             _ => Task::none(),
         }
     }
