@@ -6,8 +6,8 @@ pub mod proc;
 
 use iced::{
     Alignment::Center,
-    Element, Length, Task,
-    widget::{Id, column, row, rule, scrollable, space, text},
+    Element, Task,
+    widget::{Id, column, row, rule, space, text},
 };
 
 use crate::message::{DataReceiver, Message};
@@ -39,16 +39,9 @@ pub trait PageView<'a> {
     fn page_contents_view(&'a self) -> Element<'a, Message>;
 
     fn view(&'a self) -> Element<'a, Message> {
-        column![
-            self.page_title_view(),
-            scrollable(self.page_contents_view())
-                .width(Length::Fill)
-                .height(Length::Fill)
-                .spacing(5)
-                .id(Self::page_id()),
-        ]
-        .spacing(5)
-        .into()
+        column![self.page_title_view(), self.page_contents_view()]
+            .spacing(5)
+            .into()
     }
 }
 

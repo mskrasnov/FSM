@@ -1,6 +1,6 @@
 use crate::{
     Ferrix,
-    pages::{PageData, PageVariant},
+    pages::{PageData, PageVariant, proc::ProcPageMessage},
 };
 use ferrix_data::load_state::LoadState;
 use ferrix_lib::{cpu::Processors, ram::RAM};
@@ -55,7 +55,15 @@ impl DataReceiver {
 
 #[derive(Debug, Clone)]
 pub enum PageMessage {
-    ProcPage,
+    ProcPage(ProcPageMessage),
+}
+
+impl PageMessage {
+    pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
+        match self {
+            Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

@@ -43,6 +43,7 @@ impl Ferrix {
         match msg {
             Message::DataReceiver(drm) => drm.update(self),
             Message::Keyboard(key) => key.update(self),
+            Message::PageMessage(page) => page.update(self),
             Message::SelectPage(page) => {
                 self.active_page = page;
                 Task::none()
@@ -65,7 +66,7 @@ impl Ferrix {
     fn view<'a>(&'a self) -> Element<'a, Message> {
         let page = self.active_page.view(&self);
 
-        row![navigation::sidebar(self.active_page), page,]
+        row![navigation::sidebar(self.active_page), page]
             .spacing(5)
             .padding(5)
             .into()
