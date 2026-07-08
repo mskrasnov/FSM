@@ -19,14 +19,15 @@
  */
 
 pub mod ferrix;
+pub mod i18n;
 pub mod icons;
 pub mod message;
 pub mod navigation;
 pub mod pages;
 pub mod widgets;
-pub mod i18n;
 
 use ferrix::Ferrix;
+use iced::{Size, window::Settings};
 
 fn main() -> iced::Result {
     iced::application(Ferrix::new, Ferrix::message, Ferrix::view)
@@ -35,6 +36,15 @@ fn main() -> iced::Result {
             default_text_size: iced::Pixels(12.),
             ..Default::default()
         })
+        .window(Settings {
+            min_size: Some(Size {
+                width: 780.,
+                height: 470.,
+            }),
+            ..Default::default()
+        })
+        .window_size((780., 470.))
+        .antialiasing(true)
         .theme(Ferrix::theme)
         .run()
 }
