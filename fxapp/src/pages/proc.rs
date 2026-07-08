@@ -97,6 +97,7 @@ impl ProcPage {
         view.view().into()
     }
 
+    #[cfg(not(target_arch = "aarch64"))]
     fn proc_info<'a>(&'a self, proc: &'a Processors, id: usize) -> iced::Element<'a, Message> {
         let proc = &proc.entries[id];
         let rows = vec![
@@ -127,6 +128,19 @@ impl ProcPage {
         ];
         kv_info_table(rows).into()
     }
+
+    #[cfg(target_arch = "aarch64")]
+    fn proc_info<'a>(&'a self, proc: &'a Processors, id: usize) -> iced::Element<'a, Message> {
+        let proc = &proc.entries[id];
+        let rows = vec![
+            InfoRow::new(fl!("cpu-impl"), proc.cpu_implementer.clone()),
+            InfoRow::new(fl!("cpu-arch"), fmt_val(proc.cpu_architecture)),
+            InfoRow::new(fl!("cpu-var"), proc.cpu_variant.clone()),
+            InfoRow::new(fl!("cpu-part"), proc.cpu_part.clone()),
+            InfoRow::new(fl!("cpu-rev"), fmt_val(proc.cpu_revision)),
+        ];
+        kv_info_table(rows).into()
+    }
 }
 
 impl<'a> PageView<'a> for ProcPage {
@@ -145,7 +159,7 @@ impl<'a> PageView<'a> for ProcPage {
     fn page_contents_view(&'a self) -> iced::Element<'a, Message> {
         match &self.proc_data {
             LoadState::Loaded(proc) => self.loaded_view(proc),
-            LoadState::Loading => text("Loading data...").into(),
+            LoadState::Loading => super::loading_page(),
             LoadState::Error(why) => {
                 super::error_page::error(why, DataReceiver::GetProcData).map(Message::DataReceiver)
             }
