@@ -1,77 +1,29 @@
-use std::time::Duration;
+/* main.rs
+ *
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-use iced::{Element, Subscription, Task, widget::row};
-
-use crate::{
-    message::Message,
-    pages::{PageData, PageVariant},
-};
-
+pub mod ferrix;
 pub mod message;
 pub mod navigation;
 pub mod pages;
 
-#[derive(Debug)]
-pub struct Ferrix {
-    pub active_page: PageVariant,
-
-    pub proc_page: pages::proc::ProcPage,
-    pub mem_page: pages::mem::MemoryPage,
-}
-
-impl Ferrix {
-    fn new() -> (Self, Task<Message>) {
-        (
-            Self {
-                active_page: PageVariant::Processors,
-                proc_page: pages::proc::ProcPage::new(),
-                mem_page: pages::mem::MemoryPage::new(),
-            },
-            Task::batch([
-                pages::proc::ProcPage::get_data().map(Message::DataReceiver),
-                pages::mem::MemoryPage::get_data().map(Message::DataReceiver),
-            ]),
-        )
-    }
-
-    fn select_page(&mut self, page: PageVariant) -> Task<Message> {
-        self.active_page = page;
-        Task::none()
-    }
-
-    fn message(&mut self, msg: Message) -> Task<Message> {
-        match msg {
-            Message::DataReceiver(drm) => drm.update(self),
-            Message::Keyboard(key) => key.update(self),
-            Message::PageMessage(page) => page.update(self),
-            Message::SelectPage(page) => {
-                self.active_page = page;
-                Task::none()
-            }
-            _ => Task::none(),
-        }
-    }
-
-    fn subscription(&self) -> Subscription<Message> {
-        let scripts = vec![
-            iced::event::listen().map(|event| Message::Keyboard(message::Keyboard::Event(event))),
-            iced::time::every(Duration::from_secs_f32(1.))
-                .map(|_| Message::DataReceiver(message::DataReceiver::GetProcData)),
-            iced::time::every(Duration::from_secs_f32(1.))
-                .map(|_| Message::DataReceiver(message::DataReceiver::GetRAMData)),
-        ];
-        Subscription::batch(scripts)
-    }
-
-    fn view<'a>(&'a self) -> Element<'a, Message> {
-        let page = self.active_page.view(&self);
-
-        row![navigation::sidebar(self.active_page), page]
-            .spacing(5)
-            .padding(5)
-            .into()
-    }
-}
+use ferrix::Ferrix;
 
 fn main() -> iced::Result {
     iced::application(Ferrix::new, Ferrix::message, Ferrix::view)
