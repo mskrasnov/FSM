@@ -28,7 +28,7 @@ use iced::{
 
 use crate::{
     fl,
-    message::{DataReceiver, Message},
+    message::{DataReceiver, Message, PageMessage},
     widgets::table::{InfoRow, fmt_bool, fmt_val, fmt_vec, kv_info_table},
 };
 
@@ -56,7 +56,7 @@ impl ProcPage {
         let mut elements = Vec::with_capacity(proc.entries.len());
         for p in names {
             let b = button(text(p.1))
-                .on_press(Message::PageMessage(crate::message::PageMessage::ProcPage(
+                .on_press(Message::PageMessage(PageMessage::ProcPage(
                     ProcPageMessage::ProcSelected(p.0),
                 )))
                 .style(if p.0 == self.id {
