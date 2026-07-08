@@ -59,7 +59,7 @@ impl<'a> PageView<'a> for MemoryPage {
 
     fn page_title_controls(&'a self) -> Option<iced::Element<'a, Message>> {
         Some(
-            button("GET")
+            button("Update")
                 .on_press(Message::DataReceiver(DataReceiver::GetRAMData))
                 .style(button::subtle)
                 .padding(2)
