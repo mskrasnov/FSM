@@ -32,7 +32,7 @@ use crate::{
 fn sidebar_button<'a>(target: PageVariant, current: PageVariant) -> button::Button<'a, Message> {
     button(text(target.title()))
         .on_press(Message::SelectPage(target))
-        .padding(3)
+        .padding(4)
         .style(if target == current {
             button::secondary
         } else {
