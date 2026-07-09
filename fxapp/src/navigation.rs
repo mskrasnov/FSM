@@ -29,6 +29,17 @@ use crate::{
     pages::{GroupVariant, PageVariant},
 };
 
+fn sidebar_button<'a>(target: PageVariant, current: PageVariant) -> button::Button<'a, Message> {
+    button(text(target.title()))
+        .on_press(Message::SelectPage(target))
+        .padding(3)
+        .style(if target == current {
+            button::secondary
+        } else {
+            button::subtle
+        })
+}
+
 pub fn sidebar<'a>(current: PageVariant) -> Element<'a, Message> {
     let mut col = column![].spacing(2);
     let mut last_i = 0;
@@ -43,16 +54,7 @@ pub fn sidebar<'a>(current: PageVariant) -> Element<'a, Message> {
                 last_i = i;
                 continue 'grp;
             }
-            col = col.push(
-                button(text(page.title()))
-                    .on_press(Message::SelectPage(page))
-                    .padding(5)
-                    .style(if current == page {
-                        button::secondary
-                    } else {
-                        button::subtle
-                    }),
-            );
+            col = col.push(sidebar_button(page, current));
             last_i = i;
             i += 1;
         }
