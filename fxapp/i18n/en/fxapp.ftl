@@ -307,7 +307,7 @@ ram-swp = Swap {$name}
 ram-swp-size = Total size
 ram-swp-used = Used
 ram-swp-prior = Priority
-ram-hdr = RAM Info
+ram-hdr = General Info
 ram-swp-hdr = Swaps Info
 ram-swp-not-found = No swaps files/partitions found.
 

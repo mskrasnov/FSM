@@ -307,7 +307,7 @@ ram-swp = Подкачка {$name}
 ram-swp-size = Объём
 ram-swp-used = Занятый объём
 ram-swp-prior = Приоритет
-ram-hdr = Оперативная память
+ram-hdr = Общее
 ram-swp-hdr = Подкачка
 ram-swp-not-found = Не найдены файлы/разделы подкачки.
 
