@@ -89,6 +89,7 @@ impl DataReceiver {
 
 #[derive(Debug, Clone)]
 pub enum PageMessage {
+    ExportSingle(PageVariant),
     ProcPage(ProcPageMessage),
     MemPage(MemoryPageMessage),
 }
@@ -96,6 +97,17 @@ pub enum PageMessage {
 impl PageMessage {
     pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
         match self {
+            Self::ExportSingle(page) => {
+                match page {
+                    PageVariant::Processors => {
+                        let data = fx.proc_page.proc_data.unwrap();
+                        let contents = serde_json::to_string(data).unwrap();
+                        std::fs::write(format!("Export Page {page:?}.json"), contents).unwrap();
+                    }
+                    _ => {}
+                }
+                Task::none()
+            }
             Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
             Self::MemPage(mm) => mm.update(&mut fx.mem_page),
         }

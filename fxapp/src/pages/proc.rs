@@ -160,6 +160,16 @@ impl<'a> PageView<'a> for ProcPage {
         super::GroupVariant::Hardware
     }
 
+    fn page_title_controls(&'a self) -> Option<iced::Element<'a, Message>> {
+        let export_button =
+            button(text(fl!("sidebar-export")))
+                .padding(3)
+                .on_press(Message::PageMessage(PageMessage::ExportSingle(
+                    crate::pages::PageVariant::Processors,
+                )));
+        Some(export_button.into())
+    }
+
     fn page_contents_view(&'a self) -> iced::Element<'a, Message> {
         match &self.proc_data {
             LoadState::Loaded(proc) => self.loaded_view(proc),
