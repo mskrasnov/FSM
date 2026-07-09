@@ -24,6 +24,7 @@ use crate::{
 };
 use ferrix_data::load_state::LoadState;
 use ferrix_lib::{
+    battery::BatInfo,
     cpu::Processors,
     ram::{RAM, Swaps},
 };
@@ -53,6 +54,9 @@ pub enum DataReceiver {
 
     GetRAMData,
     RAMDataReceived((LoadState<RAM>, LoadState<Swaps>)),
+
+    GetBatData,
+    BatDataReceived(LoadState<BatInfo>),
 }
 
 impl DataReceiver {
@@ -70,6 +74,13 @@ impl DataReceiver {
             }
             Self::RAMDataReceived(val) => {
                 (fx.mem_page.ram_data, fx.mem_page.swap_data) = val;
+                Task::none()
+            }
+            Self::GetBatData => {
+                crate::pages::battery::BatPage::get_data().map(Message::DataReceiver)
+            }
+            Self::BatDataReceived(val) => {
+                fx.bat_page.bat_info = val;
                 Task::none()
             }
         }
