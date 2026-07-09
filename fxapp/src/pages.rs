@@ -64,6 +64,7 @@ pub trait PageView<'a> {
             .spacing(5),
             rule::horizontal(1),
         ]
+        .spacing(2)
         .into()
     }
 
