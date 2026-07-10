@@ -33,6 +33,7 @@ pub struct Ferrix {
 
     pub proc_page: pages::proc::ProcPage,
     pub mem_page: pages::mem::MemoryPage,
+    pub dmi_page: pages::dmi::DMIPage,
     pub bat_page: pages::battery::BatPage,
 }
 
@@ -43,6 +44,7 @@ impl Ferrix {
                 active_page: PageVariant::Processors,
                 proc_page: pages::proc::ProcPage::new(),
                 mem_page: pages::mem::MemoryPage::new(),
+                dmi_page: pages::dmi::DMIPage::new(),
                 bat_page: pages::battery::BatPage::new(),
             },
             Task::batch([
@@ -67,6 +69,9 @@ impl Ferrix {
         match page {
             PageVariant::Processors if self.proc_page.proc_data.is_none() => {
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::DMITables if self.dmi_page.dmi.is_none() => {
+                pages::dmi::DMIPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::Battery if self.bat_page.bat_info.is_none() => {
                 pages::battery::BatPage::get_data().map(Message::DataReceiver)

@@ -20,9 +20,11 @@
 
 use crate::{
     Ferrix,
-    pages::{PageData, PageVariant, mem::MemoryPageMessage, proc::ProcPageMessage},
+    pages::{
+        PageData, PageVariant, dmi::DMIPageMessage, mem::MemoryPageMessage, proc::ProcPageMessage,
+    },
 };
-use ferrix_data::load_state::LoadState;
+use ferrix_data::{dmi::DMIData, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
@@ -55,6 +57,10 @@ pub enum DataReceiver {
     GetRAMData,
     RAMDataReceived((LoadState<RAM>, LoadState<Swaps>)),
 
+    GetDMIData,
+    DMIDataRefresh,
+    DMIDataReceived(LoadState<DMIData>),
+
     GetBatData,
     BatDataReceived(LoadState<BatInfo>),
 }
@@ -76,6 +82,21 @@ impl DataReceiver {
                 (fx.mem_page.ram_data, fx.mem_page.swap_data) = val;
                 Task::none()
             }
+            Self::GetDMIData => {
+                if fx.dmi_page.is_polkit {
+                    crate::pages::dmi::DMIPage::get_data().map(Message::DataReceiver)
+                } else {
+                    Task::none()
+                }
+            }
+            Self::DMIDataRefresh => {
+                fx.dmi_page.is_polkit = false;
+                crate::pages::dmi::DMIPage::get_data().map(Message::DataReceiver)
+            }
+            Self::DMIDataReceived(val) => {
+                fx.dmi_page.dmi = val;
+                Task::none()
+            }
             Self::GetBatData => {
                 crate::pages::battery::BatPage::get_data().map(Message::DataReceiver)
             }
@@ -91,6 +112,7 @@ impl DataReceiver {
 pub enum PageMessage {
     ExportSingle(PageVariant),
     ProcPage(ProcPageMessage),
+    DMIPage(DMIPageMessage),
     MemPage(MemoryPageMessage),
 }
 
@@ -109,6 +131,7 @@ impl PageMessage {
                 Task::none()
             }
             Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
+            Self::DMIPage(dp) => dp.update(&mut fx.dmi_page),
             Self::MemPage(mm) => mm.update(&mut fx.mem_page),
         }
     }
