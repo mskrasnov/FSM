@@ -53,10 +53,17 @@ impl DMIPage {
 
     fn get_pages_list<'a>(&'a self) -> Vec<Element<'a, Message>> {
         let pages_items = [
-            ("[Type 0] BIOS", "bios"),
-            ("[Type 1] Baseboard", "bb"),
-            ("[Type 2] Chassis", "chassis"),
-            ("[Type 4] Processor", "proc"),
+            ("[Type  0] BIOS", "bios"),
+            ("[Type  1] System", "sys"),
+            ("[Type  2] Baseboard", "bb"),
+            ("[Type  2] Chassis", "chassis"),
+            ("[Type  4] Processor", "proc"),
+            ("[Type  5] Memory Controller", "mc"),
+            ("[Type  6] Memory Modules", "mm"),
+            ("[Type  7] CPU Cache", "cc"),
+            ("[Type  8] Port Connectors", "pc"),
+            ("[Type 16] Physical Memory Array", "pma"),
+            ("[Type 17] Installed Memory Devices", "imd"),
         ];
         let mut pages = Vec::with_capacity(pages_items.len());
 
@@ -84,7 +91,7 @@ impl DMIPage {
             "bb" => baseboard_table(&dmi.baseboard).into(),
             "chassis" => chassis_table(&dmi.chassis).into(),
             "proc" => processor_table(&dmi.processor).into(),
-            _ => panic!("Unknown DMI page: {}", self.selected_table),
+            _ => super::todo(),
         };
         scrollable(table).spacing(5).id(Self::page_id()).into()
     }
@@ -109,7 +116,7 @@ impl<'a> PageView<'a> for DMIPage {
 
     fn page_title_controls(&'a self) -> Option<Element<'a, Message>> {
         Some(
-            button("Refresh")
+            button(text(fl!("err-page-update")))
                 .on_press(Message::DataReceiver(DataReceiver::DMIDataRefresh))
                 .padding(3)
                 .into(),
@@ -129,7 +136,7 @@ impl<'a> PageView<'a> for DMIPage {
                 let view = SeparatedView::new(first_panel, second_panel)
                     .set_fpane_id(Self::scrolled_page_id().unwrap_or(""))
                     .set_spane_id(Self::page_id())
-                    .set_fpane_max_height(Length::Shrink)
+                    .set_fpane_max_height(Length::Fixed(120.))
                     .set_spane_max_height(Length::Fill);
                 view.view().into()
             }
