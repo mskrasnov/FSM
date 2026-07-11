@@ -111,6 +111,14 @@ impl<'a> PageView<'a> for FirmwarePage {
         super::GroupVariant::System
     }
 
+    fn page_title_controls(&'a self) -> Option<Element<'a, Message>> {
+        let update_button = button(text(fl!("err-page-update")))
+            .on_press(Message::DataReceiver(DataReceiver::FirmwareDataRefresh))
+            .padding(3);
+
+        Some(update_button.into())
+    }
+
     fn page_contents_view(&'a self) -> Element<'a, Message> {
         match &self.firmware {
             LoadState::Loaded(firmware) => match firmware {
