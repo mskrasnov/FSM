@@ -627,7 +627,23 @@ impl_from_struct!(SystemUuid, smbioslib::SystemUuid, {
 
 impl Display for SystemUuid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", String::from_utf8_lossy(&self.raw))
+        let time_low = u32::from_le_bytes([self.raw[0], self.raw[1], self.raw[2], self.raw[3]]);
+        let time_mid = u16::from_le_bytes([self.raw[4], self.raw[5]]);
+        let time_hi = u16::from_le_bytes([self.raw[6], self.raw[7]]);
+
+        let mut s = format!("{:08x}-{:04x}-{:04x}-", time_low, time_mid, time_hi);
+        let mut i = 8;
+
+        while i <= 9 {
+            s.push_str(&format!("{:02x}", self.raw[i]));
+            i += 1;
+        }
+        s.push('-');
+        while i < 16 {
+            s.push_str(&format!("{:02x}", self.raw[i]));
+            i += 1;
+        }
+        write!(f, "{s}",)
     }
 }
 
