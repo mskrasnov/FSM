@@ -126,6 +126,11 @@ impl PageMessage {
                         let contents = serde_json::to_string(data).unwrap();
                         std::fs::write(format!("Export Page {page:?}.json"), contents).unwrap();
                     }
+                    PageVariant::DMITables => {
+                        let data = fx.dmi_page.dmi.unwrap();
+                        let contents = serde_json::to_string(data).unwrap();
+                        std::fs::write(format!("Export Page {page:?}.json"), contents).unwrap();
+                    }
                     _ => {}
                 }
                 Task::none()

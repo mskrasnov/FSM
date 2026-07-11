@@ -25,12 +25,12 @@ use crate::{
 };
 use ferrix_data::{dmi::DMIData, load_state::LoadState};
 use ferrix_lib::dmi::{
-    Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, Processor,
+    Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, Processor, System,
 };
 use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
     Element, Length, Task,
-    widget::{Column, button, column, container, scrollable, table, text},
+    widget::{Column, button, column, container, row, scrollable, table, text},
 };
 
 use super::{PageData, PageView};
@@ -39,7 +39,36 @@ use super::{PageData, PageView};
 pub struct DMIPage {
     pub dmi: LoadState<DMIData>,
     pub is_polkit: bool,
-    pub selected_table: &'static str,
+    pub selected_table: SelectedTable,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Default)]
+pub enum SelectedTable {
+    #[default]
+    Bios,
+    System,
+    Baseboard,
+    Chassis,
+    Processor,
+    MemoryController,
+    MemoryModules,
+    CPUCache,
+    PortConnectors,
+    PhysicalMemoryArray,
+    InstalledMemoryDevices,
+}
+
+impl SelectedTable {
+    pub fn view<'a>(&'a self, dmi: &'a DMIData) -> Element<'a, Message> {
+        match self {
+            Self::Bios => bios_table(&dmi.bios),
+            Self::System => system_table(&dmi.system),
+            Self::Baseboard => baseboard_table(&dmi.baseboard),
+            Self::Chassis => chassis_table(&dmi.chassis),
+            Self::Processor => processor_table(&dmi.processor),
+            _ => super::todo(),
+        }
+    }
 }
 
 impl DMIPage {
@@ -47,23 +76,32 @@ impl DMIPage {
         Self {
             dmi: LoadState::Loading,
             is_polkit: false,
-            selected_table: "bios",
+            selected_table: SelectedTable::default(),
         }
     }
 
     fn get_pages_list<'a>(&'a self) -> Vec<Element<'a, Message>> {
         let pages_items = [
-            ("[Type  0] BIOS", "bios"),
-            ("[Type  1] System", "sys"),
-            ("[Type  2] Baseboard", "bb"),
-            ("[Type  2] Chassis", "chassis"),
-            ("[Type  4] Processor", "proc"),
-            ("[Type  5] Memory Controller", "mc"),
-            ("[Type  6] Memory Modules", "mm"),
-            ("[Type  7] CPU Cache", "cc"),
-            ("[Type  8] Port Connectors", "pc"),
-            ("[Type 16] Physical Memory Array", "pma"),
-            ("[Type 17] Installed Memory Devices", "imd"),
+            ("[Type  0] BIOS", SelectedTable::Bios),
+            ("[Type  1] System", SelectedTable::System),
+            ("[Type  2] Baseboard", SelectedTable::Baseboard),
+            ("[Type  2] Chassis", SelectedTable::Chassis),
+            ("[Type  4] Processor", SelectedTable::Processor),
+            (
+                "[Type  5] Memory Controller",
+                SelectedTable::MemoryController,
+            ),
+            ("[Type  6] Memory Modules", SelectedTable::MemoryModules),
+            ("[Type  7] CPU Cache", SelectedTable::CPUCache),
+            ("[Type  8] Port Connectors", SelectedTable::PortConnectors),
+            (
+                "[Type 16] Physical Memory Array",
+                SelectedTable::PhysicalMemoryArray,
+            ),
+            (
+                "[Type 17] Installed Memory Devices",
+                SelectedTable::InstalledMemoryDevices,
+            ),
         ];
         let mut pages = Vec::with_capacity(pages_items.len());
 
@@ -86,14 +124,10 @@ impl DMIPage {
     }
 
     fn table_view<'a>(&'a self, dmi: &'a DMIData) -> Element<'a, Message> {
-        let table = match self.selected_table {
-            "bios" => bios_table(&dmi.bios),
-            "bb" => baseboard_table(&dmi.baseboard).into(),
-            "chassis" => chassis_table(&dmi.chassis).into(),
-            "proc" => processor_table(&dmi.processor).into(),
-            _ => super::todo(),
-        };
-        scrollable(table).spacing(5).id(Self::page_id()).into()
+        scrollable(self.selected_table.view(dmi))
+            .spacing(5)
+            .id(Self::page_id())
+            .into()
     }
 }
 
@@ -115,12 +149,17 @@ impl<'a> PageView<'a> for DMIPage {
     }
 
     fn page_title_controls(&'a self) -> Option<Element<'a, Message>> {
-        Some(
-            button(text(fl!("err-page-update")))
-                .on_press(Message::DataReceiver(DataReceiver::DMIDataRefresh))
+        let update_button = button(text(fl!("err-page-update")))
+            .on_press(Message::DataReceiver(DataReceiver::DMIDataRefresh))
+            .padding(3);
+        let export_button =
+            button(text(fl!("sidebar-export")))
                 .padding(3)
-                .into(),
-        )
+                .on_press(Message::PageMessage(PageMessage::ExportSingle(
+                    crate::pages::PageVariant::DMITables,
+                )));
+
+        Some(row![update_button, export_button].spacing(5).into())
     }
 
     fn page_contents_view(&'a self) -> Element<'a, Message> {
@@ -411,9 +450,35 @@ fn bios_ext1_table<'a>(b: &'a Bios) -> container::Container<'a, Message> {
     }
 }
 
+fn system_table<'a>(sys: &'a LoadState<System>) -> Element<'a, Message> {
+    let sys_data = match sys {
+        LoadState::Loading => container(text(fl!("ldr-page-tooltip")).style(text::warning)),
+        LoadState::Error(why) => container(text(why).style(text::danger)),
+        LoadState::Loaded(sys) => {
+            let rows = vec![
+                InfoRow::new("Manufacturer", sys.manufacturer.clone()),
+                InfoRow::new("Product name", sys.product_name.clone()),
+                InfoRow::new("System version", sys.version.clone()),
+                InfoRow::new("Serial number", sys.serial_number.clone()),
+                InfoRow::new("System UUID", sys.uuid.clone().map(|uuid| uuid.to_string())),
+                InfoRow::new(
+                    "Wake-up type",
+                    sys.wakeup_type
+                        .clone()
+                        .map(|wt| format!("{} (raw: {})", wt.value, wt.raw)),
+                ),
+                InfoRow::new("SKU Number", sys.sku_number.clone()),
+                InfoRow::new("Family", sys.family.clone()),
+            ];
+            container(kv_info_table(rows)).style(container::rounded_box)
+        }
+    };
+    sys_data.into()
+}
+
 fn baseboard_table<'a>(bb: &'a LoadState<Baseboard>) -> Element<'a, Message> {
     let bb_data = match bb {
-        LoadState::Loading => container(text(fl!("ldr-page-tooltip"))),
+        LoadState::Loading => container(text(fl!("ldr-page-tooltip")).style(text::warning)),
         LoadState::Error(why) => container(text(why).style(text::danger)),
         LoadState::Loaded(bb) => {
             let rows = vec![
@@ -794,7 +859,7 @@ where
 
 #[derive(Debug, Clone)]
 pub enum DMIPageMessage {
-    TableSelected(&'static str),
+    TableSelected(SelectedTable),
 }
 
 impl DMIPageMessage {
