@@ -52,7 +52,6 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 | Program type          | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
 | GUI                   | `iced`                | GTK3      | Qt5/Qt6      |
 | License               | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
-| Key features          | <ul><li><b>Deep system analisys:</b> systemd services, installed packages, DMI, EDID, etc.;</li><li>Beautiful CPU and RAM utilization charts;</li><li>Simple and clean UI;</li></ul> | <ul><li><b>Hardware benchmarks:</b> CPU, GPU, disks, memory;</li><li>Hardware ratings;</li><li>Export data to HTML/plain text;</li></ul> | <ul><li>System cleaner (caches, logs, packages);</li><li>Real-time resource monitoring;</li><li><tt>systemd</tt>-services management;</li></ul> |
 | Data accuracy         | 🟢️ | ⚪️ ([incorrect battery information](https://raw.githubusercontent.com/mskrasnov/mskrasnov.github.io/refs/heads/master/ferrix/assets/hardinfo2.png)) | ⚪️ (stacer is outdated software) |
 | Target audience       | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
 | Processor topology    | 🟢️                    | 🟢️        | 🔴️           |
@@ -142,7 +141,7 @@ make TARGET={i686/aarch64}-unknown-linux-gnu build
 Prepare for `*.deb` or `*.AppImage`:
 
 ```bash
-docker build -t fsm-builder .
+docker build -t fsm-debian -f packaging/debian/Dockerfile
 ```
 
 Build `*.deb` packages for `amd64`, `i686` and `aarch64` targets:
@@ -150,7 +149,7 @@ Build `*.deb` packages for `amd64`, `i686` and `aarch64` targets:
 ```bash
 docker run --rm            \
     -v "${PWD}:/workspace" \
-    fsm-builder            \
+    fsm-debian             \
     packaging/debian/build.sh
 ```
 
@@ -159,7 +158,7 @@ Build `*.AppImage` package (only for `amd64` target):
 ```bash
 docker run --rm            \
     -v "${PWD}:/workspace" \
-    fsm-builder            \
+    fsm-debian             \
     packaging/debian/appimage.sh
 ```
 
@@ -197,4 +196,4 @@ Developing Ferrix System Monitor takes time and passion. If you find it useful, 
 
 ## License
 
-Ferrix System Monitor is free and open-source software distributed under the **GNU General Public License v3.0**. See [LICENSE](LICENSE) file for details.
+Ferrix System Monitor is free and open-source software distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE) file for details.
