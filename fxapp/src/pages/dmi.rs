@@ -25,9 +25,10 @@ use crate::{
 };
 use ferrix_data::{dmi::DMIData, load_state::LoadState};
 use ferrix_lib::dmi::{
-    Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, Processor, System,
+    Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, MemoryDevice,
+    MemoryDevices, MemoryOperatingModeCapabilities, MemoryTypeDetails, Processor, System,
 };
-use ferrix_widgets::separated_view::SeparatedView;
+use ferrix_widgets::{headers::header, separated_view::SeparatedView};
 use iced::{
     Element, Length, Task,
     widget::{Column, button, column, container, row, scrollable, table, text},
@@ -66,6 +67,8 @@ impl SelectedTable {
             Self::Baseboard => baseboard_table(&dmi.baseboard),
             Self::Chassis => chassis_table(&dmi.chassis),
             Self::Processor => processor_table(&dmi.processor),
+            Self::InstalledMemoryDevices => memory_devices_table(&dmi.memory_devices),
+            // Self::InstalledMemoryDevices => text(format!("{:#?}", &dmi.memory_devices)).into(),
             _ => super::todo(),
         }
     }
@@ -87,17 +90,17 @@ impl DMIPage {
             ("[Type  2] Baseboard", SelectedTable::Baseboard),
             ("[Type  2] Chassis", SelectedTable::Chassis),
             ("[Type  4] Processor", SelectedTable::Processor),
-            (
-                "[Type  5] Memory Controller",
-                SelectedTable::MemoryController,
-            ),
-            ("[Type  6] Memory Modules", SelectedTable::MemoryModules),
-            ("[Type  7] CPU Cache", SelectedTable::CPUCache),
-            ("[Type  8] Port Connectors", SelectedTable::PortConnectors),
-            (
-                "[Type 16] Physical Memory Array",
-                SelectedTable::PhysicalMemoryArray,
-            ),
+            // (
+            //     "[Type  5] Memory Controller",
+            //     SelectedTable::MemoryController,
+            // ),
+            // ("[Type  6] Memory Modules", SelectedTable::MemoryModules),
+            // ("[Type  7] CPU Cache", SelectedTable::CPUCache),
+            // ("[Type  8] Port Connectors", SelectedTable::PortConnectors),
+            // (
+            //     "[Type 16] Physical Memory Array",
+            //     SelectedTable::PhysicalMemoryArray,
+            // ),
             (
                 "[Type 17] Installed Memory Devices",
                 SelectedTable::InstalledMemoryDevices,
@@ -833,6 +836,207 @@ fn processor_characteristics_table<'a>(p: &'a Processor) -> container::Container
                 .spacing(5),
             )
         }
+    }
+}
+
+fn memory_devices_table<'a>(m: &'a LoadState<MemoryDevices>) -> Element<'a, Message> {
+    match m {
+        LoadState::Loading => container(text(fl!("ldr-page-tooltip")).style(text::warning)).into(),
+        LoadState::Error(why) => container(text(why).style(text::danger)).into(),
+        LoadState::Loaded(m) => {
+            let mut devices = Column::with_capacity(m.memory.len()).spacing(5);
+            let mut i = 0;
+            for device in &m.memory {
+                devices = devices.push(
+                    column![header(format!("Device #{i}")), memory_device_table(device),]
+                        .spacing(5),
+                );
+                i += 1;
+            }
+            devices.into()
+        }
+    }
+}
+
+fn memory_device_table<'a>(m: &'a MemoryDevice) -> Element<'a, Message> {
+    let rows = vec![
+        InfoRow::new("Manufacturer", m.manufacturer.clone()),
+        InfoRow::new("Serial number", m.serial_number.clone()),
+        InfoRow::new("Asset tag", m.asset_tag.clone()),
+        InfoRow::new("Part number", m.part_number.clone()),
+        InfoRow::new("Size", m.size.clone().map(|s| s.to_string())),
+        InfoRow::new(
+            "Extended size",
+            m.extended_size.clone().map(|es| es.to_string()),
+        ),
+        InfoRow::new(
+            "Memory speed",
+            m.speed.clone().map(|speed| speed.to_string()),
+        ),
+        InfoRow::new(
+            "Configured speed",
+            m.configured_memory_speed.clone().map(|cms| cms.to_string()),
+        ),
+        InfoRow::new(
+            "Extended speed",
+            m.extended_speed.clone().map(|es| es.to_string()),
+        ),
+        InfoRow::new(
+            "Extended configured speed",
+            m.extended_configured_speed
+                .clone()
+                .map(|ecs| ecs.to_string()),
+        ),
+        InfoRow::new(
+            "Form factor",
+            m.form_factor
+                .clone()
+                .map(|ff| format!("{} (raw: {})", ff.value, ff.raw)),
+        ),
+        InfoRow::new(
+            "Memory type",
+            m.memory_type
+                .clone()
+                .map(|mt| format!("{} (raw: {})", mt.value, mt.raw)),
+        ),
+        InfoRow::new(
+            "Memory technology",
+            m.memory_technology
+                .clone()
+                .map(|mt| format!("{} (raw: {})", mt.value, mt.raw)),
+        ),
+        InfoRow::new(
+            "Voltage, min",
+            m.minimum_voltage.map(|mv| format!("{mv} mV")),
+        ),
+        InfoRow::new(
+            "Voltage, max",
+            m.maximum_voltage.map(|mv| format!("{mv} mV")),
+        ),
+        InfoRow::new(
+            "Voltage, configured",
+            m.configured_voltage.map(|cv| format!("{cv} mV")),
+        ),
+        InfoRow::new(
+            "Non-volatile portion size",
+            m.non_volatile_size.clone().map(|nvs| nvs.to_string()),
+        ),
+        InfoRow::new(
+            "Volatile portion size",
+            m.volatile_size.clone().map(|vs| vs.to_string()),
+        ),
+        InfoRow::new(
+            "Cache portion size",
+            m.cache_size.clone().map(|cs| cs.to_string()),
+        ),
+        InfoRow::new(
+            "Logical size",
+            m.logical_size.clone().map(|ls| ls.to_string()),
+        ),
+        InfoRow::new("Total width", m.total_width.map(|tw| format!("{tw} bits"))),
+        InfoRow::new("Data width", m.data_width.map(|dw| format!("{dw} bits"))),
+        InfoRow::new("Device set", fmt_val(m.device_set)),
+        InfoRow::new(
+            "Memory device socket/board position",
+            m.device_locator.clone(),
+        ),
+        InfoRow::new("Bank location", m.bank_locator.clone()),
+        InfoRow::new("Attributes", fmt_val(m.attributes)),
+        // TODO: memory operating mode
+        InfoRow::new("Firmware version", m.firmware_version.clone()),
+        InfoRow::new("Module manufacturer ID", fmt_val(m.module_manufacturer_id)),
+        InfoRow::new("Module product ID", fmt_val(m.module_product_id)),
+        InfoRow::new(
+            "Memory subsystem controller manufacturer ID",
+            fmt_val(m.memory_subsystem_controller_manufacturer_id),
+        ),
+        InfoRow::new(
+            "Memory subsystem controller product ID",
+            fmt_val(m.memory_subsystem_controller_product_id),
+        ),
+        InfoRow::new("PMIC0 manufacturer ID", fmt_val(m.pmic0_manufacturer_id)),
+        InfoRow::new("PMIC0 revision number", fmt_val(m.pmic0_revision_number)),
+        InfoRow::new("RCD manufacturer ID", fmt_val(m.rcd_manufacturer_id)),
+        InfoRow::new("RCD0 revision number", fmt_val(m.rcd_revision_number)),
+        InfoRow::new(
+            "Physical memory array handle",
+            fmt_val(m.physical_memory_array_handle.clone()),
+        ),
+        InfoRow::new(
+            "Memory error information handle",
+            fmt_val(m.memory_error_information_handle.clone()),
+        ),
+    ];
+    let main_table = container(kv_info_table(rows)).style(container::rounded_box);
+
+    column![
+        main_table,
+        memory_device_type_details_table(&m.type_detail),
+        memory_device_operating_mode(&m.memory_operating_mode_capability),
+    ]
+    .spacing(5)
+    .into()
+}
+
+fn memory_device_type_details_table<'a>(td: &'a Option<MemoryTypeDetails>) -> Element<'a, Message> {
+    match td {
+        Some(td) => {
+            let rows = vec![
+                InfoRow::new("Other", fmt_bool(Some(td.other))),
+                InfoRow::new("Unknown", fmt_bool(Some(td.unknown))),
+                InfoRow::new("Fast paged", fmt_bool(Some(td.fast_paged))),
+                InfoRow::new("Static column", fmt_bool(Some(td.static_column))),
+                InfoRow::new("Pseudo-static", fmt_bool(Some(td.pseudo_static))),
+                InfoRow::new("RAMBUS", fmt_bool(Some(td.ram_bus))),
+                InfoRow::new("Synchronous", fmt_bool(Some(td.synchronous))),
+                InfoRow::new("CMOS", fmt_bool(Some(td.cmos))),
+                InfoRow::new("EDO", fmt_bool(Some(td.edo))),
+                InfoRow::new("Window DRAM", fmt_bool(Some(td.window_dram))),
+                InfoRow::new("Cache DRAM", fmt_bool(Some(td.cache_dram))),
+                InfoRow::new("Non-volatile", fmt_bool(Some(td.non_volatile))),
+                InfoRow::new("Registered (buffered)", fmt_bool(Some(td.registered))),
+                InfoRow::new("Unbuffered (unregistered)", fmt_bool(Some(td.unbuffered))),
+                InfoRow::new("LRDIMM", fmt_bool(Some(td.lrdimm))),
+                InfoRow::new("Raw value", Some(format!("{:0b}", td.raw))),
+            ];
+            column![
+                text("Type details").style(text::warning),
+                container(kv_info_table(rows)).style(container::rounded_box),
+            ]
+            .spacing(5)
+            .into()
+        }
+        None => text("Type details is not present").into(),
+    }
+}
+
+fn memory_device_operating_mode<'a>(
+    mo: &'a Option<MemoryOperatingModeCapabilities>,
+) -> Element<'a, Message> {
+    match mo {
+        Some(mo) => {
+            let rows = vec![
+                InfoRow::new("Other", fmt_bool(Some(mo.other))),
+                InfoRow::new("Unknown", fmt_bool(Some(mo.unknown))),
+                InfoRow::new("Volatile memory", fmt_bool(Some(mo.volatile_memory))),
+                InfoRow::new(
+                    "Byte-accessible persistent memory",
+                    fmt_bool(Some(mo.byte_accessible_persistent_memory)),
+                ),
+                InfoRow::new(
+                    "Block-accessible persistent memory",
+                    fmt_bool(Some(mo.block_accessible_persistent_memory)),
+                ),
+                InfoRow::new("Raw value", Some(format!("{:0b}", mo.raw))),
+            ];
+            column![
+                text("Memory device operating mode capability").style(text::warning),
+                container(kv_info_table(rows)).style(container::rounded_box),
+            ]
+            .spacing(5)
+            .into()
+        }
+        None => text("Memory operating mode info is not present").into(),
     }
 }
 

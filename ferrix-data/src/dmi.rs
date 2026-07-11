@@ -26,7 +26,7 @@ use crate::{
     polkit::*,
 };
 use anyhow::Result;
-use ferrix_lib::dmi::{Baseboard, Bios, Chassis, Processor, System};
+use ferrix_lib::dmi::{Baseboard, Bios, Chassis, MemoryDevices, Processor, System};
 use serde::{Deserialize, Serialize};
 
 pub async fn get_dmi_data() -> LoadState<DMIData> {
@@ -45,7 +45,7 @@ pub struct DMIData {
     pub baseboard: LoadState<Baseboard>,
     pub chassis: LoadState<Chassis>,
     pub processor: LoadState<Processor>,
-    // pub memory_devices: LoadState<MemoryDevices>,
+    pub memory_devices: LoadState<MemoryDevices>,
 }
 
 impl DMIData {
@@ -56,7 +56,7 @@ impl DMIData {
             baseboard: Baseboard::new().to_load_state(),
             chassis: Chassis::new().to_load_state(),
             processor: Processor::new().to_load_state(),
-            // memory_devices: MemoryDevices::new().to_load_state(),
+            memory_devices: MemoryDevices::new().to_load_state(),
         }
     }
 
