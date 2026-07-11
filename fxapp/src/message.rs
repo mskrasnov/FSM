@@ -24,7 +24,7 @@ use crate::{
         PageData, PageVariant, dmi::DMIPageMessage, mem::MemoryPageMessage, proc::ProcPageMessage,
     },
 };
-use ferrix_data::{dmi::DMIData, load_state::LoadState};
+use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
@@ -63,6 +63,10 @@ pub enum DataReceiver {
 
     GetBatData,
     BatDataReceived(LoadState<BatInfo>),
+
+    GetFirmwareData,
+    FirmwareDataRefresh,
+    FirmwareDataReceived(LoadState<FResult>),
 }
 
 impl DataReceiver {
@@ -102,6 +106,21 @@ impl DataReceiver {
             }
             Self::BatDataReceived(val) => {
                 fx.bat_page.bat_info = val;
+                Task::none()
+            }
+            Self::GetFirmwareData => {
+                if fx.firmware_page.is_polkit {
+                    crate::pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
+                } else {
+                    Task::none()
+                }
+            }
+            Self::FirmwareDataRefresh => {
+                fx.firmware_page.is_polkit = false;
+                crate::pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
+            }
+            Self::FirmwareDataReceived(val) => {
+                fx.firmware_page.firmware = val;
                 Task::none()
             }
         }

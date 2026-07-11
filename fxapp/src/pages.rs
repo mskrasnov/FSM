@@ -24,6 +24,7 @@ pub mod todo_page;
 
 pub mod battery;
 pub mod dmi;
+pub mod firmware;
 pub mod mem;
 pub mod proc;
 
@@ -172,7 +173,7 @@ impl PageVariant {
             Self::Software => GroupVariant::Admin,
             Self::Kernel => GroupVariant::System,
             Self::KernelModules => GroupVariant::System,
-            Self::FirmwareAttributes => GroupVariant::System,
+            Self::FirmwareAttributes => firmware::FirmwarePage::page_group(),
             Self::SystemMisc => GroupVariant::System,
             _ => GroupVariant::Other,
         }
@@ -184,6 +185,7 @@ impl PageVariant {
             Self::DMITables => dmi::DMIPage::page_id(),
             Self::Memory => mem::MemoryPage::page_id(),
             Self::Battery => battery::BatPage::page_id(),
+            Self::FirmwareAttributes => firmware::FirmwarePage::page_id(),
             _ => "",
         })
     }
@@ -201,6 +203,7 @@ impl PageVariant {
             Self::DMITables => dmi::DMIPage::page_title(),
             Self::Memory => mem::MemoryPage::page_title(),
             Self::Battery => battery::BatPage::page_title(),
+            Self::FirmwareAttributes => firmware::FirmwarePage::page_title(),
             _ => format!("[???] {:?}", self),
         }
     }
@@ -211,6 +214,7 @@ impl PageVariant {
             Self::DMITables => fx.dmi_page.view(),
             Self::Memory => fx.mem_page.view(),
             Self::Battery => fx.bat_page.view(),
+            Self::FirmwareAttributes => fx.firmware_page.view(),
             _ => todo_page::todo(),
         }
     }

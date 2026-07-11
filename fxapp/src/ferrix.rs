@@ -35,6 +35,7 @@ pub struct Ferrix {
     pub mem_page: pages::mem::MemoryPage,
     pub dmi_page: pages::dmi::DMIPage,
     pub bat_page: pages::battery::BatPage,
+    pub firmware_page: pages::firmware::FirmwarePage,
 }
 
 impl Ferrix {
@@ -46,6 +47,7 @@ impl Ferrix {
                 mem_page: pages::mem::MemoryPage::new(),
                 dmi_page: pages::dmi::DMIPage::new(),
                 bat_page: pages::battery::BatPage::new(),
+                firmware_page: pages::firmware::FirmwarePage::new(),
             },
             Task::batch([
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver),
@@ -75,6 +77,9 @@ impl Ferrix {
             }
             PageVariant::Battery if self.bat_page.bat_info.is_none() => {
                 pages::battery::BatPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::FirmwareAttributes if self.firmware_page.firmware.is_none() => {
+                pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
             }
             _ => Task::none(),
         }
