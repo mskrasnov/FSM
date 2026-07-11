@@ -141,7 +141,7 @@ make TARGET={i686/aarch64}-unknown-linux-gnu build
 Prepare for `*.deb` or `*.AppImage`:
 
 ```bash
-docker build -t fsm-debian -f packaging/debian/Dockerfile
+docker build -t fsm-debian -f packaging/debian/Dockerfile .
 ```
 
 Build `*.deb` packages for `amd64`, `i686` and `aarch64` targets:
@@ -165,7 +165,7 @@ docker run --rm            \
 Prepare for `*.rpm`:
 
 ```bash
-docker build -t fsm-rpm -f packaging/fedora/Dockerfile
+docker build -t fsm-rpm -f packaging/fedora/Dockerfile .
 ```
 
 Build `*.rpm` package (only for `amd64` target):
