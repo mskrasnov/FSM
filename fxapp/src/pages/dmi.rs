@@ -552,7 +552,13 @@ fn processor_table<'a>(p: &'a LoadState<Processor>) -> Element<'a, Message> {
                 InfoRow::new(
                     "Raw Processor ID",
                     match p.processor_id {
-                        Some(pid) => fmt_vec(&Some(pid.to_vec())),
+                        Some(pid) => {
+                            let val = pid
+                                .iter()
+                                .map(|val| format!("{val:02X}"))
+                                .collect::<Vec<_>>();
+                            fmt_vec(&Some(val))
+                        }
                         None => None,
                     },
                 ),
