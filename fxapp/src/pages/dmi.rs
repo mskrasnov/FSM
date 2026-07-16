@@ -68,7 +68,6 @@ impl SelectedTable {
             Self::Chassis => chassis_table(&dmi.chassis),
             Self::Processor => processor_table(&dmi.processor),
             Self::InstalledMemoryDevices => memory_devices_table(&dmi.memory_devices),
-            // Self::InstalledMemoryDevices => text(format!("{:#?}", &dmi.memory_devices)).into(),
             _ => super::todo(),
         }
     }
@@ -88,7 +87,7 @@ impl DMIPage {
             ("[Type  0] BIOS", SelectedTable::Bios),
             ("[Type  1] System", SelectedTable::System),
             ("[Type  2] Baseboard", SelectedTable::Baseboard),
-            ("[Type  2] Chassis", SelectedTable::Chassis),
+            ("[Type  3] Chassis", SelectedTable::Chassis),
             ("[Type  4] Processor", SelectedTable::Processor),
             // (
             //     "[Type  5] Memory Controller",
