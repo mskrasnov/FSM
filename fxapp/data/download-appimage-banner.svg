@@ -20,8 +20,8 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="4.6506911"
-     inkscape:cx="70.849685"
-     inkscape:cy="33.32838"
+     inkscape:cx="88.373962"
+     inkscape:cy="33.543402"
      inkscape:window-width="1536"
      inkscape:window-height="891"
      inkscape:window-x="0"
@@ -264,15 +264,14 @@
     </g>
   </g>
   <text
-     transform="matrix(.549723 0 0 .549723 29.488 1.8718)"
      xml:space="preserve"
      font-family="Montserrat"
-     font-size="21"
-     y="28.638"
-     x="46.671"
+     font-size="11.5442px"
+     y="20.840094"
+     x="56.434254"
      fill="#fff"
      id="text28"
-     style="fill:#fbf1c7;fill-opacity:1">Download as an</text>
+     style="fill:#fabd2f;fill-opacity:1;stroke-width:0.549723">Download as an</text>
   <text
      xml:space="preserve"
      font-family="Montserrat"
