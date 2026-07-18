@@ -109,7 +109,10 @@ impl DMIPage {
 
         if let LoadState::Loaded(dmi) = &self.dmi {
             if let LoadState::Loaded(mem) = &dmi.memory_devices {
-                pages_items.push(("Physical Memory Array".to_string(), SelectedTable::Category));
+                pages_items.push((
+                    "[Type 17] Installed Memory Devices".to_string(),
+                    SelectedTable::Category,
+                ));
 
                 let mem = &mem.memory;
                 let mut i = 0;
