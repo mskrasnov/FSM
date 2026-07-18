@@ -73,7 +73,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 
 ## Build & Install
 
-[![](https://img.shields.io/github/downloads/mskrasnov/fsm/total?color=red)](https://github.com/mskrasnov/FSM/releases) [![](https://img.shields.io/github/downloads/mskrasnov/fsm/latest/total?color=green)](https://github.com/mskrasnov/FSM/releases/latest) [![](https://img.shields.io/badge/Download_latest-AppImage-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
+[![](https://img.shields.io/github/downloads/mskrasnov/fsm/total?color=red)](https://github.com/mskrasnov/FSM/releases) [![](https://img.shields.io/github/downloads/mskrasnov/fsm/latest/total?color=green)](https://github.com/mskrasnov/FSM/releases/latest) [![](https://img.shields.io/badge/Download_latest-AppImage-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage) [![](https://img.shields.io/badge/Download_latest-deb_amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/Download_latest-rpm_amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
 
 ```bash
 git clone https://github.com/mskrasnov/Ferrix
