@@ -572,7 +572,7 @@ fn baseboard_table<'a>(bb: &'a LoadState<Baseboard>) -> Element<'a, Message> {
 
             container(
                 column![
-                    text("Summary").style(text::warning),
+                    text("General").style(text::warning),
                     container(kv_info_table(rows)).style(container::rounded_box),
                     features,
                     btype,
@@ -628,7 +628,7 @@ fn chassis_table<'a>(c: &'a LoadState<Chassis>) -> Element<'a, Message> {
 
             container(
                 column![
-                    text("Summary").style(text::warning),
+                    text("General").style(text::warning),
                     container(kv_info_table(rows)).style(container::rounded_box),
                     chassis_type,
                 ]
@@ -786,7 +786,7 @@ fn processor_table<'a>(p: &'a LoadState<Processor>) -> Element<'a, Message> {
             ];
             container(
                 column![
-                    text("Summary").style(text::warning),
+                    text("General").style(text::warning),
                     container(kv_info_table(rows)).style(container::rounded_box),
                     processor_characteristics_table(p),
                     processor_voltage_table(p),
@@ -997,6 +997,7 @@ fn memory_device_table<'a>(m: &'a MemoryDevice) -> Element<'a, Message> {
     let main_table = container(kv_info_table(rows)).style(container::rounded_box);
 
     column![
+        text("General").style(text::warning),
         main_table,
         memory_device_type_details_table(&m.type_detail),
         memory_device_operating_mode(&m.memory_operating_mode_capability),
