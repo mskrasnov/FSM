@@ -4097,3 +4097,192 @@ impl Display for MemoryIndicatedSize {
         )
     }
 }
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct CoolingDevice {
+    /// Handle, or instance number, of the temperature probe monitoring this
+    /// cooling device. A value of 0xFFFF indicates that no probe is provided.
+    pub temperature_probe_handle: Option<Handle>,
+
+    /// Cooling device type and status.
+    pub device_type_and_status: Option<CoolingDeviceTypeAndStatus>,
+
+    pub cooling_unit_group: Option<u8>,
+
+    pub oem_defined: Option<u32>,
+    pub rotational_speed: Option<RotationalSpeed>,
+    pub description: String,
+}
+
+impl CoolingDevice {
+    pub fn new() -> Result<Self> {
+        let table = smbioslib::table_load_from_device()?;
+        Self::new_from_table(&table)
+    }
+
+    pub fn new_from_table(table: &SMBiosData) -> Result<Self> {
+        let t = table
+            .find_map(|f: smbioslib::SMBiosCoolingDevice| Some(f))
+            .ok_or(anyhow!(
+                "Failed to get information about cooling device (type 27)!"
+            ))?;
+
+        Ok(Self {
+            temperature_probe_handle: t.temperature_probe_handle().map(|h| Handle::from(h)),
+            device_type_and_status: t
+                .device_type_and_status()
+                .map(|d| CoolingDeviceTypeAndStatus::from(d)),
+            cooling_unit_group: t.cooling_unit_group(),
+            oem_defined: t.oem_defined(),
+            rotational_speed: t.nominal_speed().map(|r| RotationalSpeed::from(r)),
+            description: t.description().to_string(),
+        })
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct CoolingDeviceTypeAndStatus {
+    /// Raw value
+    pub raw: u8,
+
+    /// Device status
+    pub device_status: CoolingDeviceStatus,
+
+    /// Device type
+    pub device_type: CoolingDeviceType,
+}
+
+impl From<smbioslib::CoolingDeviceTypeAndStatus> for CoolingDeviceTypeAndStatus {
+    fn from(value: smbioslib::CoolingDeviceTypeAndStatus) -> Self {
+        Self {
+            raw: value.raw,
+            device_status: CoolingDeviceStatus::from(value.device_status),
+            device_type: CoolingDeviceType::from(value.device_type),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum CoolingDeviceStatus {
+    Other,
+    Unknown,
+    OK,
+    NonCritical,
+    Critical,
+    NonRecoverable,
+    None,
+}
+
+impl From<smbioslib::CoolingDeviceStatus> for CoolingDeviceStatus {
+    fn from(value: smbioslib::CoolingDeviceStatus) -> Self {
+        match value {
+            smbioslib::CoolingDeviceStatus::Other => Self::Other,
+            smbioslib::CoolingDeviceStatus::Unknown => Self::Unknown,
+            smbioslib::CoolingDeviceStatus::OK => Self::OK,
+            smbioslib::CoolingDeviceStatus::Critical => Self::Critical,
+            smbioslib::CoolingDeviceStatus::NonCritical => Self::NonCritical,
+            smbioslib::CoolingDeviceStatus::NonRecoverable => Self::NonRecoverable,
+            smbioslib::CoolingDeviceStatus::None => Self::None,
+        }
+    }
+}
+
+impl Display for CoolingDeviceStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::OK => "OK",
+                Self::NonCritical => "Non-critical",
+                Self::Critical => "Critical",
+                Self::NonRecoverable => "Non-recoverable",
+                Self::None => "None",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum CoolingDeviceType {
+    Other,
+    Unknown,
+    Fan,
+    CentrifugalBlower,
+    ChipFan,
+    CabinetFan,
+    PowerSupplyFan,
+    HeatPipe,
+    IntegratedRefrigeration,
+    ActiveCooling,
+    PassiveCooling,
+    None,
+}
+
+impl From<smbioslib::CoolingDeviceType> for CoolingDeviceType {
+    fn from(value: smbioslib::CoolingDeviceType) -> Self {
+        match value {
+            smbioslib::CoolingDeviceType::Other => Self::Other,
+            smbioslib::CoolingDeviceType::Unknown => Self::Unknown,
+            smbioslib::CoolingDeviceType::Fan => Self::Fan,
+            smbioslib::CoolingDeviceType::CentrifugalBlower => Self::CentrifugalBlower,
+            smbioslib::CoolingDeviceType::ChipFan => Self::ChipFan,
+            smbioslib::CoolingDeviceType::CabinetFan => Self::CabinetFan,
+            smbioslib::CoolingDeviceType::PowerSupplyFan => Self::PowerSupplyFan,
+            smbioslib::CoolingDeviceType::HeatPipe => Self::HeatPipe,
+            smbioslib::CoolingDeviceType::IntegratedRefrigeration => Self::IntegratedRefrigeration,
+            smbioslib::CoolingDeviceType::ActiveCooling => Self::ActiveCooling,
+            smbioslib::CoolingDeviceType::PassiveCooling => Self::PassiveCooling,
+            smbioslib::CoolingDeviceType::None => Self::None,
+        }
+    }
+}
+
+impl Display for CoolingDeviceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::Fan => "FAN",
+                Self::CentrifugalBlower => "Cetrifugal Blower",
+                Self::ChipFan => "Chip FAN",
+                Self::CabinetFan => "Cabinet FAN",
+                Self::PowerSupplyFan => "Power Supply FAN",
+                Self::HeatPipe => "Heat Pipe",
+                Self::IntegratedRefrigeration => "Integrated Refrigeration",
+                Self::ActiveCooling => "Active Cooling",
+                Self::PassiveCooling => "Passive Cooling",
+                Self::None => "None",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
+pub enum RotationalSpeed {
+    Rpm(u16),
+    Unknown,
+}
+
+impl From<smbioslib::RotationalSpeed> for RotationalSpeed {
+    fn from(value: smbioslib::RotationalSpeed) -> Self {
+        match value {
+            smbioslib::RotationalSpeed::Rpm(rpm) => Self::Rpm(rpm),
+            smbioslib::RotationalSpeed::Unknown => Self::Unknown,
+        }
+    }
+}
+
+impl Display for RotationalSpeed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rpm(rpm) => write!(f, "{} RPM", rpm),
+            Self::Unknown => write!(f, "Unknown"),
+        }
+    }
+}
