@@ -13,7 +13,7 @@
 
 FSM is a modern system profiler. Is a program for obtaining information about computer hardware and software. It is designed to work in modern GNU/Linux systems.
 
-[![Download latest AppImage build (amd64)](https://docs.appimage.org/_images/download-appimage-banner.svg)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
+[![Download latest AppImage build (amd64)](./fxapp/data/download-appimage-banner.svg)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
 
 ## Functions
 
