@@ -23,7 +23,7 @@
 use super::{PageData, PageView};
 use crate::{
     fl,
-    message::{DataReceiver, Message},
+    message::{DataReceiver, KeyboardAndMouse, Message},
     widgets::table::hdr_name,
 };
 use ferrix_data::load_state::{LoadState, ToLoadState};
@@ -35,7 +35,8 @@ use ferrix_widgets::tooltip::icon_tooltip;
 use iced::{
     Alignment::Center,
     Color, Element, Font, Length, Task,
-    widget::{center, container, progress_bar, row, scrollable, stack, table, text},
+    alignment::Horizontal::Right,
+    widget::{button, center, container, progress_bar, row, scrollable, stack, table, text},
 };
 
 #[derive(Debug, Clone)]
@@ -154,24 +155,63 @@ fn storage_table<'a>(rows: Vec<TableRow<'a>>) -> Element<'a, Message> {
     let columns = [
         table::column(hdr_name(fl!("storage-dev")), |row: TableRow| {
             row![
-                text(row.device).font(Font::MONOSPACE),
-                icon_tooltip("about", format!("{}\n{}", row.mount_point, row.options))
+                button(text(row.device).font(Font::MONOSPACE))
+                    .style(button::text)
+                    .padding(0)
+                    .on_press(Message::KeyboardAndMouse(
+                        KeyboardAndMouse::CopyButtonPressed(row.device.to_string()),
+                    )),
+                button(icon_tooltip(
+                    "about",
+                    format!("{}\n{}", row.mount_point, row.options)
+                ))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::KeyboardAndMouse(
+                    KeyboardAndMouse::CopyButtonPressed(format!(
+                        "{}\n{}",
+                        row.mount_point, row.options
+                    ))
+                )),
             ]
             .spacing(5)
             .align_y(Center)
         }),
         table::column(hdr_name(fl!("storage-fs")), |row: TableRow| {
-            text(row.filesystem).font(Font::MONOSPACE)
+            button(text(row.filesystem).font(Font::MONOSPACE))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::KeyboardAndMouse(
+                    KeyboardAndMouse::CopyButtonPressed(row.filesystem.to_string()),
+                ))
         }),
         table::column(hdr_name(fl!("storage-total")), |row: TableRow| {
-            text(row.total_size.to_string())
-        }),
+            button(text(row.total_size.to_string()))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::KeyboardAndMouse(
+                    KeyboardAndMouse::CopyButtonPressed(row.total_size.to_string()),
+                ))
+        })
+        .align_x(Right),
         table::column(hdr_name(fl!("storage-free")), |row: TableRow| {
-            text(row.free_size.to_string())
-        }),
+            button(text(row.free_size.to_string()))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::KeyboardAndMouse(
+                    KeyboardAndMouse::CopyButtonPressed(row.free_size.to_string()),
+                ))
+        })
+        .align_x(Right),
         table::column(hdr_name(fl!("storage-used")), |row: TableRow| {
-            text(row.used_size.to_string())
-        }),
+            button(text(row.used_size.to_string()))
+                .style(button::text)
+                .padding(0)
+                .on_press(Message::KeyboardAndMouse(
+                    KeyboardAndMouse::CopyButtonPressed(row.used_size.to_string()),
+                ))
+        })
+        .align_x(Right),
         table::column(hdr_name(fl!("storage-usage")), |row: TableRow| {
             stack![
                 progress_bar(0.0..=100., row.usage_percent)
