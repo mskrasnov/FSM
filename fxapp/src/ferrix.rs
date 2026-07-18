@@ -33,6 +33,7 @@ pub struct Ferrix {
 
     pub proc_page: pages::proc::ProcPage,
     pub mem_page: pages::mem::MemoryPage,
+    pub fs_page: pages::fs::FSPage,
     pub dmi_page: pages::dmi::DMIPage,
     pub bat_page: pages::battery::BatPage,
     pub firmware_page: pages::firmware::FirmwarePage,
@@ -44,6 +45,7 @@ impl Ferrix {
             Self {
                 active_page: PageVariant::Processors,
                 proc_page: pages::proc::ProcPage::new(),
+                fs_page: pages::fs::FSPage::new(),
                 mem_page: pages::mem::MemoryPage::new(),
                 dmi_page: pages::dmi::DMIPage::new(),
                 bat_page: pages::battery::BatPage::new(),
@@ -71,6 +73,9 @@ impl Ferrix {
         match page {
             PageVariant::Processors if self.proc_page.proc_data.is_none() => {
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::FileSystems if self.fs_page.mounts.is_none() => {
+                pages::fs::FSPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::DMITables if self.dmi_page.dmi.is_none() => {
                 pages::dmi::DMIPage::get_data().map(Message::DataReceiver)

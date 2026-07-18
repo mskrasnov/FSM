@@ -28,6 +28,7 @@ use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
+    parts::Mounts,
     ram::{RAM, Swaps},
 };
 use iced::{
@@ -57,6 +58,9 @@ pub enum DataReceiver {
     GetRAMData,
     RAMDataReceived((LoadState<RAM>, LoadState<Swaps>)),
 
+    GetFilesystemsData,
+    FilesystemsDataReceived(LoadState<Mounts>),
+
     GetDMIData,
     DMIDataRefresh,
     DMIDataReceived(LoadState<DMIData>),
@@ -85,6 +89,13 @@ impl DataReceiver {
             Self::RAMDataReceived(val) => {
                 (fx.mem_page.ram_data, fx.mem_page.swap_data) = val;
                 Task::none()
+            }
+            Self::FilesystemsDataReceived(val) => {
+                fx.fs_page.mounts = val;
+                Task::none()
+            }
+            Self::GetFilesystemsData => {
+                crate::pages::fs::FSPage::get_data().map(Message::DataReceiver)
             }
             Self::GetDMIData => {
                 if fx.dmi_page.is_polkit {

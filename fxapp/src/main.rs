@@ -46,5 +46,6 @@ fn main() -> iced::Result {
         .window_size((780., 470.))
         .antialiasing(true)
         .theme(Ferrix::theme)
+        .title("Ferrix System Monitor")
         .run()
 }
