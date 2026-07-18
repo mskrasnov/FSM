@@ -28,9 +28,9 @@ use ferrix_lib::dmi::{
     Baseboard, Bios, Chassis, ChassisSecurityStatusData, ChassisStateData, MemoryDevice,
     MemoryDevices, MemoryOperatingModeCapabilities, MemoryTypeDetails, Processor, System,
 };
-use ferrix_widgets::{headers::header, separated_view::SeparatedView};
+use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
-    Element, Length, Task,
+    Element, Length, Padding, Task,
     widget::{Column, button, column, container, row, scrollable, table, text},
 };
 
@@ -56,7 +56,9 @@ pub enum SelectedTable {
     CPUCache,
     PortConnectors,
     PhysicalMemoryArray,
-    InstalledMemoryDevices,
+    InstalledMemoryDevices(usize),
+
+    Category,
 }
 
 impl SelectedTable {
@@ -67,7 +69,9 @@ impl SelectedTable {
             Self::Baseboard => baseboard_table(&dmi.baseboard),
             Self::Chassis => chassis_table(&dmi.chassis),
             Self::Processor => processor_table(&dmi.processor),
-            Self::InstalledMemoryDevices => memory_devices_table(&dmi.memory_devices),
+            Self::InstalledMemoryDevices(dev_num) => {
+                memory_devices_table(&dmi.memory_devices, *dev_num)
+            }
             _ => super::todo(),
         }
     }
@@ -83,12 +87,13 @@ impl DMIPage {
     }
 
     fn get_pages_list<'a>(&'a self) -> Vec<Element<'a, Message>> {
-        let pages_items = [
-            ("[Type  0] BIOS", SelectedTable::Bios),
-            ("[Type  1] System", SelectedTable::System),
-            ("[Type  2] Baseboard", SelectedTable::Baseboard),
-            ("[Type  3] Chassis", SelectedTable::Chassis),
-            ("[Type  4] Processor", SelectedTable::Processor),
+        let mut pages_items = vec![
+            ("Basic data".to_string(), SelectedTable::Category),
+            ("[Type  0] BIOS".to_string(), SelectedTable::Bios),
+            ("[Type  1] System".to_string(), SelectedTable::System),
+            ("[Type  2] Baseboard".to_string(), SelectedTable::Baseboard),
+            ("[Type  3] Chassis".to_string(), SelectedTable::Chassis),
+            ("[Type  4] Processor".to_string(), SelectedTable::Processor),
             // (
             //     "[Type  5] Memory Controller",
             //     SelectedTable::MemoryController,
@@ -100,15 +105,40 @@ impl DMIPage {
             //     "[Type 16] Physical Memory Array",
             //     SelectedTable::PhysicalMemoryArray,
             // ),
-            (
-                "[Type 17] Installed Memory Devices",
-                SelectedTable::InstalledMemoryDevices,
-            ),
         ];
+
+        if let LoadState::Loaded(dmi) = &self.dmi {
+            if let LoadState::Loaded(mem) = &dmi.memory_devices {
+                pages_items.push(("Physical Memory Array".to_string(), SelectedTable::Category));
+
+                let mem = &mem.memory;
+                let mut i = 0;
+                while i < mem.len() {
+                    let m = &mem[i];
+                    pages_items.push((
+                        format!(
+                            "{i}: {} {}",
+                            &m.manufacturer
+                                .clone()
+                                .unwrap_or("Unknown Manufacturer".to_string()),
+                            &m.part_number.clone().unwrap_or(String::new())
+                        ),
+                        SelectedTable::InstalledMemoryDevices(i),
+                    ));
+                    i += 1;
+                }
+            }
+        }
         let mut pages = Vec::with_capacity(pages_items.len());
 
         for page in pages_items {
-            let b = button(page.0)
+            if page.1 == SelectedTable::Category {
+                let item = text(page.0).style(text::secondary);
+                pages.push(item.into());
+                continue;
+            }
+
+            let b = button(text(page.0))
                 .on_press(Message::PageMessage(PageMessage::DMIPage(
                     DMIPageMessage::TableSelected(page.1),
                 )))
@@ -118,7 +148,10 @@ impl DMIPage {
                     button::text
                 })
                 .height(Length::Fill)
-                .padding(2)
+                .padding(match page.1 {
+                    SelectedTable::InstalledMemoryDevices(_) => Padding::new(2.).left(10),
+                    _ => Padding::new(2.),
+                })
                 .into();
             pages.push(b);
         }
@@ -177,7 +210,7 @@ impl<'a> PageView<'a> for DMIPage {
                 let view = SeparatedView::new(first_panel, second_panel)
                     .set_fpane_id(Self::scrolled_page_id().unwrap_or(""))
                     .set_spane_id(Self::page_id())
-                    .set_fpane_max_height(Length::Fixed(120.))
+                    .set_fpane_max_height(Length::Fixed(160.))
                     .set_spane_max_height(Length::Fill);
                 view.view().into()
             }
@@ -838,22 +871,14 @@ fn processor_characteristics_table<'a>(p: &'a Processor) -> container::Container
     }
 }
 
-fn memory_devices_table<'a>(m: &'a LoadState<MemoryDevices>) -> Element<'a, Message> {
+fn memory_devices_table<'a>(
+    m: &'a LoadState<MemoryDevices>,
+    dev_num: usize,
+) -> Element<'a, Message> {
     match m {
         LoadState::Loading => container(text(fl!("ldr-page-tooltip")).style(text::warning)).into(),
         LoadState::Error(why) => container(text(why).style(text::danger)).into(),
-        LoadState::Loaded(m) => {
-            let mut devices = Column::with_capacity(m.memory.len()).spacing(5);
-            let mut i = 0;
-            for device in &m.memory {
-                devices = devices.push(
-                    column![header(format!("Device #{i}")), memory_device_table(device),]
-                        .spacing(5),
-                );
-                i += 1;
-            }
-            devices.into()
-        }
+        LoadState::Loaded(m) => memory_device_table(&m.memory[dev_num]),
     }
 }
 
