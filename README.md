@@ -62,6 +62,7 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 | Installed software list    | 🟢️ | 🔴️ | 🔴️ |
 | Linux kernel information   | 🟢️ | 🟢️ | 🔴️ |
 | Desktop environment info   | ⚪️ | ⚪️ | ⚪️ |
+| Command shell info         | 🟢️ | 🔴️ | 🔴️ |
 | UEFI Attributes Info       | 🟢️ | 🔴️ | 🔴️ |
 | Hardware benchmarks        | 🔴️ | 🟢️ | 🔴️ |
 | System cleaning tools      | 🔴️ | 🔴️ | 🟢️ |
