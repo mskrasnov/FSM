@@ -5,7 +5,7 @@
 
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Support me](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
-  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png">
+  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png" width="60%"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png" width="60%">
   <small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small>
 </div>
 
@@ -37,15 +37,6 @@ FSM is a modern system profiler. Is a program for obtaining information about co
     - Desktop environment name;
     - UEFI Settings (tested on Lenovo ThinkBook);
 
-**TODO:**
-
-- [ ] More information about environment (name and version of DE, WM, DM);
-- [ ] Information about media: name of video- and soundcard, information about Pulseaudio/PipeWire and Xorg/Wayland;
-- [ ] I/O utilization charts;
-- [ ] Process monitor;
-- [ ] More information about network;
-- [ ] Sensors information;
-
 ## Difference from analogues
 
 | Criteria              | Ferrix System Monitor | Hardinfo2 | Stacer/Nexis |
@@ -71,46 +62,125 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 - 🔴️ - no;
 - ⚪️ - partial;
 
-## Build & Install
+## Installation
 
-[![](https://img.shields.io/github/downloads/mskrasnov/fsm/total?color=red)](https://github.com/mskrasnov/FSM/releases) [![](https://img.shields.io/github/downloads/mskrasnov/fsm/latest/total?color=green)](https://github.com/mskrasnov/FSM/releases/latest) [![](https://img.shields.io/badge/Download_latest-AppImage-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage) [![](https://img.shields.io/badge/Download_latest-deb_amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/Download_latest-rpm_amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
+[![](https://img.shields.io/github/downloads/mskrasnov/fsm/total?color=red)](https://github.com/mskrasnov/FSM/releases) [![](https://img.shields.io/github/downloads/mskrasnov/fsm/latest/total?color=green)](https://github.com/mskrasnov/FSM/releases/latest)
+
+You can use the universal AppImage package (no installation required) or install the deb/rpm packages (for Debian/Ubuntu or Fedora/RHEL).
+
+### For all systems (AppImage package)
+
+- **Dependencies:**
+    - glibc >= 2.36;
+    - Xorg or Wayland;
+    - Graphics drivers;
+
+Download the AppImage package (only `amd64` is supported yet): [![](https://img.shields.io/badge/FSM_v0.7.1_AppImage-amd64-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
+
+Make this package executable:
 
 ```bash
-git clone https://github.com/mskrasnov/Ferrix
-cd Ferrix
+sudo chmod +x ./Ferrix.System.Monitor-v0.7.1-x86_64.AppImage
+```
 
+Run this package:
+
+```bash
+./Ferrix.System.Monitor-v0.7.1-x86_64.AppImage
+```
+
+### For Debian/Ubuntu
+
+- **Minimum version required:** Debian 11, Ubuntu 22.04;
+- **Dependencies:**
+    - glibc >= 2.36;
+    - dbus;
+    - Xorg or Wayland;
+    - Graphics drivers;
+
+Download the package for your CPU architecture: [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-i386-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_i386.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-ARM64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_arm64.deb)
+
+Install using `apt`:
+
+```bash
+sudo apt install ./ferrix-app_0.7.1-1_${your architecture}.deb
+```
+
+### For Fedora/RHEL
+
+- **Minimum version required:** Fedora 42;
+- **Dependencies:**
+    - glibc >= 2.36;
+    - dbus;
+    - Xorg or Wayland;
+    - Graphics drivers;
+
+Download the package (only `amd64` is supported yet): [![](https://img.shields.io/badge/FSM_v0.7.1_Fedora-amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
+
+Install using `dnf`:
+
+```bash
+sudo dnf install ./ferrix-app-0.7.1-1.x86_64.rpm
+```
+
+## Building from the source code
+
+- **Dependencies:**
+    - glibc >= 2.36;
+    - GNU make;
+    - GNU coreutils;
+    - `rustc`, `cargo` >= 1.96;
+    - [optional] `dpkg`, `dpkg-dev`, `liblzma-dev` for building the `deb` package;
+    - [optional] `docker`, `buildx-plugin` for docker;
+    - [optional] `libfuse2`, `wget` for appimage build;
+
+Clone this repository:
+
+```bash
+git clone https://github.com/mskrasnov/FSM
+cd        ./FSM
+```
+
+### Building on the host
+
+**1. Prepare your host system:**
+
+```bash
+# If you use Debian/Ubuntu and its derivatives:
+sudo bash ./packaging/debian/setup.sh
+
+# If you use Fedora/RHEL:
+sudo bash ./packaging/fedora/setup.sh
+```
+
+This script will install all build dependencies, including the Rust programming language toolchain (`rustup`, `cargo`, `rustc`).
+
+**2. Build the package:**
+
+- `debug`-profile without optimizations and LTO:
+
+```bash
+make debug
+```
+
+- `release`-profile with optimizations and LTO and without debug symbols:
+
+```bash
 make build
 ```
 
-If you use Debian, perform:
+If you want to build Debian package, run this (on Debian):
 
 ```bash
+cargo install cargo-deb
 make deb
 ```
 
-And install `deb`-package:
+If you want to build Fedora/RHEL package, run this (on Fedora):
 
 ```bash
-sudo dpkg -i ./target/${TARGET_ARCH}/debian/ferrix-app_${VERSION}-${BUILD_NUM}_${ARCH}.deb
-```
-
-If you use other Linux system, perform:
-
-```bash
-make run # to run Ferrix...
-# ... or
-make install # to install Ferrix.
-# Perform:
-make uninstall # to uninstall Ferrix from your system.
-```
-
-### Running in WSL
-
-```bash
-export XDG_SESSION_TYPE=xorg
-export DISPLAY=':0'
-export WAYLAND_DISPLAY=
-ferrix-app
+cargo install cargo-generate-rpm
+cargo generate-rpm --target-dir=${PWD}/target/
 ```
 
 ### Cross compilation (Debian 12 x86_64 glibc -> i686/AArch64 glibc)
@@ -133,20 +203,36 @@ rustup target add i686-unknown-linux-gnu
 Build Ferrix:
 
 ```bash
-cargo build [--release] --target={i686/aarch64}-unknown-linux-gnu
-# or:
+#   debug-profile:
+make TARGET={i686/aarch64}-unknown-linux-gnu debug
+# or
+#   release-profile:
 make TARGET={i686/aarch64}-unknown-linux-gnu build
 ```
 
 ### Docker build
 
-Prepare for `*.deb` or `*.AppImage`:
+> **Note 1:** In the Docker container you can build the Debian or Fedora/RHEL packages and AppImage.
+
+> **Note 2:** Each of the built packages will be placed in the `builds/` directory.
+
+**1. Some preparations.**
+
+**1.1. To build `deb` or `AppImage` packages:**
 
 ```bash
-docker build -t fsm-debian -f packaging/debian/Dockerfile .
+docker build -t fsm-debian -f ./packaging/debian/Dockerfile .
 ```
 
-Build `*.deb` packages for `amd64`, `i686` and `aarch64` targets:
+**1.2. To build `rpm` package:**
+
+```bash
+docker build -t fsm-fedora -f ./packaging/fedora/Dockerfile .
+```
+
+**2. Build packages.**
+
+**2.1. Build `deb`-packages:**
 
 ```bash
 docker run --rm            \
@@ -155,7 +241,9 @@ docker run --rm            \
     packaging/debian/build.sh
 ```
 
-Build `*.AppImage` package (only for `amd64` target):
+> **Note:** This script will build 3 packages: for the `amd64`, `i386`, and `aarch64` architectures.
+
+**2.2. Build `AppImage` package (for `amd64`):**
 
 ```bash
 docker run --rm            \
@@ -164,26 +252,28 @@ docker run --rm            \
     packaging/debian/appimage.sh
 ```
 
-Prepare for `*.rpm`:
+**2.3. Build `rpm` package (for `amd64`):**
 
 ```bash
-docker build -t fsm-rpm -f packaging/fedora/Dockerfile .
-```
-
-Build `*.rpm` package (only for `amd64` target):
-
-```bash
-docker build -t fsm-rpm -f ./packaging/fedora/Dockerfile
 docker run -- rm           \
     -v "${PWD}:/workspace" \
-    fsm-rpm                \
+    fsm-fedora             \
     packaging/fedora/build.sh
+```
+
+### Running in WSL
+
+```bash
+export XDG_SESSION_TYPE=xorg
+export DISPLAY=':0'
+export WAYLAND_DISPLAY=
+ferrix-app
 ```
 
 ## Technology stack
 
 - **OS:** Linux with `glibc`, `dbus` and `systemd`;
-- **Programming language:** Rust 1.88+ (2024 edition);
+- **Programming language:** Rust 1.96+ (2024 edition);
 - **GUI:** [`iced`](https://iced.rs);
 - **Hardware:** modern PC or laptop;
 
