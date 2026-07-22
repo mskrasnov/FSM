@@ -5,7 +5,7 @@
 
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Support me](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
-  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png" width="40%"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png" width="40%">
+  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png" width="43%"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png" width="43%">
 
   <p><small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small></p>
 </div>
@@ -40,24 +40,38 @@ FSM is a modern system profiler. Is a program for obtaining information about co
 
 ## Difference from analogues
 
-| Criteria              | Ferrix System Monitor | Hardinfo2 | Stacer/Nexis |
-|-----------------------|-----------------------|-----------|--------------|
-| Programming language  | Rust                  | C         | C++          |
-| Program type          | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
-| GUI                   | `iced`                | GTK3      | Qt5/Qt6      |
-| License               | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
-| Data accuracy         | 🟢️ | ⚪️ ([incorrect battery information](https://raw.githubusercontent.com/mskrasnov/mskrasnov.github.io/refs/heads/master/ferrix/assets/hardinfo2.png)) | ⚪️ (stacer is outdated software) |
-| Target audience       | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
-| Processor topology    | 🟢️                    | 🟢️        | 🔴️           |
-| Processor frequencies | 🟢️                    | ⚪️        | ?            |
-| Processor vulnerabilities | 🟢️                | 🟢️        | 🔴️           |
-| Real-time monitoring  | 🟢️                    | ⚪️        | 🟢️           |
-| Hardware info panel   | 🟢️                    | 🟢️        | 🟢️           |
-| Battery health        | 🟢️                    | 🔴️        | 🟢️           |
-| systemd services list | 🟢️                    | 🔴️        | 🟢️           |
-| DMI Tables            | ⚪️ (more data than Hardinfo) | ⚪️ (less data than FSM) | 🔴️ |
-| UEFI Settings         | 🟢️                    | 🔴️        | 🔴️           |
-| Official AppImage builds | 🟢️                 | 🔴️        | 🟢️           |
+| Criteria                   | FSM | Hardinfo2 | Stacer/Nexis |
+|----------------------------|-----|-----------|--------------|
+| Programming language       | Rust                  | C         | C++          |
+| Program type               | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
+| GUI                        | `iced`                | GTK3      | Qt5/Qt6      |
+| License                    | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
+| CPU&RAM utilization charts | 🟢️ | ⚪️ (charts is ugly) | 🟢️ |
+| CPU Information            | 🟢️ | 🟢️ | ⚪️ |
+| Memory Information         | 🟢️ | 🟢️ | ⚪️ |
+| Filesystems Information    | 🟢️ | 🟢️ | 🔴️ |
+| Network Information        | ⚪️ | 🟢️ | 🔴️ |
+| DMI Tables contents        | ⚪️ (full information from BIOS, Baseboard, Chassis, System, Processors, Memory Devices tables) | ⚪️ (only basic information from Chassis, BIOS, Baseboard tables) | 🔴️ |
+| Notebook battery(es) Info  | 🟢️ | ⚪️ ([incorrect battery information](https://raw.githubusercontent.com/mskrasnov/mskrasnov.github.io/refs/heads/master/ferrix/assets/hardinfo2.png)) | 🟢️ |
+| Connected screens Info     | ⚪️ | 🟢️ | 🔴️ |
+| Installed Linux system     | 🟢️ | 🟢️ | 🔴️ |
+| Users and groups list      | 🟢️ | 🟢️ | 🔴️ |
+| Environment variables list | 🟢️ | 🟢️ | 🔴️ |
+| `systemd` services list    | 🟢️ | 🔴️ | 🔴️ |
+| Linux boots list           | 🔴️ | 🟢️ | 🔴️ |
+| Installed software list    | 🟢️ | 🔴️ | 🔴️ |
+| Linux kernel information   | 🟢️ | 🟢️ | 🔴️ |
+| Desktop environment info   | ⚪️ | ⚪️ | ⚪️ |
+| UEFI Attributes Info       | 🟢️ | 🔴️ | 🔴️ |
+| Hardware benchmarks        | 🔴️ | 🟢️ | 🔴️ |
+| System cleaning tools      | 🔴️ | 🔴️ | 🟢️ |
+| PCI- and USB-devices list  | 🔴️ | 🟢️ | 🔴️ |
+| Supported locales list     | 🔴️ | 🟢️ | 🔴️ |
+| GPU information            | 🔴️ | 🟢️ | 🔴️ |
+| Sensors information        | 🔴️ | 🟢️ | ⚪️ |
+| Target audience | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
+| Real-time monitoring       | 🟢️ | ⚪️ | 🟢️ |
+| Official AppImage builds   | 🟢️ | 🔴️ | 🟢️ |
 
 - 🟢️ - yes;
 - 🔴️ - no;
