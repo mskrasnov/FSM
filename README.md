@@ -6,7 +6,8 @@
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Support me](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
   <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png" width="60%"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png" width="60%">
-  <small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small>
+
+  <p><small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small></p>
 </div>
 
 ## What is FSM?
@@ -75,7 +76,8 @@ You can use the universal AppImage package (no installation required) or install
     - Xorg or Wayland;
     - Graphics drivers;
 
-Download the AppImage package (only `amd64` is supported yet): [![](https://img.shields.io/badge/FSM_v0.7.1_AppImage-amd64-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
+Download the AppImage package (only `amd64` is supported yet):
+<br>[![](https://img.shields.io/badge/FSM_v0.7.1_AppImage-amd64-blue)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
 
 Make this package executable:
 
@@ -98,7 +100,8 @@ Run this package:
     - Xorg or Wayland;
     - Graphics drivers;
 
-Download the package for your CPU architecture: [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-i386-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_i386.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-ARM64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_arm64.deb)
+Download the package for your CPU architecture:
+<br>[![](https://img.shields.io/badge/FSM_v0.7.1_Debian-amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-i386-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_i386.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-ARM64-red)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_arm64.deb)
 
 Install using `apt`:
 
@@ -115,7 +118,8 @@ sudo apt install ./ferrix-app_0.7.1-1_${your architecture}.deb
     - Xorg or Wayland;
     - Graphics drivers;
 
-Download the package (only `amd64` is supported yet): [![](https://img.shields.io/badge/FSM_v0.7.1_Fedora-amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
+Download the package (only `amd64` is supported yet):
+<br>[![](https://img.shields.io/badge/FSM_v0.7.1_Fedora-amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
 
 Install using `dnf`:
 
@@ -261,7 +265,7 @@ docker run -- rm           \
     packaging/fedora/build.sh
 ```
 
-### Running in WSL
+## Running in WSL
 
 ```bash
 export XDG_SESSION_TYPE=xorg
