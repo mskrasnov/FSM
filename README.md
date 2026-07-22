@@ -5,7 +5,7 @@
 
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Support me](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
-  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png" width="43%"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png" width="43%">
+  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png" width="45%"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png" width="45%">
 
   <p><small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small></p>
 </div>
