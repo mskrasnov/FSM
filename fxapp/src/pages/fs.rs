@@ -186,7 +186,7 @@ fn storage_table<'a>(rows: Vec<TableRow<'a>>) -> Element<'a, Message> {
                 ))
         }),
         table::column(hdr_name(fl!("storage-total")), |row: TableRow| {
-            button(text(row.total_size.to_string()))
+            button(text(row.total_size.to_string()).font(Font::MONOSPACE))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::KeyboardAndMouse(
@@ -195,7 +195,7 @@ fn storage_table<'a>(rows: Vec<TableRow<'a>>) -> Element<'a, Message> {
         })
         .align_x(Right),
         table::column(hdr_name(fl!("storage-free")), |row: TableRow| {
-            button(text(row.free_size.to_string()))
+            button(text(row.free_size.to_string()).font(Font::MONOSPACE))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::KeyboardAndMouse(
@@ -204,7 +204,7 @@ fn storage_table<'a>(rows: Vec<TableRow<'a>>) -> Element<'a, Message> {
         })
         .align_x(Right),
         table::column(hdr_name(fl!("storage-used")), |row: TableRow| {
-            button(text(row.used_size.to_string()))
+            button(text(row.used_size.to_string()).font(Font::MONOSPACE))
                 .style(button::text)
                 .padding(0)
                 .on_press(Message::KeyboardAndMouse(
