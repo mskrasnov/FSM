@@ -25,6 +25,8 @@ pub mod message;
 pub mod navigation;
 pub mod pages;
 pub mod widgets;
+pub mod settings;
+pub mod utils;
 
 use ferrix::Ferrix;
 use iced::{Size, window::Settings};

@@ -25,11 +25,16 @@ use crate::{
     message::{DataReceiver, KeyboardAndMouse, Message},
     navigation,
     pages::{self, PageData, PageVariant},
+    settings::FXSettings,
+    utils::get_home,
 };
+
+const SETTINGS_PATH: &str = "./ferrix.conf";
 
 #[derive(Debug)]
 pub struct Ferrix {
     pub active_page: PageVariant,
+    pub settings: FXSettings,
 
     pub proc_page: pages::proc::ProcPage,
     pub mem_page: pages::mem::MemoryPage,
@@ -44,6 +49,8 @@ impl Ferrix {
         (
             Self {
                 active_page: PageVariant::Processors,
+                settings: FXSettings::read(get_home().join(".config").join(SETTINGS_PATH))
+                    .unwrap_or_default(),
                 proc_page: pages::proc::ProcPage::new(),
                 fs_page: pages::fs::FSPage::new(),
                 mem_page: pages::mem::MemoryPage::new(),
@@ -104,8 +111,18 @@ impl Ferrix {
         let scripts = vec![
             iced::event::listen()
                 .map(|event| Message::KeyboardAndMouse(KeyboardAndMouse::Event(event))),
-            iced::time::every(Duration::from_secs_f32(1.))
-                .map(|_| Message::DataReceiver(DataReceiver::GetRAMData)),
+            iced::time::every(Duration::from_secs(
+                self.settings.update_period_general as u64,
+            ))
+            .map(|_| Message::DataReceiver(DataReceiver::GetRAMData)),
+            iced::time::every(Duration::from_secs(
+                self.settings.update_period_fsystems as u64,
+            ))
+            .map(|_| Message::DataReceiver(DataReceiver::GetFilesystemsData)),
+            iced::time::every(Duration::from_secs(
+                self.settings.update_period_battery as u64,
+            ))
+            .map(|_| Message::DataReceiver(DataReceiver::GetBatData)),
         ];
         Subscription::batch(scripts)
     }
