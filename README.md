@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/mskrasnov/FSM/refs/heads/master/ferrix-app/data/com.mskrasnov.Ferrix.svg" width="200">
-  <h1>Ferrix System Monitor — Swiss Army Knife for Linux Hardware Diagnostics</h1>
+  <h1>FSM — Swiss Army Knife for Linux Hardware Diagnostics</h1>
   <p><b>A modern program for getting information about computer hardware and installed software.</b></p>
 
   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Support me](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
@@ -219,7 +219,7 @@ sudo apt install gcc-12-i686-linux-gnu binutils-i686-linux-gnu
 rustup target add i686-unknown-linux-gnu
 ```
 
-Build Ferrix:
+Build FSM:
 
 ```bash
 #   debug-profile:
@@ -300,9 +300,9 @@ See [FSM Home Page](https://mskrasnov.github.io/fsm/index.html#troubleshooting) 
 - **GUI:** [`iced`](https://iced.rs);
 - **Hardware:** modern PC or laptop;
 
-## ❤️ Support Ferrix System Monitor
+## ❤️ Support FSM
 
-Developing Ferrix System Monitor takes time and passion. If you find it useful, please consider supporting its development:
+Developing FSM takes time and passion. If you find it useful, please consider supporting its development:
 
 - **Star ⭐ this repo!** It helps others discover FSM;
 - **Write comments, questions, bug reports, or suggestions** for new functionality in [issues](https://github.com/mskrasnov/Ferrix/issues/new).
