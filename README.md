@@ -289,6 +289,10 @@ export WAYLAND_DISPLAY=
 ferrix-app
 ```
 
+## TROUBLESHOOTING
+
+See [FSM Home Page](https://mskrasnov.github.io/fsm/index.html#troubleshooting) for details.
+
 ## Technology stack
 
 - **OS:** Linux with `glibc`, `dbus` and `systemd`;
