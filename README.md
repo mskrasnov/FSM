@@ -7,7 +7,7 @@
 
   <img src="https://mskrasnov.github.io/fsm/screens/sysmon-new.png" width="45%"> <img src="https://mskrasnov.github.io/fsm/screens/firmware.png" width="45%">
 
-  <p><small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small></p>
+  <p><small><a href="https://mskrasnov.github.io/fsm/gallery.html">Other screenshots</a></small></p>
 </div>
 
 ## What is FSM?
