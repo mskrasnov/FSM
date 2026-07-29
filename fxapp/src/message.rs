@@ -21,15 +21,12 @@
 use crate::{
     Ferrix,
     pages::{
-        PageData, PageVariant, dmi::DMIPageMessage, mem::MemoryPageMessage, proc::ProcPageMessage,
+        PageData, PageVariant, dmi::DMIPageMessage, freq::ProcFreqMessage, mem::MemoryPageMessage, proc::ProcPageMessage
     },
 };
 use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
 use ferrix_lib::{
-    battery::BatInfo,
-    cpu::Processors,
-    parts::Mounts,
-    ram::{RAM, Swaps},
+    battery::BatInfo, cpu::Processors, cpu_freq::CpuFreq, parts::Mounts, ram::{RAM, Swaps}
 };
 use iced::{
     Event, Task,
@@ -54,6 +51,9 @@ pub enum Message {
 pub enum DataReceiver {
     GetProcData,
     ProcDataReceived(LoadState<Processors>),
+
+    GetCpuFreqData,
+    CpuFreqDataReceived(LoadState<CpuFreq>),
 
     GetRAMData,
     RAMDataReceived((LoadState<RAM>, LoadState<Swaps>)),
@@ -81,6 +81,13 @@ impl DataReceiver {
             }
             Self::ProcDataReceived(val) => {
                 fx.proc_page.proc_data = val;
+                Task::none()
+            }
+            Self::GetCpuFreqData => {
+                crate::pages::freq::CpuFreqPage::get_data().map(Message::DataReceiver)
+            }
+            Self::CpuFreqDataReceived(val) => {
+                fx.freq_page.freqs = val;
                 Task::none()
             }
             Self::GetRAMData => {
@@ -140,10 +147,12 @@ impl DataReceiver {
 
 #[derive(Debug, Clone)]
 pub enum PageMessage {
-    ExportSingle(PageVariant),
     ProcPage(ProcPageMessage),
+    CpuFreqMessage(ProcFreqMessage),
     DMIPage(DMIPageMessage),
     MemPage(MemoryPageMessage),
+
+    ExportSingle(PageVariant),
 }
 
 impl PageMessage {
@@ -166,6 +175,7 @@ impl PageMessage {
                 Task::none()
             }
             Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
+            Self::CpuFreqMessage(cfm) => cfm.update(&mut fx.freq_page),
             Self::DMIPage(dp) => dp.update(&mut fx.dmi_page),
             Self::MemPage(mm) => mm.update(&mut fx.mem_page),
         }

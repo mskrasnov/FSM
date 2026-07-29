@@ -25,6 +25,7 @@ pub mod todo_page;
 pub mod battery;
 pub mod dmi;
 pub mod firmware;
+pub mod freq;
 pub mod fs;
 pub mod mem;
 pub mod proc;
@@ -155,7 +156,7 @@ impl PageVariant {
             Self::SystemPassport => GroupVariant::General,
             Self::SystemMonitor => GroupVariant::General,
             Self::Processors => proc::ProcPage::page_group(),
-            Self::CPUFrequencies => GroupVariant::Hardware,
+            Self::CPUFrequencies => freq::CpuFreqPage::page_group(),
             Self::CPUVulnerabilities => GroupVariant::Hardware,
             Self::Memory => mem::MemoryPage::page_group(),
             Self::FileSystems => fs::FSPage::page_group(),
@@ -183,6 +184,7 @@ impl PageVariant {
     pub fn id(&self) -> Id {
         Id::new(match self {
             Self::Processors => proc::ProcPage::page_id(),
+            Self::CPUFrequencies => freq::CpuFreqPage::page_id(),
             Self::FileSystems => fs::FSPage::page_id(),
             Self::DMITables => dmi::DMIPage::page_id(),
             Self::Memory => mem::MemoryPage::page_id(),
@@ -195,6 +197,9 @@ impl PageVariant {
     pub fn scrolled_id(&self) -> Option<Id> {
         match self {
             Self::Processors => proc::ProcPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
+            Self::CPUFrequencies => {
+                freq::CpuFreqPage::scrolled_page_id().and_then(|id| Some(Id::new(id)))
+            }
             Self::DMITables => dmi::DMIPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
             Self::Memory => mem::MemoryPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
             _ => None,
@@ -204,6 +209,7 @@ impl PageVariant {
     pub fn title(&self) -> String {
         match self {
             Self::Processors => proc::ProcPage::page_title(),
+            Self::CPUFrequencies => freq::CpuFreqPage::page_title(),
             Self::FileSystems => fs::FSPage::page_title(),
             Self::DMITables => dmi::DMIPage::page_title(),
             Self::Memory => mem::MemoryPage::page_title(),
@@ -216,6 +222,7 @@ impl PageVariant {
     pub fn view<'a>(&'a self, fx: &'a crate::Ferrix) -> Element<'a, Message> {
         match self {
             Self::Processors => fx.proc_page.view(),
+            Self::CPUFrequencies => fx.freq_page.view(),
             Self::FileSystems => fx.fs_page.view(),
             Self::DMITables => fx.dmi_page.view(),
             Self::Memory => fx.mem_page.view(),

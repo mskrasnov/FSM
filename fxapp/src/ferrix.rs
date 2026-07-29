@@ -37,6 +37,7 @@ pub struct Ferrix {
     pub settings: FXSettings,
 
     pub proc_page: pages::proc::ProcPage,
+    pub freq_page: pages::freq::CpuFreqPage,
     pub mem_page: pages::mem::MemoryPage,
     pub fs_page: pages::fs::FSPage,
     pub dmi_page: pages::dmi::DMIPage,
@@ -52,6 +53,7 @@ impl Ferrix {
                 settings: FXSettings::read(get_home().join(".config").join(SETTINGS_PATH))
                     .unwrap_or_default(),
                 proc_page: pages::proc::ProcPage::new(),
+                freq_page: pages::freq::CpuFreqPage::new(),
                 fs_page: pages::fs::FSPage::new(),
                 mem_page: pages::mem::MemoryPage::new(),
                 dmi_page: pages::dmi::DMIPage::new(),
@@ -80,6 +82,9 @@ impl Ferrix {
         match page {
             PageVariant::Processors if self.proc_page.proc_data.is_none() => {
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::CPUFrequencies if self.freq_page.freqs.is_none() => {
+                pages::freq::CpuFreqPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::FileSystems if self.fs_page.mounts.is_none() => {
                 pages::fs::FSPage::get_data().map(Message::DataReceiver)
@@ -111,6 +116,10 @@ impl Ferrix {
         let scripts = vec![
             iced::event::listen()
                 .map(|event| Message::KeyboardAndMouse(KeyboardAndMouse::Event(event))),
+            iced::time::every(Duration::from_secs(
+                self.settings.update_period_general as u64,
+            ))
+            .map(|_| Message::DataReceiver(DataReceiver::GetCpuFreqData)),
             iced::time::every(Duration::from_secs(
                 self.settings.update_period_general as u64,
             ))
