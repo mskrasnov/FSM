@@ -25,7 +25,7 @@ use ferrix_lib::cpu_freq::CpuFreq;
 use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
     Element, Length, Task,
-    widget::{Column, button, column, container, text},
+    widget::{Grid, button, column, container, text},
 };
 
 use crate::{
@@ -95,7 +95,7 @@ impl CpuFreqPage {
         let first_panel = container(
             column![
                 text(fl!("cpufreq-flist")).style(text::secondary),
-                Column::from_vec(freq_list),
+                Grid::from_vec(freq_list).spacing(5).fluid(125).height(190.),
             ]
             .spacing(5),
         )
@@ -105,8 +105,8 @@ impl CpuFreqPage {
 
         let second_panel = freq_view(self.id, &cpu_freq);
         let cpu_freq_view = SeparatedView::new(first_panel, second_panel)
-            .set_fpane_id(Self::page_id())
-            .set_spane_id(Self::scrolled_page_id().unwrap_or(""))
+            .set_fpane_id(Self::scrolled_page_id().unwrap_or(""))
+            .set_spane_id(Self::page_id())
             .set_fpane_max_height(210.);
         cpu_freq_view.view()
     }
@@ -118,7 +118,7 @@ impl<'a> PageView<'a> for CpuFreqPage {
     }
 
     fn scrolled_page_id() -> Option<&'static str> {
-        Some("freq")
+        Some("freq-scrolled")
     }
 
     fn page_title() -> String {
