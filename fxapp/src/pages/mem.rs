@@ -208,7 +208,7 @@ impl<'a> PageView<'a> for MemoryPage {
     }
 
     fn page_group() -> super::GroupVariant {
-        super::GroupVariant::System
+        super::GroupVariant::Hardware
     }
 
     fn page_contents_view(&'a self) -> iced::Element<'a, Message> {
