@@ -50,7 +50,7 @@ impl Ferrix {
     pub fn new() -> (Self, Task<Message>) {
         (
             Self {
-                active_page: PageVariant::Processors,
+                active_page: PageVariant::default(),
                 settings: FXSettings::read(get_home().join(".config").join(SETTINGS_PATH))
                     .unwrap_or_default(),
                 proc_page: pages::proc::ProcPage::new(),
@@ -62,10 +62,7 @@ impl Ferrix {
                 bat_page: pages::battery::BatPage::new(),
                 firmware_page: pages::firmware::FirmwarePage::new(),
             },
-            Task::batch([
-                pages::proc::ProcPage::get_data().map(Message::DataReceiver),
-                pages::mem::MemoryPage::get_data().map(Message::DataReceiver),
-            ]),
+            crate::pages::passport::Passport::get_data().map(Message::DataReceiver),
         )
     }
 
@@ -86,6 +83,16 @@ impl Ferrix {
     pub fn select_page(&mut self, page: PageVariant) -> Task<Message> {
         self.active_page = page;
         match page {
+            PageVariant::SystemPassport
+                if self.proc_page.proc_data.is_none()
+                    || self.mem_page.ram_data.is_none()
+                    || self.mem_page.swap_data.is_none()
+                    || self.freq_page.freqs.is_none()
+                    || self.fs_page.mounts.is_none()
+                    || self.bat_page.bat_info.is_none() =>
+            {
+                pages::passport::Passport::get_data().map(Message::DataReceiver)
+            }
             PageVariant::Processors if self.proc_page.proc_data.is_none() => {
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver)
             }

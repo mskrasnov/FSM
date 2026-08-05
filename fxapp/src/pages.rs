@@ -28,6 +28,7 @@ pub mod firmware;
 pub mod freq;
 pub mod fs;
 pub mod mem;
+pub mod passport;
 pub mod proc;
 pub mod vuln;
 
@@ -102,6 +103,7 @@ pub enum PageVariant {
     Battery,
     Screens,
     Sensors,
+    Resources,
     Distro,
     Session,
     Users,
@@ -134,6 +136,7 @@ impl PageVariant {
         Self::Battery,
         Self::Screens,
         Self::Sensors,
+        Self::Resources,
         // Network
         Self::NetworkInterfaces,
         Self::NetworkStatistics,
@@ -154,7 +157,7 @@ impl PageVariant {
 
     pub fn group(&self) -> GroupVariant {
         match self {
-            Self::SystemPassport => GroupVariant::General,
+            Self::SystemPassport => passport::Passport::page_group(),
             Self::SystemMonitor => GroupVariant::General,
             Self::Processors => proc::ProcPage::page_group(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_group(),
@@ -165,6 +168,7 @@ impl PageVariant {
             Self::Battery => battery::BatPage::page_group(),
             Self::Screens => GroupVariant::Hardware,
             Self::Sensors => GroupVariant::Hardware,
+            Self::Resources => GroupVariant::Hardware,
             Self::NetworkInterfaces => GroupVariant::Network,
             Self::NetworkStatistics => GroupVariant::Network,
             Self::Distro => GroupVariant::Admin,
@@ -184,6 +188,7 @@ impl PageVariant {
 
     pub fn id(&self) -> Id {
         Id::new(match self {
+            Self::SystemPassport => passport::Passport::page_id(),
             Self::Processors => proc::ProcPage::page_id(),
             Self::CPUVulnerabilities => vuln::VulnPage::page_id(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_id(),
@@ -210,7 +215,7 @@ impl PageVariant {
 
     pub fn title(&self) -> String {
         match self {
-            Self::SystemPassport => fl!("page-dashboard"),
+            Self::SystemPassport => passport::Passport::page_title(),
             Self::Processors => proc::ProcPage::page_title(),
             Self::CPUVulnerabilities => vuln::VulnPage::page_title(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_title(),
@@ -225,6 +230,7 @@ impl PageVariant {
 
     pub fn view<'a>(&'a self, fx: &'a crate::Ferrix) -> Element<'a, Message> {
         match self {
+            Self::SystemPassport => fx.system_passport_view(),
             Self::Processors => fx.proc_page.view(),
             Self::CPUVulnerabilities => fx.vulns_page.view(),
             Self::CPUFrequencies => fx.freq_page.view(),

@@ -52,7 +52,7 @@ impl Default for FXSettings {
     fn default() -> Self {
         Self {
             update_period_general: 1,
-            update_period_fsystems: 10,
+            update_period_fsystems: 1,
             update_period_battery: 1,
             charts_update_period_nsecs: 5,
             style: Style::default(),
