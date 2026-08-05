@@ -44,6 +44,7 @@ use iced::{
     Element, Task,
     widget::{Id, column, row, rule, space, text},
 };
+use serde::{Deserialize, Serialize};
 
 pub trait PageView<'a> {
     fn page_id() -> &'static str;
@@ -87,7 +88,7 @@ pub trait PageData {
     fn get_data() -> Task<DataReceiver>;
 }
 
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Deserialize, Serialize)]
 pub enum PageVariant {
     #[default]
     SystemPassport,

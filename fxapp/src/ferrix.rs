@@ -48,11 +48,14 @@ pub struct Ferrix {
 
 impl Ferrix {
     pub fn new() -> (Self, Task<Message>) {
+        let settings =
+            FXSettings::read(get_home().join(".config").join(SETTINGS_PATH)).unwrap_or_default();
+        let active_page = settings.default_page.clone();
+
         (
             Self {
-                active_page: PageVariant::default(),
-                settings: FXSettings::read(get_home().join(".config").join(SETTINGS_PATH))
-                    .unwrap_or_default(),
+                active_page,
+                settings,
                 proc_page: pages::proc::ProcPage::new(),
                 vulns_page: pages::vuln::VulnPage::new(),
                 freq_page: pages::freq::CpuFreqPage::new(),

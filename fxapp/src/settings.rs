@@ -23,7 +23,7 @@ use iced::{Theme, color};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, fs, path::Path};
 
-use crate::fl;
+use crate::{fl, pages::PageVariant};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct FXSettings {
@@ -32,6 +32,7 @@ pub struct FXSettings {
     pub update_period_battery: u8,
     pub charts_update_period_nsecs: u8,
     pub style: Style,
+    pub default_page: PageVariant,
 }
 
 impl FXSettings {
@@ -56,6 +57,7 @@ impl Default for FXSettings {
             update_period_battery: 1,
             charts_update_period_nsecs: 5,
             style: Style::default(),
+            default_page: PageVariant::default(),
         }
     }
 }
