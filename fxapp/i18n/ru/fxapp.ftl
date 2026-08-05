@@ -147,7 +147,6 @@ cpu-see-freq = См. страницу «Частоты ЦП»
 cpufreq-tboost = Поддержка CPU Turbo Boost
 cpufreq-flist = Список частот ЦП
 cpufreq-notfound = Отсутствует информация о частотах ЦП.
-cpufreq-sum = ЦП №{$cpu}
 cpufreq-summary = Обзор
 cpufreq-bios-limit = Лимит BIOS
 cpufreq-cpb = Core Performance Boost

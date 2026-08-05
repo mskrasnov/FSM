@@ -61,8 +61,7 @@ impl CpuFreqPage {
                 names.push((
                     i,
                     format!(
-                        "{}: {}",
-                        fl!("cpufreq-sum", cpu = i),
+                        "#{i}: {}",
                         fmt_freq(*(&cpu_freq.policy[i].scaling_cur_freq))
                             .unwrap_or("N/A MHz".to_string()),
                     ),

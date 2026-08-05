@@ -147,7 +147,6 @@ cpu-see-freq = See "CPU Frequencies" page
 cpufreq-tboost = CPU Turbo Boost support
 cpufreq-flist = CPU Frequency List
 cpufreq-notfound = No CPU policy list found.
-cpufreq-sum = CPU #{$cpu}
 cpufreq-summary = Summary
 cpufreq-bios-limit = BIOS Limit
 cpufreq-cpb = Core Performance Boost
