@@ -210,6 +210,7 @@ impl PageVariant {
 
     pub fn title(&self) -> String {
         match self {
+            Self::SystemPassport => fl!("page-dashboard"),
             Self::Processors => proc::ProcPage::page_title(),
             Self::CPUVulnerabilities => vuln::VulnPage::page_title(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_title(),
