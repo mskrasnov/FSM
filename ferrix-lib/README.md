@@ -1,20 +1,29 @@
 # ferrix-lib
 
-> **NOTE 1:** visit our [GitHub repository](https://github.com/mskrasnov/ferrix) to get more information about this crate.
+> **NOTE 1:** visit our [GitHub repository](https://github.com/mskrasnov/fsm) to get more information about this crate.
 >
 > **NOTE 2:** this crate is a part of [ferrix-app](https://crates.io/crates/ferrix-app) crate.
 
-Crate to get information about PC's hardware and software. Only for Linux. Some features are requires `d-bus`, `systemd` and `flatpak`. Supported features: get information about:
+Crate to get information about PC's hardware and software. Only for Linux. Some features are requires `d-bus` and `systemd`. Supported features: get information about:
 
 - CPU (`/proc/cpuinfo`);
 - RAM (`/proc/meminfo`) and swaps (`/proc/swaps`);
 - Linux kernel information (version, architecture, cmdline);
+- Kernel modules list;
 - Users and groups;
 - Environment variables for current user;
 - `systemd` services;
 - Infrormation from DMI tables (BIOS, motherboard, chassis/enclosure, processor, RAM);
 - Information from EDID (basic info);
 - Supported resolutions for monitor;
+- Hardware resources;
+- UEFI Settings;
+- Mounted partitions;
+- Installed software (`deb`, `rpm` packages);
+- Network statistics (RX/TX Bytes, Packets, Errors, Drops);
+- Command interpreter (name, version, path);
+- Desktop environment name and version;
+- Notebook battery;
 
 TODO:
 
