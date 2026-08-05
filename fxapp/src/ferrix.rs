@@ -70,7 +70,7 @@ impl Ferrix {
     }
 
     pub fn title(&self) -> String {
-        format!("FSM v{}", env!("CARGO_PKG_VERSION"))
+        format!("FSM v{}, https://mskrasnov.github.io/fsm/", env!("CARGO_PKG_VERSION"))
     }
 
     pub fn theme(&self) -> iced::Theme {
