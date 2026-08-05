@@ -1,6 +1,6 @@
 [package]
 name = "fxapp"
-version.workspace = true
+version = "0.8.0-EXPERIMENTAL"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true

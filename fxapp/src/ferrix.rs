@@ -69,6 +69,10 @@ impl Ferrix {
         )
     }
 
+    pub fn title(&self) -> String {
+        format!("FSM v{}", env!("CARGO_PKG_VERSION"))
+    }
+
     pub fn theme(&self) -> iced::Theme {
         let mut palette = iced::Theme::GruvboxDark.palette();
         palette.success = color!(0x98971a);

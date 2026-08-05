@@ -24,9 +24,9 @@ pub mod icons;
 pub mod message;
 pub mod navigation;
 pub mod pages;
-pub mod widgets;
 pub mod settings;
 pub mod utils;
+pub mod widgets;
 
 use ferrix::Ferrix;
 use iced::{Size, window::Settings};
@@ -48,6 +48,6 @@ fn main() -> iced::Result {
         .window_size((780., 470.))
         .antialiasing(true)
         .theme(Ferrix::theme)
-        .title("Ferrix System Monitor")
+        .title(Ferrix::title)
         .run()
 }
