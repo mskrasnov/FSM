@@ -29,6 +29,7 @@ pub mod freq;
 pub mod fs;
 pub mod mem;
 pub mod proc;
+pub mod vuln;
 
 pub use loading_page::loading_page;
 pub use todo_page::todo;
@@ -157,7 +158,7 @@ impl PageVariant {
             Self::SystemMonitor => GroupVariant::General,
             Self::Processors => proc::ProcPage::page_group(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_group(),
-            Self::CPUVulnerabilities => GroupVariant::Hardware,
+            Self::CPUVulnerabilities => vuln::VulnPage::page_group(),
             Self::Memory => mem::MemoryPage::page_group(),
             Self::FileSystems => fs::FSPage::page_group(),
             Self::DMITables => dmi::DMIPage::page_group(),
@@ -184,6 +185,7 @@ impl PageVariant {
     pub fn id(&self) -> Id {
         Id::new(match self {
             Self::Processors => proc::ProcPage::page_id(),
+            Self::CPUVulnerabilities => vuln::VulnPage::page_id(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_id(),
             Self::FileSystems => fs::FSPage::page_id(),
             Self::DMITables => dmi::DMIPage::page_id(),
@@ -209,6 +211,7 @@ impl PageVariant {
     pub fn title(&self) -> String {
         match self {
             Self::Processors => proc::ProcPage::page_title(),
+            Self::CPUVulnerabilities => vuln::VulnPage::page_title(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_title(),
             Self::FileSystems => fs::FSPage::page_title(),
             Self::DMITables => dmi::DMIPage::page_title(),
@@ -222,6 +225,7 @@ impl PageVariant {
     pub fn view<'a>(&'a self, fx: &'a crate::Ferrix) -> Element<'a, Message> {
         match self {
             Self::Processors => fx.proc_page.view(),
+            Self::CPUVulnerabilities => fx.vulns_page.view(),
             Self::CPUFrequencies => fx.freq_page.view(),
             Self::FileSystems => fx.fs_page.view(),
             Self::DMITables => fx.dmi_page.view(),

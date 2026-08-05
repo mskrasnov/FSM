@@ -21,12 +21,18 @@
 use crate::{
     Ferrix,
     pages::{
-        PageData, PageVariant, dmi::DMIPageMessage, freq::ProcFreqMessage, mem::MemoryPageMessage, proc::ProcPageMessage
+        PageData, PageVariant, dmi::DMIPageMessage, freq::ProcFreqMessage, mem::MemoryPageMessage,
+        proc::ProcPageMessage,
     },
 };
 use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
 use ferrix_lib::{
-    battery::BatInfo, cpu::Processors, cpu_freq::CpuFreq, parts::Mounts, ram::{RAM, Swaps}
+    battery::BatInfo,
+    cpu::Processors,
+    cpu_freq::CpuFreq,
+    parts::Mounts,
+    ram::{RAM, Swaps},
+    vulnerabilities::Vulnerabilities,
 };
 use iced::{
     Event, Task,
@@ -51,6 +57,9 @@ pub enum Message {
 pub enum DataReceiver {
     GetProcData,
     ProcDataReceived(LoadState<Processors>),
+
+    GetCpuVulnsData,
+    CpuVulnsDataReceived(LoadState<Vulnerabilities>),
 
     GetCpuFreqData,
     CpuFreqDataReceived(LoadState<CpuFreq>),
@@ -81,6 +90,13 @@ impl DataReceiver {
             }
             Self::ProcDataReceived(val) => {
                 fx.proc_page.proc_data = val;
+                Task::none()
+            }
+            Self::GetCpuVulnsData => {
+                crate::pages::vuln::VulnPage::get_data().map(Message::DataReceiver)
+            }
+            Self::CpuVulnsDataReceived(val) => {
+                fx.vulns_page.vulns = val;
                 Task::none()
             }
             Self::GetCpuFreqData => {

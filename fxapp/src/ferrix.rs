@@ -37,6 +37,7 @@ pub struct Ferrix {
     pub settings: FXSettings,
 
     pub proc_page: pages::proc::ProcPage,
+    pub vulns_page: pages::vuln::VulnPage,
     pub freq_page: pages::freq::CpuFreqPage,
     pub mem_page: pages::mem::MemoryPage,
     pub fs_page: pages::fs::FSPage,
@@ -53,6 +54,7 @@ impl Ferrix {
                 settings: FXSettings::read(get_home().join(".config").join(SETTINGS_PATH))
                     .unwrap_or_default(),
                 proc_page: pages::proc::ProcPage::new(),
+                vulns_page: pages::vuln::VulnPage::new(),
                 freq_page: pages::freq::CpuFreqPage::new(),
                 fs_page: pages::fs::FSPage::new(),
                 mem_page: pages::mem::MemoryPage::new(),
@@ -82,6 +84,9 @@ impl Ferrix {
         match page {
             PageVariant::Processors if self.proc_page.proc_data.is_none() => {
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::CPUVulnerabilities if self.vulns_page.vulns.is_none() => {
+                pages::vuln::VulnPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::CPUFrequencies if self.freq_page.freqs.is_none() => {
                 pages::freq::CpuFreqPage::get_data().map(Message::DataReceiver)
