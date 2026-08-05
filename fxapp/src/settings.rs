@@ -53,7 +53,7 @@ impl Default for FXSettings {
         Self {
             update_period_general: 1,
             update_period_fsystems: 10,
-            update_period_battery: 20,
+            update_period_battery: 1,
             charts_update_period_nsecs: 5,
             style: Style::default(),
         }
