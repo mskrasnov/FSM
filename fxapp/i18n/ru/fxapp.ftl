@@ -13,7 +13,7 @@ sidebar-system = Система
 sidebar-manage = Обслуживание
 
 # PAGES
-page-dashboard = Обзор
+page-dashboard = Паспорт системы
 page-procs = Процессоры
 page-cpufreq = Частоты ЦП
 page-vuln = Уязвимости ЦП

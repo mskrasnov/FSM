@@ -13,7 +13,7 @@ sidebar-system = System
 sidebar-manage = Management
 
 # PAGES
-page-dashboard = Dashboard
+page-dashboard = System Passport
 page-procs = Processors
 page-cpufreq = CPU Frequencies
 page-vuln = CPU Vulnerabilities
