@@ -34,6 +34,11 @@ use crate::{
     widgets::table::{InfoRow, kv_info_table},
 };
 
+/*                                NOTE                                       */
+/* "Virtual" page without standard view method (Passport::view throws a panic
+ * if used in code). This page doesn't contain its own data; instead, it pulls
+ * data from other pages registered in ::ferrix::Ferrix.
+ */
 #[derive(Debug, Clone)]
 pub struct Passport;
 
@@ -56,6 +61,10 @@ impl<'a> PageView<'a> for Passport {
         super::GroupVariant::General
     }
 
+    /* NOTE: We can't retrieve data from other pages using this method,
+     * so there's no need to use it. Nevertheless, implementing this
+     * type is necessary to simplify the integration of the Passport
+     * page into the FSM UI. */
     fn page_contents_view(&'a self) -> Element<'a, Message> {
         panic!("Instead of this method, use the `Ferrix::system_passport_view()` method.")
     }
@@ -104,7 +113,7 @@ impl Ferrix {
             InfoRow::new(fl!("dash-root-part"), self.disk("/")),
             InfoRow::new(fl!("dash-home-part"), self.disk("/home")),
             InfoRow::new(fl!("dash-bat"), self.battery()),
-            InfoRow::new("Display", self.screen()),
+            InfoRow::new(fl!("page-screen"), self.screen()),
             InfoRow::new("Current user", None),
             InfoRow::new("Locale", None),
             InfoRow::new("Load average", None),
