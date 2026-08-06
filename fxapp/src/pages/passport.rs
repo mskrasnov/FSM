@@ -160,7 +160,7 @@ impl Ferrix {
 
         match (name, max_frequency) {
             (Some(name), Some(freq)) => Some(format!("{name} @ {freq}")),
-            (Some(name), None) => Some(format!("{name} @ <unknown max frequency>")),
+            (Some(name), None) => Some(name),
             _ => None,
         }
     }
