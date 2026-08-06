@@ -43,6 +43,7 @@ pub struct Ferrix {
     pub fs_page: pages::fs::FSPage,
     pub dmi_page: pages::dmi::DMIPage,
     pub bat_page: pages::battery::BatPage,
+    pub drm_page: pages::drm::DRMPage,
     pub firmware_page: pages::firmware::FirmwarePage,
 }
 
@@ -63,6 +64,7 @@ impl Ferrix {
                 mem_page: pages::mem::MemoryPage::new(),
                 dmi_page: pages::dmi::DMIPage::new(),
                 bat_page: pages::battery::BatPage::new(),
+                drm_page: pages::drm::DRMPage::new(),
                 firmware_page: pages::firmware::FirmwarePage::new(),
             },
             crate::pages::passport::Passport::get_data().map(Message::DataReceiver),
@@ -70,7 +72,10 @@ impl Ferrix {
     }
 
     pub fn title(&self) -> String {
-        format!("FSM v{}, https://mskrasnov.github.io/fsm/", env!("CARGO_PKG_VERSION"))
+        format!(
+            "FSM v{}, https://mskrasnov.github.io/fsm/",
+            env!("CARGO_PKG_VERSION"),
+        )
     }
 
     pub fn theme(&self) -> iced::Theme {
@@ -113,6 +118,9 @@ impl Ferrix {
             }
             PageVariant::Battery if self.bat_page.bat_info.is_none() => {
                 pages::battery::BatPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::Screens if self.drm_page.drm.is_none() => {
+                pages::drm::DRMPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::FirmwareAttributes if self.firmware_page.firmware.is_none() => {
                 pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)

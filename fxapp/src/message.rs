@@ -21,8 +21,8 @@
 use crate::{
     Ferrix,
     pages::{
-        PageData, PageVariant, dmi::DMIPageMessage, freq::ProcFreqMessage, mem::MemoryPageMessage,
-        proc::ProcPageMessage,
+        PageData, PageVariant, dmi::DMIPageMessage, drm::DRMPageMessage, freq::ProcFreqMessage,
+        mem::MemoryPageMessage, proc::ProcPageMessage,
     },
 };
 use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
@@ -30,6 +30,7 @@ use ferrix_lib::{
     battery::BatInfo,
     cpu::Processors,
     cpu_freq::CpuFreq,
+    drm::Video,
     parts::Mounts,
     ram::{RAM, Swaps},
     vulnerabilities::Vulnerabilities,
@@ -76,6 +77,9 @@ pub enum DataReceiver {
 
     GetBatData,
     BatDataReceived(LoadState<BatInfo>),
+
+    GetDRMData,
+    DRMDataReceived(LoadState<Video>),
 
     GetFirmwareData,
     FirmwareDataRefresh,
@@ -142,6 +146,11 @@ impl DataReceiver {
                 fx.bat_page.bat_info = val;
                 Task::none()
             }
+            Self::GetDRMData => crate::pages::drm::DRMPage::get_data().map(Message::DataReceiver),
+            Self::DRMDataReceived(val) => {
+                fx.drm_page.drm = val;
+                Task::none()
+            }
             Self::GetFirmwareData => {
                 if fx.firmware_page.is_polkit {
                     crate::pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
@@ -167,6 +176,7 @@ pub enum PageMessage {
     CpuFreqMessage(ProcFreqMessage),
     DMIPage(DMIPageMessage),
     MemPage(MemoryPageMessage),
+    DRMPage(DRMPageMessage),
 
     ExportSingle(PageVariant),
 }
@@ -194,6 +204,7 @@ impl PageMessage {
             Self::CpuFreqMessage(cfm) => cfm.update(&mut fx.freq_page),
             Self::DMIPage(dp) => dp.update(&mut fx.dmi_page),
             Self::MemPage(mm) => mm.update(&mut fx.mem_page),
+            Self::DRMPage(drm) => drm.update(&mut fx.drm_page),
         }
     }
 }

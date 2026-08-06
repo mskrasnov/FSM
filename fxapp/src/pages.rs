@@ -24,6 +24,7 @@ pub mod todo_page;
 
 pub mod battery;
 pub mod dmi;
+pub mod drm;
 pub mod firmware;
 pub mod freq;
 pub mod fs;
@@ -167,7 +168,7 @@ impl PageVariant {
             Self::FileSystems => fs::FSPage::page_group(),
             Self::DMITables => dmi::DMIPage::page_group(),
             Self::Battery => battery::BatPage::page_group(),
-            Self::Screens => GroupVariant::Hardware,
+            Self::Screens => drm::DRMPage::page_group(),
             Self::Sensors => GroupVariant::Hardware,
             Self::Resources => GroupVariant::Hardware,
             Self::NetworkInterfaces => GroupVariant::Network,
@@ -197,6 +198,7 @@ impl PageVariant {
             Self::DMITables => dmi::DMIPage::page_id(),
             Self::Memory => mem::MemoryPage::page_id(),
             Self::Battery => battery::BatPage::page_id(),
+            Self::Screens => drm::DRMPage::page_id(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_id(),
             _ => "",
         })
@@ -210,6 +212,7 @@ impl PageVariant {
             }
             Self::DMITables => dmi::DMIPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
             Self::Memory => mem::MemoryPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
+            Self::Screens => drm::DRMPage::scrolled_page_id().and_then(|id| Some(Id::new(id))),
             _ => None,
         }
     }
@@ -224,6 +227,7 @@ impl PageVariant {
             Self::DMITables => dmi::DMIPage::page_title(),
             Self::Memory => mem::MemoryPage::page_title(),
             Self::Battery => battery::BatPage::page_title(),
+            Self::Screens => drm::DRMPage::page_title(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_title(),
             _ => format!("[???] {:?}", self),
         }
@@ -239,6 +243,7 @@ impl PageVariant {
             Self::DMITables => fx.dmi_page.view(),
             Self::Memory => fx.mem_page.view(),
             Self::Battery => fx.bat_page.view(),
+            Self::Screens => fx.drm_page.view(),
             Self::FirmwareAttributes => fx.firmware_page.view(),
             _ => todo_page::todo(),
         }
