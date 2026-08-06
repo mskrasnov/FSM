@@ -97,7 +97,8 @@ impl Ferrix {
                     || self.mem_page.swap_data.is_none()
                     || self.freq_page.freqs.is_none()
                     || self.fs_page.mounts.is_none()
-                    || self.bat_page.bat_info.is_none() =>
+                    || self.bat_page.bat_info.is_none()
+                    || self.drm_page.drm.is_none() =>
             {
                 pages::passport::Passport::get_data().map(Message::DataReceiver)
             }

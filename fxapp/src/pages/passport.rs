@@ -67,8 +67,9 @@ impl PageData for Passport {
             super::proc::ProcPage::get_data(),
             super::freq::CpuFreqPage::get_data(),
             super::mem::MemoryPage::get_data(),
-            super::battery::BatPage::get_data(),
             super::fs::FSPage::get_data(),
+            super::battery::BatPage::get_data(),
+            super::drm::DRMPage::get_data(),
         ])
     }
 }
@@ -103,7 +104,7 @@ impl Ferrix {
             InfoRow::new(fl!("dash-root-part"), self.disk("/")),
             InfoRow::new(fl!("dash-home-part"), self.disk("/home")),
             InfoRow::new(fl!("dash-bat"), self.battery()),
-            InfoRow::new("Display", None),
+            InfoRow::new("Display", self.screen()),
             InfoRow::new("Current user", None),
             InfoRow::new("Locale", None),
             InfoRow::new("Load average", None),
@@ -230,6 +231,28 @@ impl Ferrix {
                     format!("{name}: {cap}% ({status})")
                 })
                 .unwrap_or("Unknown battery".to_string())
+        })
+    }
+
+    fn screen(&self) -> Option<String> {
+        self.drm_page.drm.to_option().map(|drm| {
+            let mut screens = String::new();
+            let scr = drm
+                .devices
+                .iter()
+                .filter(|screen| screen.enabled && !screen.is_empty_info())
+                .collect::<Vec<_>>();
+            for screen in scr {
+                screens += screen
+                    .edid
+                    .clone()
+                    .map(|edid| {
+                        format!("{} (serial: {})\n", &edid.manufacturer, edid.serial_number)
+                    })
+                    .unwrap_or("".to_string())
+                    .as_str();
+            }
+            screens.trim_end().to_string()
         })
     }
 }
