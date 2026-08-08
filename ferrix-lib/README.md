@@ -4,7 +4,7 @@
 >
 > **NOTE 2:** this crate is a part of [ferrix-app](https://crates.io/crates/ferrix-app) crate.
 
-Crate to get information about PC's hardware and software. Only for Linux. Some features are requires `d-bus` and `systemd`. Supported features: get information about:
+Crate to get information about PC's hardware and software. Only for Linux. Some features are requires `d-bus` and `systemd`. This crate can get information about:
 
 - CPU (`/proc/cpuinfo`);
 - RAM (`/proc/meminfo`) and swaps (`/proc/swaps`);
@@ -33,6 +33,8 @@ TODO:
 - [ ] Get information about audio;
 - [ ] Get information about GUI (desktop environment, session type (Wayland or X.org), etc.);
 - [ ] Backup and reset `gsettings` settins;
+
+At this time, the API is stable, and changes between versions are very minor. All changes are made primarily to further the development of the FSM project (adding new data sources).
 
 ## Features
 
