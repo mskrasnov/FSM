@@ -19,6 +19,19 @@
  */
 
 //! Get information about `systemd` services
+//! 
+//! ## Usage
+//! ```no-test
+//! use ferrix_lib::init::SystemdServices;
+//! use zbus::Connection;
+//! 
+//! let mut conn = Connection::system().await.unwrap();
+//! let systemd = SystemdServices::new_from_connection(&conn)
+//!     .await
+//!     .unwrap();
+//! 
+//! dbg!(systemd);
+//! ```
 
 use anyhow::{Result, anyhow};
 use libc::{CLOCK_MONOTONIC, CLOCK_REALTIME, clock_gettime, timespec};
@@ -37,6 +50,19 @@ pub struct SystemdServices {
 }
 
 impl SystemdServices {
+    /// Get current systemd services
+    /// 
+    /// ## Usage
+    /// ```no-test
+    /// use ferrix_lib::init::SystemdServices;
+    /// use zbus::Connection;
+    /// 
+    /// let mut conn = Connection::system().await.unwrap();
+    /// let sysd = SystemdServices::new_from_connection(&conn)
+    ///     .await
+    ///     .unwrap();
+    /// dbg!(&sysd.units);
+    /// ```
     pub async fn new_from_connection(conn: &Connection) -> Result<Self> {
         let mgr = ManagerProxy::new(conn).await?;
         let mut units = vec![];
