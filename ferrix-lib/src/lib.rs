@@ -22,18 +22,6 @@
 //! hardware and software of a PC running Linux OS.
 //!
 //! ## Examples
-//! Get all information about hardware and software (NOTE: needed
-//! `root` permissions!):
-//! ```no-test
-//! use ferrix_lib::Ferrix;
-//!
-//! let data = Ferrix::new()?; // get all data
-//!
-//! let json_str = data.to_json()?; // get machine-readable JSON from this data
-//! let pjson_str = data.to_json_pretty()?; // get human-readable JSON
-//! let xml_str = data.to_xml()?; // get XML
-//! ```
-//!
 //! Get information about CPU:
 //! ```no-test
 //! use ferrix_lib::cpu::Processors;
@@ -41,6 +29,13 @@
 //!
 //! let json_str = data.to_json()?;
 //! let pjson_str = data.to_json_pretty()?;
+//! ```
+//! 
+//! Get information about DMI tables (note: `root` permissions is needed!):
+//! ```no-test
+//! use ferrix_lib::dmi::DMITable;
+//! let dmi = DMITable::new().unwrap();
+//! dbg!(dmi);
 //! ```
 
 #[cfg(feature = "battery")]
