@@ -19,6 +19,16 @@
  */
 
 //! Get firmware settings (only for modern systems with UEFI)
+//! 
+//! > **Note:** you need to be `root` for get this information.
+//! 
+//! ## Example
+//! ```no-test
+//! use ferrix_lib::firmware::Firmware;
+//! let f = Firmware::new().unwrap();
+//! println!("WMI Driver: {}", &f.driver_name);
+//! dbg!(&f.attributes);
+//! ```
 
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
