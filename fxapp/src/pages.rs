@@ -29,6 +29,7 @@ pub mod firmware;
 pub mod freq;
 pub mod fs;
 pub mod mem;
+pub mod netlist;
 pub mod passport;
 pub mod proc;
 pub mod vuln;

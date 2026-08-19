@@ -67,6 +67,8 @@ pub mod parts;
 pub mod ram;
 #[cfg(feature = "resources")]
 pub mod resources;
+#[cfg(feature = "sensors")]
+pub mod sensors;
 #[cfg(feature = "soft")]
 pub mod soft;
 #[cfg(feature = "sys")]
