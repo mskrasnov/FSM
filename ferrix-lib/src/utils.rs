@@ -146,7 +146,7 @@ impl Display for Size {
             f,
             "{}",
             match self {
-                Size::B(n) => format!("{n} B"),
+                Size::B(n) => format!("{n}  B"),
                 Size::KB(n) => format!("{n:.2} KB"),
                 Size::MB(n) => format!("{n:.2} MB"),
                 Size::GB(n) => format!("{n:.2} GB"),

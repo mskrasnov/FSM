@@ -44,7 +44,7 @@ pub use smbioslib::SMBiosData;
 /// let dmi = DMITable::new().unwrap();
 /// dbg!(dmi);
 /// ```
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct DMITable {
     /// Information about BIOS (Type 0)
     pub bios: Bios,
@@ -67,13 +67,13 @@ pub struct DMITable {
     // /// Information about memory module (Type 6)
     // pub memory_module: MemoryModule,
     /// Information about CPU cache (Type 7)
-    pub caches: Caches,
+    // pub caches: Caches,
 
     /// Information about port connectors (Type 8)
-    pub ports: PortConnectors,
+    // pub ports: PortConnectors,
 
     /// Information about physical memory array (Type 16)
-    pub mem_array: MemoryArray,
+    // pub mem_array: MemoryArray,
 
     /// Information about installed memory devices (Type 17)
     pub mem_devices: MemoryDevices,
@@ -91,9 +91,9 @@ impl DMITable {
             baseboard: Baseboard::new_from_table(&table)?,
             chassis: Chassis::new_from_table(&table)?,
             processor: Processor::new_from_table(&table)?,
-            caches: Caches::new_from_table(&table)?,
-            ports: PortConnectors::new_from_table(&table)?,
-            mem_array: MemoryArray::new_from_table(&table)?,
+            // caches: Caches::new_from_table(&table)?,
+            // ports: PortConnectors::new_from_table(&table)?,
+            // mem_array: MemoryArray::new_from_table(&table)?,
             mem_devices: MemoryDevices::new_from_table(&table)?,
         })
     }
@@ -627,7 +627,23 @@ impl_from_struct!(SystemUuid, smbioslib::SystemUuid, {
 
 impl Display for SystemUuid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", String::from_utf8_lossy(&self.raw))
+        let time_low = u32::from_le_bytes([self.raw[0], self.raw[1], self.raw[2], self.raw[3]]);
+        let time_mid = u16::from_le_bytes([self.raw[4], self.raw[5]]);
+        let time_hi = u16::from_le_bytes([self.raw[6], self.raw[7]]);
+
+        let mut s = format!("{:08x}-{:04x}-{:04x}-", time_low, time_mid, time_hi);
+        let mut i = 8;
+
+        while i <= 9 {
+            s.push_str(&format!("{:02x}", self.raw[i]));
+            i += 1;
+        }
+        s.push('-');
+        while i < 16 {
+            s.push_str(&format!("{:02x}", self.raw[i]));
+            i += 1;
+        }
+        write!(f, "{s}",)
     }
 }
 
@@ -1274,6 +1290,7 @@ impl Display for ChassisSecurityStatus {
 pub enum ChassisHeight {
     Unspecified,
     U(u8),
+    SpecifiedInRackHeight,
 }
 
 impl From<smbioslib::ChassisHeight> for ChassisHeight {
@@ -1281,6 +1298,7 @@ impl From<smbioslib::ChassisHeight> for ChassisHeight {
         match value {
             smbioslib::ChassisHeight::Unspecified => Self::Unspecified,
             smbioslib::ChassisHeight::U(u) => Self::U(u),
+            smbioslib::ChassisHeight::SpecifiedInRackHeight => Self::SpecifiedInRackHeight,
         }
     }
 }
@@ -1293,6 +1311,7 @@ impl Display for ChassisHeight {
             match self {
                 Self::Unspecified => format!("Unspecified"),
                 Self::U(u) => format!("{u} U (1 U = 1.75 inch or 4.445 cm)"),
+                Self::SpecifiedInRackHeight => "Height is specified in the Rack Height".to_string(),
             }
         )
     }
@@ -2644,6 +2663,14 @@ pub enum ProcessorUpgrade {
     SocketBGA4129,
     SocketLGA4710,
     SocketLGA7529,
+    SocketBGA1964,
+    SocketBGA1792,
+    SocketBGA2049,
+    SocketBGA2551,
+    SocketBGA2114,
+    SocketBGA2833,
+    SocketLGA1851,
+    SeeSocketType,
     None,
 }
 
@@ -2733,6 +2760,14 @@ impl Display for ProcessorUpgrade {
                 Self::SocketBGA4129 => "Socket BGA4129",
                 Self::SocketLGA4710 => "Socket LGA4710",
                 Self::SocketLGA7529 => "Socket LGA7529",
+                Self::SocketBGA1964 => "Socket BGA1964",
+                Self::SocketBGA1792 => "Socket BGA1792",
+                Self::SocketBGA2049 => "Socket BGA2049",
+                Self::SocketBGA2551 => "Socket BGA2551",
+                Self::SocketBGA2114 => "Socket BGA2114",
+                Self::SocketBGA2833 => "Socket BGA2833",
+                Self::SocketLGA1851 => "Socket LGA1851",
+                Self::SeeSocketType => "See Socket Type",
                 Self::None => "A value unknown to this standard, check the raw value",
             }
         )
@@ -2822,6 +2857,14 @@ impl From<smbioslib::ProcessorUpgrade> for ProcessorUpgrade {
             smbioslib::ProcessorUpgrade::SocketBGA4129 => Self::SocketBGA4129,
             smbioslib::ProcessorUpgrade::SocketLGA4710 => Self::SocketLGA4710,
             smbioslib::ProcessorUpgrade::SocketLGA7529 => Self::SocketLGA7529,
+            smbioslib::ProcessorUpgrade::SocketBGA1964 => Self::SocketBGA1964,
+            smbioslib::ProcessorUpgrade::SocketBGA2049 => Self::SocketBGA2049,
+            smbioslib::ProcessorUpgrade::SocketBGA1792 => Self::SocketBGA1792,
+            smbioslib::ProcessorUpgrade::SocketBGA2551 => Self::SocketBGA2551,
+            smbioslib::ProcessorUpgrade::SocketBGA2114 => Self::SocketBGA2114,
+            smbioslib::ProcessorUpgrade::SocketBGA2833 => Self::SocketBGA2833,
+            smbioslib::ProcessorUpgrade::SocketLGA1851 => Self::SocketLGA1851,
+            smbioslib::ProcessorUpgrade::SeeSocketType => Self::SeeSocketType,
             smbioslib::ProcessorUpgrade::None => Self::None,
         }
     }
@@ -3254,8 +3297,7 @@ impl MemoryArray {
 impl ToJson for MemoryArray {}
 
 /// Information about all installed memory devices
-// #[derive(Debug, Clone, Deserialize, Serialize)]
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MemoryDevices {
     pub memory: Vec<MemoryDevice>,
 }
@@ -3286,7 +3328,7 @@ impl MemoryDevices {
 impl ToJson for MemoryDevices {}
 
 /// Information about single memory device
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MemoryDevice {
     /// Handle or instance number, associated with the physical
     /// memory array to which this device belongs
@@ -3327,13 +3369,13 @@ pub struct MemoryDevice {
     pub bank_locator: Option<String>,
 
     /// Type of memory used in this device
-    pub memory_type: Option<smbioslib::MemoryDeviceTypeData>,
+    pub memory_type: Option<MemoryDeviceTypeData>,
 
     /// Additional detail on the memory device type
-    pub type_detail: Option<smbioslib::MemoryTypeDetails>,
+    pub type_detail: Option<MemoryTypeDetails>,
 
     /// The maximum capable speed of the device (MT/s)
-    pub speed: Option<smbioslib::MemorySpeed>,
+    pub speed: Option<MemorySpeed>,
 
     /// Manufacturer of this memory device
     pub manufacturer: Option<String>,
@@ -3351,10 +3393,10 @@ pub struct MemoryDevice {
     pub attributes: Option<u8>,
 
     /// Extended suze of the memory device in MB
-    pub extended_size: Option<smbioslib::MemorySizeExtended>,
+    pub extended_size: Option<MemorySizeExtended>,
 
     /// Configured speed of the memory device, in megatransfers per second (MT/s)
-    pub configured_memory_speed: Option<smbioslib::MemorySpeed>,
+    pub configured_memory_speed: Option<MemorySpeed>,
 
     /// Minimum operating voltage for this device, in millivolts
     pub minimum_voltage: Option<u16>,
@@ -3366,10 +3408,10 @@ pub struct MemoryDevice {
     pub configured_voltage: Option<u16>,
 
     /// Memory technology type for this memory device
-    pub memory_technology: Option<smbioslib::MemoryDeviceTechnologyData>,
+    pub memory_technology: Option<MemoryDeviceTechnologyData>,
 
     /// The operating modes supported by this memory device
-    pub memory_operating_mode_capability: Option<smbioslib::MemoryOperatingModeCapabilities>,
+    pub memory_operating_mode_capability: Option<MemoryOperatingModeCapabilities>,
 
     /// Firmware version of this memory device
     pub firmware_version: Option<String>,
@@ -3392,29 +3434,29 @@ pub struct MemoryDevice {
 
     /// Size of the Non-volatile portion of the memory device in
     /// Bytes, if any
-    pub non_volatile_size: Option<smbioslib::MemoryIndicatedSize>,
+    pub non_volatile_size: Option<MemoryIndicatedSize>,
 
     /// Size of the Volatile portion of the memory device in
     /// Bytes, if any
-    pub volatile_size: Option<smbioslib::MemoryIndicatedSize>,
+    pub volatile_size: Option<MemoryIndicatedSize>,
 
     /// Size of the Cache portion of the memory device in Bytes,
     /// if any
-    pub cache_size: Option<smbioslib::MemoryIndicatedSize>,
+    pub cache_size: Option<MemoryIndicatedSize>,
 
     /// Size of the Logical memory device in Bytes
-    pub logical_size: Option<smbioslib::MemoryIndicatedSize>,
+    pub logical_size: Option<MemoryIndicatedSize>,
 
     /// Extended speed of the memory device (complements the
     /// Speed field at offset 15h). Identifies the maximum capable
     /// speed of the device, in MT/s
-    pub extended_speed: Option<smbioslib::MemorySpeedExtended>,
+    pub extended_speed: Option<MemorySpeedExtended>,
 
     /// Extended configured memory speed of the memory device
     /// (complements the `configure_memory_speed` field at offset
     /// 20h). Identifies the configured speed of the memory device,
     /// in MT/s
-    pub extended_configured_speed: Option<smbioslib::MemorySpeedExtended>,
+    pub extended_configured_speed: Option<MemorySpeedExtended>,
 
     /// Two-byte PMIC0 manufacturer ID found in the SPD of this
     /// memory device; LSB first
@@ -3442,10 +3484,7 @@ impl<'a> From<smbioslib::SMBiosMemoryDevice<'a>> for MemoryDevice {
             ),
             total_width: value.total_width(),
             data_width: value.data_width(),
-            size: match value.size() {
-                Some(size) => Some(MemorySize::from(size)),
-                _ => None,
-            },
+            size: value.size().map(|s| MemorySize::from(s)),
             form_factor: match value.form_factor() {
                 Some(ff) => Some(MemoryFormFactorData::from(ff)),
                 _ => None,
@@ -3453,33 +3492,45 @@ impl<'a> From<smbioslib::SMBiosMemoryDevice<'a>> for MemoryDevice {
             device_set: value.device_set(),
             device_locator: value.device_locator().ok(),
             bank_locator: value.bank_locator().ok(),
-            memory_type: value.memory_type(),
-            type_detail: value.type_detail(),
-            speed: value.speed(),
+            memory_type: value.memory_type().map(|mt| MemoryDeviceTypeData::from(mt)),
+            type_detail: value.type_detail().map(|td| MemoryTypeDetails::from(td)),
+            speed: value.speed().map(|s| MemorySpeed::from(s)),
             manufacturer: value.manufacturer().ok(),
             serial_number: value.serial_number().ok(),
             asset_tag: value.asset_tag().ok(),
             part_number: value.part_number().ok(),
             attributes: value.attributes(),
-            extended_size: value.extended_size(),
-            configured_memory_speed: value.configured_memory_speed(),
+            extended_size: value.extended_size().map(|es| MemorySizeExtended::from(es)),
+            configured_memory_speed: value
+                .configured_memory_speed()
+                .map(|cms| MemorySpeed::from(cms)),
             minimum_voltage: value.minimum_voltage(),
             maximum_voltage: value.maximum_voltage(),
             configured_voltage: value.configured_voltage(),
-            memory_technology: value.memory_technology(),
-            memory_operating_mode_capability: value.memory_operating_mode_capability(),
+            memory_technology: value
+                .memory_technology()
+                .map(|mt| MemoryDeviceTechnologyData::from(mt)),
+            memory_operating_mode_capability: value
+                .memory_operating_mode_capability()
+                .map(|momc| MemoryOperatingModeCapabilities::from(momc)),
             firmware_version: value.firmware_version().ok(),
             module_manufacturer_id: value.module_manufacturer_id(),
             module_product_id: value.module_product_id(),
             memory_subsystem_controller_manufacturer_id: value
                 .memory_subsystem_controller_manufacturer_id(),
             memory_subsystem_controller_product_id: value.memory_subsystem_controller_product_id(),
-            non_volatile_size: value.non_volatile_size(),
-            volatile_size: value.volatile_size(),
-            cache_size: value.cache_size(),
-            logical_size: value.logical_size(),
-            extended_speed: value.extended_speed(),
-            extended_configured_speed: value.extended_speed(),
+            non_volatile_size: value
+                .non_volatile_size()
+                .map(|n| MemoryIndicatedSize::from(n)),
+            volatile_size: value.volatile_size().map(|n| MemoryIndicatedSize::from(n)),
+            cache_size: value.cache_size().map(|n| MemoryIndicatedSize::from(n)),
+            logical_size: value.logical_size().map(|n| MemoryIndicatedSize::from(n)),
+            extended_speed: value
+                .extended_speed()
+                .map(|es| MemorySpeedExtended::from(es)),
+            extended_configured_speed: value
+                .extended_speed()
+                .map(|ecs| MemorySpeedExtended::from(ecs)),
             pmic0_manufacturer_id: value.pmic0_manufacturer_id(),
             pmic0_revision_number: value.pmic0_revision_number(),
             rcd_manufacturer_id: value.rcd_manufacturer_id(),
@@ -3508,6 +3559,50 @@ impl From<smbioslib::MemorySize> for MemorySize {
             smbioslib::MemorySize::Kilobytes(kb) => Self::Kilobytes(kb),
             smbioslib::MemorySize::Megabytes(mb) => Self::Megabytes(mb),
         }
+    }
+}
+
+impl Display for MemorySize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::NotInstalled => "Not installed".to_string(),
+                Self::Unknown => "Unknown".to_string(),
+                Self::SeeExtendedSize => "See Extended Size".to_string(),
+                Self::Kilobytes(n) => format!("{n} KB"),
+                Self::Megabytes(n) => format!("{n} MB"),
+            }
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum MemorySizeExtended {
+    Megabytes(u32),
+    SeeSize,
+}
+
+impl From<smbioslib::MemorySizeExtended> for MemorySizeExtended {
+    fn from(value: smbioslib::MemorySizeExtended) -> Self {
+        match value {
+            smbioslib::MemorySizeExtended::Megabytes(mb) => Self::Megabytes(mb),
+            smbioslib::MemorySizeExtended::SeeSize => Self::SeeSize,
+        }
+    }
+}
+
+impl Display for MemorySizeExtended {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Megabytes(n) => format!("{n} MB"),
+                Self::SeeSize => "See Size".to_string(),
+            }
+        )
     }
 }
 
@@ -3569,11 +3664,42 @@ impl From<smbioslib::MemoryFormFactor> for MemoryFormFactor {
             smbioslib::MemoryFormFactor::Srimm => Self::Srimm,
             smbioslib::MemoryFormFactor::Fbdimm => Self::Fbdimm,
             smbioslib::MemoryFormFactor::Die => Self::Dip,
-            // smbioslib::MemoryFormFactor::Camm => Self::Camm,
-            // smbioslib::MemoryFormFactor::Cudimm => Self::Cudimm,
-            // smbioslib::MemoryFormFactor::Csodimm => Self::Csodimm,
+            smbioslib::MemoryFormFactor::Camm => Self::Camm,
+            smbioslib::MemoryFormFactor::Cudimm => Self::Cudimm,
+            smbioslib::MemoryFormFactor::Csodimm => Self::Csodimm,
             smbioslib::MemoryFormFactor::None => Self::None,
         }
+    }
+}
+
+impl Display for MemoryFormFactor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::Simm => "SIMM",
+                Self::Sip => "SIP",
+                Self::Chip => "Chip",
+                Self::Dip => "DIP",
+                Self::Zip => "ZIP",
+                Self::ProprietaryCard => "Proprietary Card",
+                Self::Dimm => "DIMM",
+                Self::Tsop => "TSOP",
+                Self::RowOfChips => "Row of chips",
+                Self::Rimm => "RIMM",
+                Self::Sodimm => "SODIMM",
+                Self::Srimm => "SRIMM",
+                Self::Fbdimm => "FB-DIMM",
+                Self::Die => "Die",
+                Self::Camm => "CAMM",
+                Self::Cudimm => "CUDIMM",
+                Self::Csodimm => "CSODIMM",
+                Self::None => "None",
+            }
+        )
     }
 }
 
@@ -3581,6 +3707,15 @@ impl From<smbioslib::MemoryFormFactor> for MemoryFormFactor {
 pub struct MemoryDeviceTypeData {
     pub raw: u8,
     pub value: MemoryDeviceType,
+}
+
+impl From<smbioslib::MemoryDeviceTypeData> for MemoryDeviceTypeData {
+    fn from(value: smbioslib::MemoryDeviceTypeData) -> Self {
+        Self {
+            raw: value.raw,
+            value: MemoryDeviceType::from(value.value),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -3620,4 +3755,534 @@ pub enum MemoryDeviceType {
     Hbm3,
     Mrdimm,
     None,
+}
+
+impl From<smbioslib::MemoryDeviceType> for MemoryDeviceType {
+    fn from(value: smbioslib::MemoryDeviceType) -> Self {
+        match value {
+            smbioslib::MemoryDeviceType::Other => Self::Other,
+            smbioslib::MemoryDeviceType::Unknown => Self::Unknown,
+            smbioslib::MemoryDeviceType::Dram => Self::Dram,
+            smbioslib::MemoryDeviceType::Edram => Self::Edram,
+            smbioslib::MemoryDeviceType::Vram => Self::Vram,
+            smbioslib::MemoryDeviceType::Sram => Self::Sram,
+            smbioslib::MemoryDeviceType::Ram => Self::Ram,
+            smbioslib::MemoryDeviceType::Rom => Self::Rom,
+            smbioslib::MemoryDeviceType::Flash => Self::Flash,
+            smbioslib::MemoryDeviceType::Eeprom => Self::Eeprom,
+            smbioslib::MemoryDeviceType::Feprom => Self::Feprom,
+            smbioslib::MemoryDeviceType::Eprom => Self::Eprom,
+            smbioslib::MemoryDeviceType::Cdram => Self::Cdram,
+            smbioslib::MemoryDeviceType::ThreeDram => Self::ThreeDram,
+            smbioslib::MemoryDeviceType::Sdram => Self::Sdram,
+            smbioslib::MemoryDeviceType::Sgram => Self::Sgram,
+            smbioslib::MemoryDeviceType::Rdram => Self::Rdram,
+            smbioslib::MemoryDeviceType::Ddr => Self::Ddr,
+            smbioslib::MemoryDeviceType::Ddr2 => Self::Ddr2,
+            smbioslib::MemoryDeviceType::Ddr2Fbdimm => Self::Ddr2Fbdimm,
+            smbioslib::MemoryDeviceType::Ddr3 => Self::Ddr3,
+            smbioslib::MemoryDeviceType::Fbd2 => Self::Fbd2,
+            smbioslib::MemoryDeviceType::Ddr4 => Self::Ddr4,
+            smbioslib::MemoryDeviceType::Lpddr => Self::Lpddr,
+            smbioslib::MemoryDeviceType::Lpddr2 => Self::Lpddr2,
+            smbioslib::MemoryDeviceType::Lpddr3 => Self::Lpddr3,
+            smbioslib::MemoryDeviceType::Lpddr4 => Self::Lpddr4,
+            smbioslib::MemoryDeviceType::LogicalNonVolatileDevice => Self::LogicalNonVolatileDevice,
+            smbioslib::MemoryDeviceType::Hbm => Self::Hbm,
+            smbioslib::MemoryDeviceType::Hbm2 => Self::Hbm2,
+            smbioslib::MemoryDeviceType::Ddr5 => Self::Ddr5,
+            smbioslib::MemoryDeviceType::Lpddr5 => Self::Lpddr5,
+            smbioslib::MemoryDeviceType::Hbm3 => Self::Hbm3,
+            smbioslib::MemoryDeviceType::Mrdimm => Self::Mrdimm,
+            smbioslib::MemoryDeviceType::None => Self::None,
+        }
+    }
+}
+
+impl Display for MemoryDeviceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::Dram => "DRAM",
+                Self::Edram => "EDRAM",
+                Self::Vram => "VRAM",
+                Self::Sram => "SRAM",
+                Self::Ram => "RAM",
+                Self::Rom => "ROM",
+                Self::Flash => "Flash",
+                Self::Eeprom => "EEPROM",
+                Self::Feprom => "FEPROM",
+                Self::Eprom => "EPROM",
+                Self::Cdram => "CDRAM",
+                Self::ThreeDram => "3DRAM",
+                Self::Sdram => "SDRAM",
+                Self::Sgram => "SGRAM",
+                Self::Rdram => "RDRAM",
+                Self::Ddr => "DDR",
+                Self::Ddr2 => "DDR2",
+                Self::Ddr2Fbdimm => "DDR2 FB-DIMM",
+                Self::Ddr3 => "DDR3",
+                Self::Fbd2 => "FBD2",
+                Self::Ddr4 => "DDR4",
+                Self::Lpddr => "LPDDR",
+                Self::Lpddr2 => "LPDDR2",
+                Self::Lpddr3 => "LPDDR3",
+                Self::Lpddr4 => "LPDDR4",
+                Self::LogicalNonVolatileDevice => "Logical non-volatile device",
+                Self::Hbm => "HBM (High Bandwidth Memory)",
+                Self::Hbm2 => "HBM2 (High Bandwidth Memory Generation 2)",
+                Self::Ddr5 => "DDR5",
+                Self::Lpddr5 => "LPDDR5",
+                Self::Hbm3 => "HBM3",
+                Self::Mrdimm => "MRDIMM",
+                Self::None => "A value unknown to this standard",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MemoryTypeDetails {
+    /// Raw value
+    pub raw: u16,
+
+    /// Bit 1 other
+    pub other: bool,
+
+    /// But 2 unknown
+    pub unknown: bool,
+
+    /// Bit 3 fast-paged
+    pub fast_paged: bool,
+
+    /// Bit 4 static column
+    pub static_column: bool,
+
+    /// Bit 5 pseudo-static
+    pub pseudo_static: bool,
+
+    /// Bit 6 RAMBUS
+    pub ram_bus: bool,
+
+    /// Bit 7 synchronous
+    pub synchronous: bool,
+
+    /// Bit 8 CMOS
+    pub cmos: bool,
+
+    /// Bit 9 EDO
+    pub edo: bool,
+
+    /// Bit 10 Window DRAM
+    pub window_dram: bool,
+
+    /// Bit 11 Cache DRAM
+    pub cache_dram: bool,
+
+    // Bit 12 non-volatile
+    pub non_volatile: bool,
+
+    /// Bit 13 Registered (Buffered)
+    pub registered: bool,
+
+    /// Bit 14 Unbuffered (Unregistered)
+    pub unbuffered: bool,
+
+    /// Bit 15 LRDIMM
+    pub lrdimm: bool,
+}
+
+impl From<smbioslib::MemoryTypeDetails> for MemoryTypeDetails {
+    fn from(v: smbioslib::MemoryTypeDetails) -> Self {
+        Self {
+            raw: v.raw,
+            other: v.other(),
+            unknown: v.unknown(),
+            fast_paged: v.fast_paged(),
+            static_column: v.static_column(),
+            pseudo_static: v.pseudo_static(),
+            ram_bus: v.ram_bus(),
+            synchronous: v.synchronous(),
+            cmos: v.cmos(),
+            edo: v.edo(),
+            window_dram: v.window_dram(),
+            cache_dram: v.cache_dram(),
+            non_volatile: v.non_volatile(),
+            registered: v.registered(),
+            unbuffered: v.unbuffered(),
+            lrdimm: v.lrdimm(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum MemorySpeed {
+    Unknown,
+    SeeExtendedSpeed,
+    MTs(u16),
+}
+
+impl From<smbioslib::MemorySpeed> for MemorySpeed {
+    fn from(value: smbioslib::MemorySpeed) -> Self {
+        match value {
+            smbioslib::MemorySpeed::Unknown => Self::Unknown,
+            smbioslib::MemorySpeed::SeeExtendedSpeed => Self::SeeExtendedSpeed,
+            smbioslib::MemorySpeed::MTs(mts) => Self::MTs(mts),
+        }
+    }
+}
+
+impl Display for MemorySpeed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unknown => write!(f, "Unknown"),
+            Self::SeeExtendedSpeed => write!(f, "See Extended Speed"),
+            Self::MTs(mts) => write!(f, "{mts} MT/s"),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum MemorySpeedExtended {
+    MTs(u32),
+    SeeSpeed,
+}
+
+impl From<smbioslib::MemorySpeedExtended> for MemorySpeedExtended {
+    fn from(value: smbioslib::MemorySpeedExtended) -> Self {
+        match value {
+            smbioslib::MemorySpeedExtended::MTs(mts) => Self::MTs(mts),
+            smbioslib::MemorySpeedExtended::SeeSpeed => Self::SeeSpeed,
+        }
+    }
+}
+
+impl Display for MemorySpeedExtended {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MTs(mts) => write!(f, "{mts} MT/s"),
+            Self::SeeSpeed => write!(f, "See Speed"),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MemoryDeviceTechnologyData {
+    pub raw: u8,
+    pub value: MemoryDeviceTechnology,
+}
+
+impl From<smbioslib::MemoryDeviceTechnologyData> for MemoryDeviceTechnologyData {
+    fn from(value: smbioslib::MemoryDeviceTechnologyData) -> Self {
+        Self {
+            raw: value.raw,
+            value: MemoryDeviceTechnology::from(value.value),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum MemoryDeviceTechnology {
+    Other,
+    Unknown,
+    Dram,
+    NvidimmN,
+    NvidimmF,
+    NvidimmP,
+    IntelOptaneDcPersistentMemory,
+    Mrdimm,
+    None,
+}
+
+impl From<smbioslib::MemoryDeviceTechnology> for MemoryDeviceTechnology {
+    fn from(value: smbioslib::MemoryDeviceTechnology) -> Self {
+        match value {
+            smbioslib::MemoryDeviceTechnology::Other => Self::Other,
+            smbioslib::MemoryDeviceTechnology::Unknown => Self::Unknown,
+            smbioslib::MemoryDeviceTechnology::Dram => Self::Dram,
+            smbioslib::MemoryDeviceTechnology::NvdimmN => Self::NvidimmN,
+            smbioslib::MemoryDeviceTechnology::NvdimmF => Self::NvidimmF,
+            smbioslib::MemoryDeviceTechnology::NvdimmP => Self::NvidimmP,
+            smbioslib::MemoryDeviceTechnology::IntelOptaneDcPersistentMemory => {
+                Self::IntelOptaneDcPersistentMemory
+            }
+            smbioslib::MemoryDeviceTechnology::Mrdimm => Self::Mrdimm,
+            smbioslib::MemoryDeviceTechnology::None => Self::None,
+        }
+    }
+}
+
+impl Display for MemoryDeviceTechnology {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::Dram => "DRAM",
+                Self::NvidimmN => "NVIDIMM-N",
+                Self::NvidimmF => "NVIDIMM-F",
+                Self::NvidimmP => "NVIDIMM-P",
+                Self::IntelOptaneDcPersistentMemory => "Intel® Optane™ persistent memory",
+                Self::Mrdimm => "MRDIMM (Deprecated)",
+                Self::None => "???",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MemoryOperatingModeCapabilities {
+    /// Raw value
+    pub raw: u16,
+
+    /// Other
+    pub other: bool,
+
+    /// Unknown
+    pub unknown: bool,
+
+    /// Volatile memory
+    pub volatile_memory: bool,
+
+    /// Byte-accessible persistent memory
+    pub byte_accessible_persistent_memory: bool,
+
+    /// Block-accessible persistent memory
+    pub block_accessible_persistent_memory: bool,
+}
+
+impl From<smbioslib::MemoryOperatingModeCapabilities> for MemoryOperatingModeCapabilities {
+    fn from(v: smbioslib::MemoryOperatingModeCapabilities) -> Self {
+        Self {
+            raw: v.raw,
+            other: v.other(),
+            unknown: v.unknown(),
+            volatile_memory: v.volatile_memory(),
+            byte_accessible_persistent_memory: v.byte_accessible_persistent_memory(),
+            block_accessible_persistent_memory: v.block_accessible_persistent_memory(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum MemoryIndicatedSize {
+    Unknown,
+    Bytes(u64),
+}
+
+impl From<smbioslib::MemoryIndicatedSize> for MemoryIndicatedSize {
+    fn from(value: smbioslib::MemoryIndicatedSize) -> Self {
+        match value {
+            smbioslib::MemoryIndicatedSize::Unknown => Self::Unknown,
+            smbioslib::MemoryIndicatedSize::Bytes(b) => Self::Bytes(b),
+        }
+    }
+}
+
+impl Display for MemoryIndicatedSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Unknown => "Unknown".to_string(),
+                Self::Bytes(n) => format!("{n} B"),
+            }
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct CoolingDevice {
+    /// Handle, or instance number, of the temperature probe monitoring this
+    /// cooling device. A value of 0xFFFF indicates that no probe is provided.
+    pub temperature_probe_handle: Option<Handle>,
+
+    /// Cooling device type and status.
+    pub device_type_and_status: Option<CoolingDeviceTypeAndStatus>,
+
+    pub cooling_unit_group: Option<u8>,
+
+    pub oem_defined: Option<u32>,
+    pub rotational_speed: Option<RotationalSpeed>,
+    pub description: String,
+}
+
+impl CoolingDevice {
+    pub fn new() -> Result<Self> {
+        let table = smbioslib::table_load_from_device()?;
+        Self::new_from_table(&table)
+    }
+
+    pub fn new_from_table(table: &SMBiosData) -> Result<Self> {
+        let t = table
+            .find_map(|f: smbioslib::SMBiosCoolingDevice| Some(f))
+            .ok_or(anyhow!(
+                "Failed to get information about cooling device (type 27)!"
+            ))?;
+
+        Ok(Self {
+            temperature_probe_handle: t.temperature_probe_handle().map(|h| Handle::from(h)),
+            device_type_and_status: t
+                .device_type_and_status()
+                .map(|d| CoolingDeviceTypeAndStatus::from(d)),
+            cooling_unit_group: t.cooling_unit_group(),
+            oem_defined: t.oem_defined(),
+            rotational_speed: t.nominal_speed().map(|r| RotationalSpeed::from(r)),
+            description: t.description().to_string(),
+        })
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct CoolingDeviceTypeAndStatus {
+    /// Raw value
+    pub raw: u8,
+
+    /// Device status
+    pub device_status: CoolingDeviceStatus,
+
+    /// Device type
+    pub device_type: CoolingDeviceType,
+}
+
+impl From<smbioslib::CoolingDeviceTypeAndStatus> for CoolingDeviceTypeAndStatus {
+    fn from(value: smbioslib::CoolingDeviceTypeAndStatus) -> Self {
+        Self {
+            raw: value.raw,
+            device_status: CoolingDeviceStatus::from(value.device_status),
+            device_type: CoolingDeviceType::from(value.device_type),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum CoolingDeviceStatus {
+    Other,
+    Unknown,
+    OK,
+    NonCritical,
+    Critical,
+    NonRecoverable,
+    None,
+}
+
+impl From<smbioslib::CoolingDeviceStatus> for CoolingDeviceStatus {
+    fn from(value: smbioslib::CoolingDeviceStatus) -> Self {
+        match value {
+            smbioslib::CoolingDeviceStatus::Other => Self::Other,
+            smbioslib::CoolingDeviceStatus::Unknown => Self::Unknown,
+            smbioslib::CoolingDeviceStatus::OK => Self::OK,
+            smbioslib::CoolingDeviceStatus::Critical => Self::Critical,
+            smbioslib::CoolingDeviceStatus::NonCritical => Self::NonCritical,
+            smbioslib::CoolingDeviceStatus::NonRecoverable => Self::NonRecoverable,
+            smbioslib::CoolingDeviceStatus::None => Self::None,
+        }
+    }
+}
+
+impl Display for CoolingDeviceStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::OK => "OK",
+                Self::NonCritical => "Non-critical",
+                Self::Critical => "Critical",
+                Self::NonRecoverable => "Non-recoverable",
+                Self::None => "None",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum CoolingDeviceType {
+    Other,
+    Unknown,
+    Fan,
+    CentrifugalBlower,
+    ChipFan,
+    CabinetFan,
+    PowerSupplyFan,
+    HeatPipe,
+    IntegratedRefrigeration,
+    ActiveCooling,
+    PassiveCooling,
+    None,
+}
+
+impl From<smbioslib::CoolingDeviceType> for CoolingDeviceType {
+    fn from(value: smbioslib::CoolingDeviceType) -> Self {
+        match value {
+            smbioslib::CoolingDeviceType::Other => Self::Other,
+            smbioslib::CoolingDeviceType::Unknown => Self::Unknown,
+            smbioslib::CoolingDeviceType::Fan => Self::Fan,
+            smbioslib::CoolingDeviceType::CentrifugalBlower => Self::CentrifugalBlower,
+            smbioslib::CoolingDeviceType::ChipFan => Self::ChipFan,
+            smbioslib::CoolingDeviceType::CabinetFan => Self::CabinetFan,
+            smbioslib::CoolingDeviceType::PowerSupplyFan => Self::PowerSupplyFan,
+            smbioslib::CoolingDeviceType::HeatPipe => Self::HeatPipe,
+            smbioslib::CoolingDeviceType::IntegratedRefrigeration => Self::IntegratedRefrigeration,
+            smbioslib::CoolingDeviceType::ActiveCooling => Self::ActiveCooling,
+            smbioslib::CoolingDeviceType::PassiveCooling => Self::PassiveCooling,
+            smbioslib::CoolingDeviceType::None => Self::None,
+        }
+    }
+}
+
+impl Display for CoolingDeviceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Other => "Other",
+                Self::Unknown => "Unknown",
+                Self::Fan => "FAN",
+                Self::CentrifugalBlower => "Cetrifugal Blower",
+                Self::ChipFan => "Chip FAN",
+                Self::CabinetFan => "Cabinet FAN",
+                Self::PowerSupplyFan => "Power Supply FAN",
+                Self::HeatPipe => "Heat Pipe",
+                Self::IntegratedRefrigeration => "Integrated Refrigeration",
+                Self::ActiveCooling => "Active Cooling",
+                Self::PassiveCooling => "Passive Cooling",
+                Self::None => "None",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
+pub enum RotationalSpeed {
+    Rpm(u16),
+    Unknown,
+}
+
+impl From<smbioslib::RotationalSpeed> for RotationalSpeed {
+    fn from(value: smbioslib::RotationalSpeed) -> Self {
+        match value {
+            smbioslib::RotationalSpeed::Rpm(rpm) => Self::Rpm(rpm),
+            smbioslib::RotationalSpeed::Unknown => Self::Unknown,
+        }
+    }
+}
+
+impl Display for RotationalSpeed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rpm(rpm) => write!(f, "{} RPM", rpm),
+            Self::Unknown => write!(f, "Unknown"),
+        }
+    }
 }

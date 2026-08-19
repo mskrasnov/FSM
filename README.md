@@ -1,21 +1,24 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/mskrasnov/FSM/refs/heads/master/ferrix-app/data/com.mskrasnov.Ferrix.svg" width="200">
-  <h1>Ferrix System Monitor — Swiss Knife for Linux Hardware Diagnostics</h1>
+  <h1>FSM — Swiss Army Knife for Linux Hardware Diagnostics</h1>
   <p><b>A modern program for getting information about computer hardware and installed software.</b></p>
 
-  [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Star this repo!](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
+  [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Rust](https://img.shields.io/badge/Made%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/) [![Iced](https://img.shields.io/badge/Made%20with-iced-blue?logo=iced)](https://iced.rs) [![GitHub Release](https://img.shields.io/github/v/release/mskrasnov/ferrix?logo=github&color=lightgray)](https://github.com/mskrasnov/ferrix/releases) [![Support me](https://img.shields.io/badge/Donate_me-Boosty-orange)](https://boosty.to/mskrasnov) [![All downloads](https://img.shields.io/github/downloads/mskrasnov/fsm/total)](https://github.com/mskrasnov/FSM/releases) [![Star this repo!](https://img.shields.io/github/stars/mskrasnov/fsm?style=social)](https://github.com/mskrasnov/FSM/stargazers)
 
-  <img src="https://mskrasnov.github.io/ferrix/screens/sysmon-new.png"> <img src="https://mskrasnov.github.io/ferrix/screens/firmware.png">
-  <small><a href="https://mskrasnov.github.io/ferrix/gallery.html">Other screenshots</a></small>
+  <img src="https://mskrasnov.github.io/fsm/screens/sysmon-new.png" width="45%"> <img src="https://mskrasnov.github.io/fsm/screens/firmware.png" width="45%">
+
+  <p><small><a href="https://mskrasnov.github.io/fsm/gallery.html">Other screenshots</a></small></p>
 </div>
 
 ## What is FSM?
 
 FSM is a modern system profiler. Is a program for obtaining information about computer hardware and software. It is designed to work in modern GNU/Linux systems.
 
+<a href="https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage"><img src="./fxapp/data/download-appimage-banner.svg" width="364" height="112"></a>
+
 ## Functions
 
-- Beautiful CPU and RAM utilization charts ([System Monitor](https://mskrasnov.github.io/ferrix/screens/sysmon-new.png) page);
+- Beautiful CPU and RAM utilization charts ([System Monitor](https://mskrasnov.github.io/fsm/screens/sysmon-new.png) page);
 - Hardware:
     - Information about installed CPUs: name(s), model(s), topology, frequencies, vulnerabilities;
     - Filesystems: mount point and mount options, total and used size, file system type;
@@ -35,81 +38,168 @@ FSM is a modern system profiler. Is a program for obtaining information about co
     - Desktop environment name;
     - UEFI Settings (tested on Lenovo ThinkBook);
 
-**TODO:**
-
-- [ ] More information about environment (name and version of DE, WM, DM);
-- [ ] Information about media: name of video- and soundcard, information about Pulseaudio/PipeWire and Xorg/Wayland;
-- [ ] I/O utilization charts;
-- [ ] Process monitor;
-- [ ] More information about network;
-- [ ] Sensors information;
-
 ## Difference from analogues
 
-| Criteria              | Ferrix System Monitor | Hardinfo2 | Stacer/Nexis |
-|-----------------------|-----------------------|-----------|--------------|
-| Programming language  | Rust                  | C         | C++          |
-| Program type          | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
-| GUI                   | `iced`                | GTK3      | Qt5/Qt6      |
-| License               | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
-| Key features          | <ul><li><b>Deep system analisys:</b> systemd services, installed packages, DMI, EDID, etc.;</li><li>Beautiful CPU and RAM utilization charts;</li><li>Simple and clean UI;</li></ul> | <ul><li><b>Hardware benchmarks:</b> CPU, GPU, disks, memory;</li><li>Hardware ratings;</li><li>Export data to HTML/plain text;</li></ul> | <ul><li>System cleaner (caches, logs, packages);</li><li>Real-time resource monitoring;</li><li><tt>systemd</tt>-services management;</li></ul> |
-| Data accuracy         | 🟢️ | ⚪️ ([incorrect battery information](https://raw.githubusercontent.com/mskrasnov/mskrasnov.github.io/refs/heads/master/ferrix/assets/hardinfo2.png)) | ⚪️ (stacer is outdated software) |
-| Target audience       | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
-| Processor topology    | 🟢️                    | 🟢️        | 🔴️           |
-| Processor frequencies | 🟢️                    | ⚪️        | ?            |
-| Processor vulnerabilities | 🟢️                | 🟢️        | 🔴️           |
-| Real-time monitoring  | 🟢️                    | ⚪️        | 🟢️           |
-| Hardware info panel   | 🟢️                    | 🟢️        | 🟢️           |
-| Battery health        | 🟢️                    | 🔴️        | 🟢️           |
-| systemd services list | 🟢️                    | 🔴️        | 🟢️           |
-| DMI Tables            | ⚪️ (more data than Hardinfo) | ⚪️ (less data than FSM) | 🔴️ |
-| UEFI Settings         | 🟢️                    | 🔴️        | 🔴️           |
-| Official AppImage builds | 🟢️                 | 🔴️        | 🟢️           |
+| Criteria                   | FSM | Hardinfo2 | Stacer/Nexis |
+|----------------------------|-----|-----------|--------------|
+| Programming language       | Rust                  | C         | C++          |
+| Program type               | System profiler       | System profiler & hardware benchmark | System optimizer and monitor |
+| GUI                        | `iced`                | GTK3      | Qt5/Qt6      |
+| License                    | GNU GPLv3             | GNU GPLv3 | GNU GPLv3    |
+| CPU&RAM utilization charts | 🟢️ | ⚪️ (charts is ugly) | 🟢️ |
+| CPU Information            | 🟢️ | 🟢️ | ⚪️ |
+| Memory Information         | 🟢️ | 🟢️ | ⚪️ |
+| Filesystems Information    | 🟢️ | 🟢️ | 🔴️ |
+| Network Information        | ⚪️ | 🟢️ | 🔴️ |
+| DMI Tables contents        | ⚪️ (full information from BIOS, Baseboard, Chassis, System, Processors, Memory Devices tables) | ⚪️ (only basic information from Chassis, BIOS, Baseboard tables) | 🔴️ |
+| Notebook battery(es) Info  | 🟢️ | ⚪️ ([incorrect battery information](https://raw.githubusercontent.com/mskrasnov/mskrasnov.github.io/refs/heads/master/fsm/assets/hardinfo2.png)) | 🟢️ |
+| Connected screens Info     | ⚪️ | 🟢️ | 🔴️ |
+| Installed Linux system     | 🟢️ | 🟢️ | 🔴️ |
+| Users and groups list      | 🟢️ | 🟢️ | 🔴️ |
+| Environment variables list | 🟢️ | 🟢️ | 🔴️ |
+| `systemd` services list    | 🟢️ | 🔴️ | 🔴️ |
+| Linux boots list           | 🔴️ | 🟢️ | 🔴️ |
+| Installed software list    | 🟢️ | 🔴️ | 🔴️ |
+| Linux kernel information   | 🟢️ | 🟢️ | 🔴️ |
+| Desktop environment info   | ⚪️ | ⚪️ | ⚪️ |
+| Command shell info         | 🟢️ | 🔴️ | 🔴️ |
+| UEFI Attributes Info       | 🟢️ | 🔴️ | 🔴️ |
+| Hardware benchmarks        | 🔴️ | 🟢️ | 🔴️ |
+| System cleaning tools      | 🔴️ | 🔴️ | 🟢️ |
+| PCI- and USB-devices list  | 🔴️ | 🟢️ | 🔴️ |
+| Supported locales list     | 🔴️ | 🟢️ | 🔴️ |
+| GPU information            | 🔴️ | 🟢️ | 🔴️ |
+| Sensors information        | 🔴️ | 🟢️ | ⚪️ |
+| Target audience | Advanced users who need detailed information about software and hardware | Enthusiasts and overlockers interested in benchmarks and system comparisons | Beginners and regular users who want a simple tool for configuring and cleaning up their system |
+| Real-time monitoring       | 🟢️ | ⚪️ | 🟢️ |
+| Official AppImage builds   | 🟢️ | 🔴️ | 🟢️ |
 
 - 🟢️ - yes;
 - 🔴️ - no;
 - ⚪️ - partial;
 
-## Build & Install
+## Installation
 
 [![](https://img.shields.io/github/downloads/mskrasnov/fsm/total?color=red)](https://github.com/mskrasnov/FSM/releases) [![](https://img.shields.io/github/downloads/mskrasnov/fsm/latest/total?color=green)](https://github.com/mskrasnov/FSM/releases/latest)
 
-```bash
-git clone https://github.com/mskrasnov/Ferrix
-cd Ferrix
+You can use the universal AppImage package (no installation required) or install the deb/rpm packages (for Debian/Ubuntu or Fedora/RHEL).
 
+### For all systems (AppImage package)
+
+- **Dependencies:**
+    - glibc >= 2.36;
+    - Xorg or Wayland;
+    - Graphics drivers;
+
+Download the AppImage package (only `amd64` is supported yet):
+<br>[![](https://img.shields.io/badge/FSM_v0.7.1_AppImage-amd64-blue)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
+
+Make this package executable:
+
+```bash
+sudo chmod +x ./Ferrix.System.Monitor-v0.7.1-x86_64.AppImage
+```
+
+Run this package:
+
+```bash
+./Ferrix.System.Monitor-v0.7.1-x86_64.AppImage
+```
+
+### For Debian/Ubuntu
+
+- **Minimum version required:** Debian 11, Ubuntu 22.04;
+- **Dependencies:**
+    - glibc >= 2.36;
+    - dbus;
+    - Xorg or Wayland;
+    - Graphics drivers;
+
+Download the package for your CPU architecture:
+<br>[![](https://img.shields.io/badge/FSM_v0.7.1_Debian-amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-i386-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_i386.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-ARM64-red)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_arm64.deb)
+
+Install using `apt`:
+
+```bash
+sudo apt install ./ferrix-app_0.7.1-1_${your architecture}.deb
+```
+
+### For Fedora/RHEL
+
+- **Minimum version required:** Fedora 42;
+- **Dependencies:**
+    - glibc >= 2.36;
+    - dbus;
+    - Xorg or Wayland;
+    - Graphics drivers;
+
+Download the package (only `amd64` is supported yet):
+<br>[![](https://img.shields.io/badge/FSM_v0.7.1_Fedora-amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
+
+Install using `dnf`:
+
+```bash
+sudo dnf install ./ferrix-app-0.7.1-1.x86_64.rpm
+```
+
+## Building from the source code
+
+- **Dependencies:**
+    - glibc >= 2.36;
+    - GNU make;
+    - GNU coreutils;
+    - `rustc`, `cargo` >= 1.96;
+    - [optional] `dpkg`, `dpkg-dev`, `liblzma-dev` for building the `deb` package;
+    - [optional] `docker`, `buildx-plugin` for docker;
+    - [optional] `libfuse2`, `wget` for appimage build;
+
+Clone this repository:
+
+```bash
+git clone https://github.com/mskrasnov/FSM
+cd        ./FSM
+```
+
+### Building on the host
+
+**1. Prepare your host system:**
+
+```bash
+# If you use Debian/Ubuntu and its derivatives:
+sudo bash ./packaging/debian/setup.sh
+
+# If you use Fedora/RHEL:
+sudo bash ./packaging/fedora/setup.sh
+```
+
+This script will install all build dependencies, including the Rust programming language toolchain (`rustup`, `cargo`, `rustc`).
+
+**2. Build the package:**
+
+- `debug`-profile without optimizations and LTO:
+
+```bash
+make debug
+```
+
+- `release`-profile with optimizations and LTO and without debug symbols:
+
+```bash
 make build
 ```
 
-If you use Debian, perform:
+If you want to build Debian package, run this (on Debian):
 
 ```bash
+cargo install cargo-deb
 make deb
 ```
 
-And install `deb`-package:
+If you want to build Fedora/RHEL package, run this (on Fedora):
 
 ```bash
-sudo dpkg -i ./target/${TARGET_ARCH}/debian/ferrix-app_${VERSION}-${BUILD_NUM}_${ARCH}.deb
-```
-
-If you use other Linux system, perform:
-
-```bash
-make run # to run Ferrix...
-# ... or
-make install # to install Ferrix.
-# Perform:
-make uninstall # to uninstall Ferrix from your system.
-```
-
-### Running in WSL
-
-```bash
-export XDG_SESSION_TYPE=xorg
-export DISPLAY=':0'
-export WAYLAND_DISPLAY=
-ferrix-app
+cargo install cargo-generate-rpm
+cargo generate-rpm --target-dir=${PWD}/target/
 ```
 
 ### Cross compilation (Debian 12 x86_64 glibc -> i686/AArch64 glibc)
@@ -129,66 +219,90 @@ sudo apt install gcc-12-i686-linux-gnu binutils-i686-linux-gnu
 rustup target add i686-unknown-linux-gnu
 ```
 
-Build Ferrix:
+Build FSM:
 
 ```bash
-cargo build [--release] --target={i686/aarch64}-unknown-linux-gnu
-# or:
+#   debug-profile:
+make TARGET={i686/aarch64}-unknown-linux-gnu debug
+# or
+#   release-profile:
 make TARGET={i686/aarch64}-unknown-linux-gnu build
 ```
 
 ### Docker build
 
-Prepare for `*.deb` or `*.AppImage`:
+> **Note 1:** In the Docker container you can build the Debian or Fedora/RHEL packages and AppImage.
+
+> **Note 2:** Each of the built packages will be placed in the `builds/` directory.
+
+**1. Some preparations.**
+
+**1.1. To build `deb` or `AppImage` packages:**
 
 ```bash
-docker build -t fsm-builder .
+docker build -t fsm-debian -f ./packaging/debian/Dockerfile .
 ```
 
-Build `*.deb` packages for `amd64`, `i686` and `aarch64` targets:
+**1.2. To build `rpm` package:**
+
+```bash
+docker build -t fsm-fedora -f ./packaging/fedora/Dockerfile .
+```
+
+**2. Build packages.**
+
+**2.1. Build `deb`-packages:**
 
 ```bash
 docker run --rm            \
     -v "${PWD}:/workspace" \
-    fsm-builder            \
+    fsm-debian             \
     packaging/debian/build.sh
 ```
 
-Build `*.AppImage` package (only for `amd64` target):
+> **Note:** This script will build 3 packages: for the `amd64`, `i386`, and `aarch64` architectures.
+
+**2.2. Build `AppImage` package (for `amd64`):**
 
 ```bash
 docker run --rm            \
     -v "${PWD}:/workspace" \
-    fsm-builder            \
+    fsm-debian             \
     packaging/debian/appimage.sh
 ```
 
-Prepare for `*.rpm`:
+**2.3. Build `rpm` package (for `amd64`):**
 
 ```bash
-docker build -t fsm-rpm -f packaging/fedora/Dockerfile
-```
-
-Build `*.rpm` package (only for `amd64` target):
-
-```bash
-docker build -t fsm-rpm -f ./packaging/fedora/Dockerfile
 docker run -- rm           \
     -v "${PWD}:/workspace" \
-    fsm-rpm                \
+    fsm-fedora             \
     packaging/fedora/build.sh
 ```
+
+## Running in WSL
+
+```bash
+export XDG_SESSION_TYPE=xorg
+export DISPLAY=':0'
+export WAYLAND_DISPLAY=
+ferrix-app
+```
+
+## TROUBLESHOOTING
+
+See [FSM Home Page](https://mskrasnov.github.io/fsm/index.html#troubleshooting) for details.
 
 ## Technology stack
 
 - **OS:** Linux with `glibc`, `dbus` and `systemd`;
-- **Programming language:** Rust 1.88+ (2024 edition);
+- **Programming language:** Rust 1.96+ (2024 edition);
 - **GUI:** [`iced`](https://iced.rs);
 - **Hardware:** modern PC or laptop;
 
-## ❤️ Support Ferrix System Monitor
+## ❤️ Support FSM
 
-Developing Ferrix System Monitor takes time and passion. If you find it useful, please consider supporting its development:
+Developing FSM takes time and passion. If you find it useful, please consider supporting its development:
 
 - **Star ⭐ this repo!** It helps others discover FSM;
 - **Write comments, questions, bug reports, or suggestions** for new functionality in [issues](https://github.com/mskrasnov/Ferrix/issues/new).
@@ -197,4 +311,4 @@ Developing Ferrix System Monitor takes time and passion. If you find it useful, 
 
 ## License
 
-Ferrix System Monitor is free and open-source software distributed under the **GNU General Public License v3.0**. See [LICENSE](LICENSE) file for details.
+Ferrix System Monitor is free and open-source software distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE) file for details.

@@ -1,0 +1,15 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=Ferrix System Monitor
+Comment=Get information about your PC and installed OS
+Comment[ru]=Получить информацию о вашем ПК и установленной ОС
+Exec=ferrix-app
+Icon=com.mskrasnov.Ferrix
+Terminal=false
+Type=Application
+Categories=Application;System;
+Keywords=System;Monitor
+StartupNotify=true
+DBusActivatable=true
+Name[ru_RU]=Ferrix System Monitor

@@ -28,8 +28,13 @@ use std::{env, fs, path::Path, process::Command};
 /// Session info (desktop, window manager)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionInfo {
+    /// Desktop environment name
     pub desktop: Option<String>,
+
+    /// DE version
     pub desktop_ver: Option<String>,
+
+    /// Window manager/compositor name
     pub window_manager: Option<String>,
 }
 

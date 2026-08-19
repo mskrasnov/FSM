@@ -1,6 +1,6 @@
 /* cpu.rs
  *
- * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 //! dbg!(json);
 //! ```
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
 
@@ -207,7 +207,8 @@ impl ToPlainText for CPU {
 }
 
 fn read_info() -> Result<Vec<CPU>> {
-    let blocks = read_to_string("/proc/cpuinfo")?;
+    let blocks = read_to_string("/proc/cpuinfo")
+        .map_err(|err| anyhow!("read_info(): Failed to read `/proc/cpuinfo` file: {err}"))?;
     let blocks = blocks
         .split("\n\n") // split by CPU blocks
         .collect::<Vec<_>>();
@@ -418,7 +419,8 @@ impl From<&str> for SoftIrq {
 }
 
 fn parse_proc_stat() -> Result<Stat> {
-    let content = read_to_string("/proc/stat")?;
+    let content = read_to_string("/proc/stat")
+        .map_err(|err| anyhow!("parse_proc_stat(): Failed to read `/proc/stat` file: {err}"))?;
     let mut stat = Stat::default();
 
     for line in content.lines() {

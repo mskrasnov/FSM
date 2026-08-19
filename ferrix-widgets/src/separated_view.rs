@@ -21,7 +21,7 @@
 //! Two-pane view
 
 use iced::{
-    Element, Length, Pixels,
+    Element, Length,
     widget::{Id, column, container, scrollable},
 };
 
@@ -30,7 +30,8 @@ pub struct SeparatedView<'a, Message> {
     pub second_pane: Element<'a, Message>,
     pub first_pane_id: Option<&'static str>,
     pub second_pane_id: Option<&'static str>,
-    pub fpane_max_height: f32,
+    pub fpane_max_height: Length,
+    pub spane_max_height: Length,
 }
 
 impl<'a, Message: 'a + Clone> SeparatedView<'a, Message> {
@@ -40,7 +41,8 @@ impl<'a, Message: 'a + Clone> SeparatedView<'a, Message> {
             second_pane: s.into(),
             first_pane_id: None,
             second_pane_id: None,
-            fpane_max_height: 170.,
+            fpane_max_height: Length::Fixed(170.),
+            spane_max_height: Length::Fill,
         }
     }
 
@@ -54,8 +56,13 @@ impl<'a, Message: 'a + Clone> SeparatedView<'a, Message> {
         self
     }
 
-    pub fn set_fpane_max_height(mut self, height: f32) -> Self {
-        self.fpane_max_height = height;
+    pub fn set_fpane_max_height(mut self, height: impl Into<Length>) -> Self {
+        self.fpane_max_height = height.into();
+        self
+    }
+
+    pub fn set_spane_max_height(mut self, height: impl Into<Length>) -> Self {
+        self.spane_max_height = height.into();
         self
     }
 
@@ -81,9 +88,8 @@ impl<'a, Message: 'a + Clone> SeparatedView<'a, Message> {
 
         container(
             column![
-                f.height(Length::Shrink)
-                    .max_height(Pixels(self.fpane_max_height)),
-                s,
+                f.height(self.fpane_max_height),
+                s.height(self.spane_max_height),
             ]
             .spacing(5),
         )

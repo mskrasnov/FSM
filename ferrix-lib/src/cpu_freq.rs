@@ -19,6 +19,14 @@
  */
 
 //! Get information about CPU frequency
+//! 
+//! ## Example
+//! ```no-test
+//! use ferrix_lib::cpu_freq::CpuFreq;
+//! 
+//! let freqs = CpuFreq::new().unwrap();
+//! dbg!(&freqs.policy);
+//! ```
 
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
@@ -31,9 +39,15 @@ use std::{
 
 use crate::traits::ToJson;
 
+/// Information about power management and frequencies
+/// for the processors installed in the PC
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CpuFreq {
+    /// Information on power and frequency management
+    /// for each processor core/thread
     pub policy: Vec<Policy>,
+
+    /// Does the processor support Turbo Boost technology?
     pub boost: Option<bool>,
 }
 
@@ -68,6 +82,8 @@ impl CpuFreq {
 
 impl ToJson for CpuFreq {}
 
+/// Information about power management and the frequency
+/// of a specific core/thread
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
 pub struct Policy {
     /// Maximum frequency from the BIOS

@@ -55,6 +55,8 @@ pub mod vulnerabilities;
 
 pub use sysmon::*;
 
+pub mod page_impl;
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 pub enum Page {
     /************************************

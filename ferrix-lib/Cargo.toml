@@ -26,7 +26,7 @@ default = [
   "battery", "cpu", "desktop",
   "dmi", "drm", "firmware",
   "init", "mem", "net",
-  "parts", "resources", "soft",
+  "parts", "resources", "soft", "sensors",
   "sys", "cpu_freq", "vulnerabilities",
 ]
 
@@ -42,6 +42,7 @@ mem = []
 net = []
 parts = ["dep:libc"]
 resources = []
+sensors = []
 soft = []
 sys = []
 vulnerabilities = ["cpu"]

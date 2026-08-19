@@ -19,6 +19,16 @@
  */
 
 //! Get information about notebook's battery
+//! 
+//! ## Example
+//! ```no-test
+//! use ferrix_lib::battery::BatInfo;
+//! use ferrix_lib::traits::ToJson;
+//! 
+//! let bat = BatInfo::new().unwrap();
+//! let bat_json = bat.to_json().unwrap();
+//! dbg!(bat_json);
+//! ```
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};

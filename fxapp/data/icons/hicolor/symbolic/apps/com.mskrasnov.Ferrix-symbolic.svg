@@ -1,0 +1,10 @@
+<svg width="160" height="100" viewBox="0 0 160 100">
+  <rect x="0" y="0" width="160" height="100" rx="8" fill="#242424"/>
+  <path d="M10,50 L30,50 L30,30 L50,30 L50,70 L70,70 L70,50 L90,50 L90,30 L110,30 L110,70 L130,70 L130,50 L150,50" 
+        stroke="#f5c211" 
+        stroke-width="3" 
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <!-- Компоненты с адаптированными цветами для темной темы -->
+</svg>
