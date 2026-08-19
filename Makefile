@@ -102,6 +102,30 @@ debug:
 	cargo build --target=$(TARGET)
 	@echo -e "$(GREEN)Debug build completed$(NC)"
 
+docker_rpm_prepare:
+	docker build -t fsm-fedora -f ./packaging/fedora/Dockerfile .
+
+docker_rpm_build:
+	docker run -- rm           \
+		-v "${PWD}:/workspace" \
+		fsm-fedora             \
+		packaging/fedora/build.sh
+
+docker_deb_prepare:
+	docker build -t fsm-debian -f ./packaging/debian/Dockerfile .
+
+docker_deb_build:
+	docker run -- rm           \
+		-v "${PWD}:/workspace" \
+		fsm-debian             \
+		packaging/debian/build.sh
+
+docker_appdir_build:
+	docker run -- rm           \
+		-v "${PWD}:/workspace" \
+		fsm-debian             \
+		packaging/debian/appimage.sh
+
 help:
 	@echo -e "Available targets:"
 	@echo -e "  $(GREEN)build$(NC)     - Build the project in release mode (default)"
@@ -110,6 +134,12 @@ help:
 	@echo -e "  $(GREEN)clean$(NC)     - Remove build artifacts"
 	@echo -e "  $(GREEN)run$(NC)       - Build and run without installing"
 	@echo -e "  $(GREEN)debug$(NC)     - Build in debug mode"
+	@echo -e "  $(GREEN)run_debug$(NC) - Run in debug mode without installing"
+	@echo -e "  $(GREEN)docker_rpm_prepare$(NC)  - Create Docker image to build FSM RPM packages"
+	@echo -e "  $(GREEN)docker_rpm_build$(NC)    - Build the rpm package of FSM"
+	@echo -e "  $(GREEN)docker_deb_prepare$(NC)  - Create Docker image to build FSM deb/AppImage packages"
+	@echo -e "  $(GREEN)docker_deb_build$(NC)    - Build the deb package of FSM"
+	@echo -e "  $(GREEN)docker_appdir_build$(NC) - Build the AppImage package of FSM"
 	@echo -e "  $(GREEN)help$(NC)      - Show this help message"
 	@echo -e ""
 	@echo -e "Examples:"
