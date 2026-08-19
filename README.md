@@ -289,6 +289,13 @@ export WAYLAND_DISPLAY=
 ferrix-app
 ```
 
+## Running test version (`pre-v0.8.0`)
+
+```bash
+cargo build
+cargo run --bin=fxapp
+```
+
 ## TROUBLESHOOTING
 
 See [FSM Home Page](https://mskrasnov.github.io/fsm/index.html#troubleshooting) for details.
