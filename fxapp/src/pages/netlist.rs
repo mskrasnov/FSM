@@ -21,7 +21,11 @@
 //! Pages with information about network interfaces
 
 use ferrix_data::load_state::{LoadState, ToLoadState};
-use ferrix_lib::net::{Network, Networks};
+use ferrix_lib::{
+    net::{Network, Networks},
+    utils::Size,
+};
+use ferrix_widgets::tooltip::icon_tooltip;
 use iced::{
     Alignment::Center,
     Element, Font, Length, Task,
@@ -66,7 +70,7 @@ impl NetStatPage {
                 ))
             }),
             table::column(hdr_name("RX Bytes"), |row: &'a Network| {
-                button(num_item(row.statistics.rx_bytes))
+                button(num_bytes(row.statistics.rx_bytes))
                     .style(button::text)
                     .padding(0)
                     .on_press(Message::KeyboardAndMouse(
@@ -102,7 +106,7 @@ impl NetStatPage {
             })
             .align_x(Horizontal::Right),
             table::column(hdr_name("TX Bytes"), |row: &'a Network| {
-                button(num_item(row.statistics.tx_bytes))
+                button(num_bytes(row.statistics.tx_bytes))
                     .style(button::text)
                     .padding(0)
                     .on_press(Message::KeyboardAndMouse(
@@ -172,6 +176,20 @@ impl NetStatPage {
     pub fn page_title2() -> String {
         fl!("page-net")
     }
+}
+
+fn num_bytes<'a>(num: u64) -> Element<'a, Message> {
+    let size = Size::B(num).round(2).unwrap_or_default();
+    let btn = button(icon_tooltip("about", format!("{size}")))
+        .style(button::text)
+        .padding(0)
+        .on_press(Message::KeyboardAndMouse(
+            KeyboardAndMouse::CopyButtonPressed(format!("{size}")),
+        ));
+    row![text(num).font(Font::MONOSPACE), btn]
+        .spacing(5)
+        .align_y(Center)
+        .into()
 }
 
 fn num_item<'a>(num: u64) -> text::Text<'a> {
