@@ -44,6 +44,7 @@ pub struct Ferrix {
     pub dmi_page: pages::dmi::DMIPage,
     pub bat_page: pages::battery::BatPage,
     pub drm_page: pages::drm::DRMPage,
+    pub net_pages: pages::netlist::NetStatPage,
     pub firmware_page: pages::firmware::FirmwarePage,
 }
 
@@ -65,6 +66,7 @@ impl Ferrix {
                 dmi_page: pages::dmi::DMIPage::new(),
                 bat_page: pages::battery::BatPage::new(),
                 drm_page: pages::drm::DRMPage::new(),
+                net_pages: pages::netlist::NetStatPage::new(),
                 firmware_page: pages::firmware::FirmwarePage::new(),
             },
             crate::pages::passport::Passport::get_data().map(Message::DataReceiver),
@@ -123,6 +125,11 @@ impl Ferrix {
             PageVariant::Screens if self.drm_page.drm.is_none() => {
                 pages::drm::DRMPage::get_data().map(Message::DataReceiver)
             }
+            PageVariant::NetworkInterfaces | PageVariant::NetworkStatistics
+                if self.net_pages.net.is_none() =>
+            {
+                pages::netlist::NetStatPage::get_data().map(Message::DataReceiver)
+            }
             PageVariant::FirmwareAttributes if self.firmware_page.firmware.is_none() => {
                 pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
             }
@@ -160,6 +167,10 @@ impl Ferrix {
                 self.settings.update_period_battery as u64,
             ))
             .map(|_| Message::DataReceiver(DataReceiver::GetBatData)),
+            iced::time::every(Duration::from_secs(
+                self.settings.update_period_general as u64,
+            ))
+            .map(|_| Message::DataReceiver(DataReceiver::GetNetworkData)),
         ];
         Subscription::batch(scripts)
     }

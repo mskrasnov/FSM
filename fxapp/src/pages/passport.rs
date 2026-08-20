@@ -79,6 +79,7 @@ impl PageData for Passport {
             super::fs::FSPage::get_data(),
             super::battery::BatPage::get_data(),
             super::drm::DRMPage::get_data(),
+            super::netlist::NetStatPage::get_data(),
         ])
     }
 }

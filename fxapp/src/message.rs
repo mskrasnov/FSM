@@ -27,13 +27,7 @@ use crate::{
 };
 use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
 use ferrix_lib::{
-    battery::BatInfo,
-    cpu::Processors,
-    cpu_freq::CpuFreq,
-    drm::Video,
-    parts::Mounts,
-    ram::{RAM, Swaps},
-    vulnerabilities::Vulnerabilities,
+    battery::BatInfo, cpu::Processors, cpu_freq::CpuFreq, drm::Video, net::Networks, parts::Mounts, ram::{RAM, Swaps}, vulnerabilities::Vulnerabilities
 };
 use iced::{
     Event, Task,
@@ -80,6 +74,9 @@ pub enum DataReceiver {
 
     GetDRMData,
     DRMDataReceived(LoadState<Video>),
+
+    GetNetworkData,
+    NetworkDataReceived(LoadState<Networks>),
 
     GetFirmwareData,
     FirmwareDataRefresh,
@@ -149,6 +146,11 @@ impl DataReceiver {
             Self::GetDRMData => crate::pages::drm::DRMPage::get_data().map(Message::DataReceiver),
             Self::DRMDataReceived(val) => {
                 fx.drm_page.drm = val;
+                Task::none()
+            }
+            Self::GetNetworkData => crate::pages::netlist::NetStatPage::get_data().map(Message::DataReceiver),
+            Self::NetworkDataReceived(val) => {
+                fx.net_pages.net = val;
                 Task::none()
             }
             Self::GetFirmwareData => {
