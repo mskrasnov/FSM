@@ -19,12 +19,12 @@
  */
 
 //! Get information about notebook's battery
-//! 
+//!
 //! ## Example
 //! ```no-test
 //! use ferrix_lib::battery::BatInfo;
 //! use ferrix_lib::traits::ToJson;
-//! 
+//!
 //! let bat = BatInfo::new().unwrap();
 //! let bat_json = bat.to_json().unwrap();
 //! dbg!(bat_json);
@@ -160,10 +160,9 @@ fn polish_values(bat: &mut Battery) {
 }
 
 fn calculate_health(bat: &mut Battery) {
-    if bat.energy_full.is_some() && bat.energy_full_design.is_some() {
-        let (energy_full, energy_full_design) =
-            (bat.energy_full.unwrap(), bat.energy_full_design.unwrap());
-        bat.health = Some((energy_full / energy_full_design * 100.).min(100.));
+    if let (Some(energy_full), Some(energy_full_design)) = (bat.energy_full, bat.energy_full_design)
+    {
+        bat.health = Some((energy_full / energy_full_design * 100.).min(100.))
     }
 }
 
