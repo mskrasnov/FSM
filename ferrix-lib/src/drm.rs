@@ -182,79 +182,212 @@ impl DRM {
 /// Read [Wikipedia](https://en.wikipedia.org/wiki/Extended_Display_Identification_Data) for details.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EDID {
-    //  NAME          TYPE       BYTES
-    /// Manufacturer ID. This is a legacy Plug and Play ID assigned
-    /// by UEFI forum which is a *big-endian* 16-bit value made up
-    /// of three 5-bit letters: 00001 - 'A', 00010 - 'B', etc.
-    pub manufacturer: String, // 8-9
+    /// Raw EDID bytes (at least 128 bytes)
+    pub raw: Vec<u8>,
+
+    /// Manufacturer ID
+    ///
+    /// This is a legacy Plug and Play ID assigned by the UEFI forum, which is a big-endian
+    /// 16-bit value made up three 5-bit letters: 00001 = 'A', 00010 = 'B', etc.
+    ///
+    /// > Byte offset: 8-9
+    pub manufacturer: String,
+
+    /// General alphanumeric description of the display. Extracted from the Monitor Descriptor
+    /// block with type `0xFE`
+    pub description: Option<String>,
 
     /// Manufacturer product code. 16-bit hex-nubmer, little-endian.
     /// For example, "LGC" + "C0CF"
-    pub product_code: u16, // 10-11
+    ///
+    /// > Byte offset: 10-11
+    pub product_code: u16,
 
     /// Serial number. 32 bits, little-endian
-    pub serial_number: u32, // 12-15
+    ///
+    /// Note: This may be zero in the serial number is provided as a text string instead.
+    ///
+    /// > Byte offset: 12-15
+    pub serial_number: u32,
+
+    /// Display product name/model
+    ///
+    /// Extracted from the Monitor Descriptor block with type `0xFC`
+    pub model: String,
+
+    /// Text serial number
+    ///
+    /// Extracted from the Monitor Descriptor block with type `0xFF`
+    pub serial: Option<String>,
 
     /// Week of manufacture; or `FF` model year flag
     ///
-    /// > **NOTE:** week numbering isn't consistent between
-    /// > manufacturers
-    pub week: u8, // 16
+    /// > **WARN:** week numbering isn't consistent between manufacturers.
+    /// 
+    /// > Byte offset: 16
+    pub week: u8,
 
-    /// Year of manufacture, or year of model, if model year flag
-    /// is set
-    pub year: u16, // 17
+    /// Year of manufacture, or year of model, if model year flag is set
+    ///
+    /// > Byte offset: 17
+    pub year: u16,
 
     /// EDID version, usually `01` for 1.3 and 1.4
-    pub edid_version: u8, // 18
+    ///
+    /// > Byte offset: 18
+    pub edid_version: u8,
 
     /// EDID revision, usually `03` for 1.3 or `04` for 1.4
-    pub edid_revision: u8, // 19
+    ///
+    /// > Byte offset: 19
+    pub edid_revision: u8,
 
-    /// Video input parameters
-    pub video_input: VideoInputParams, // 20
+    /// Video input parameters (signal type, voltage levels, etc.)
+    ///
+    /// > Byte offset: 20
+    pub video_input: VideoInputParams,
 
-    /// Horizontal screen size, in centimetres (range 1-255)
-    pub hscreen_size: u8, // 21
+    /// Horizontal screen size, in centimetres (range 1-255). A value of `0` indicates the size
+    /// is not specified
+    ///
+    /// > Byte offset: 21
+    pub hscreen_size: u8,
 
-    /// Vertical screen size, in centimetres
-    pub vscreen_size: u8, // 22
+    /// Vertical screen size, in centimetres. A value of `0` indicates the size is not specified
+    ///
+    /// > Byte offset: 22
+    pub vscreen_size: u8,
+
+    /// Calculated screen diagonal in inches, derived from `hscreen_size` and `vscreen_size`
+    ///
+    /// `None` if either dimension is `0`.
+    pub diagonal_inches: Option<f32>,
+
+    /// Calculated aspect ratio of the preferred timing mode (e.g. "16:10", "4:3", etc.
+    /// or "1.60:1")
+    pub aspect_ratio: Option<String>,
+
+    /// Active horizontal resolution in pixels. Derived from the first Detailed Timing Descriptor
+    /// (preferred timing)
+    pub resolution_width: Option<u32>,
+
+    /// Active vertical resolution in pixels. Derived from the first DTD (preferred timing)
+    pub resolution_height: Option<u32>,
+
+    /// Pixel clock frequency in MHz. Derived from the first DTD (preferred timing)
+    pub pixel_clock_mhz: Option<f32>,
 
     /// Display gamma, factory default
-    pub display_gamma: u8, // 23
+    ///
+    /// Formula: `(value + 100) / 100`
+    ///
+    /// > Byte offset: 23
+    pub display_gamma: u8,
+
+    /// List of all parsed DTDs. The first entry is typically the "Preferred Timing" (native
+    /// resolution)
+    pub detailed_timings: Vec<DetailedTiming>,
+
+    /// Supported vertical/horizontal frequency ranges and maximum pixel clock. Extracted from the
+    /// Monitor Range Limits Descriptor (type `0xFD`)
+    pub range_limits: Option<RangeLimits>,
+
+    /// Number of 128-byte extension blocks following this base block
+    ///
+    /// > Byte offset: 126
+    pub extension_blocks: u8,
+
+    /// Checksum of the base block. The sum of all 128 bytes should be `0` modulo `256`
+    ///
+    /// > Byte offset: 127
+    pub checksum: u8,
 }
 
 impl EDID {
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let data = read(path.as_ref().join("edid"))?;
-        if data.len() < 128 || data[0..8] != [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00] {
-            return Err(anyhow!(
-                "Invalid EDID header on path {}",
-                path.as_ref().display(),
-            ));
+    /// Parses an EDID structure from a `edid` file located in the given directory path
+    pub fn new<P: AsRef<Path>>(edid_dir_path: P) -> Result<Self> {
+        let path = edid_dir_path.as_ref().join("edid");
+        let data = read(&path)
+            .map_err(|err| anyhow!("Failed to read EDID file at: {}: {}", path.display(), err))?;
+
+        if data.len() < 128 {
+            return Err(anyhow!("EDID data too short ({} bytes)", data.len()));
+        }
+
+        if data[0..8] != [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00] {
+            return Err(anyhow!("Invalid EDID header on path {}", path.display()));
         }
 
         let manufacturer = {
-            let word = ((data[8] as u16) << 8) | data[9] as u16;
+            let word = u16::from_be_bytes([data[8], data[9]]);
 
             let c1 = ((word >> 10) & 0x1F) as u8 + 64;
-            let c2 = ((word >> 5) & 0x1f) as u8 + 64;
-            let c3 = (word & 0x1f) as u8 + 64;
+            let c2 = ((word >> 5) & 0x1F) as u8 + 64;
+            let c3 = (word & 0x1F) as u8 + 64;
 
             format!("{}{}{}", c1 as char, c2 as char, c3 as char)
         };
+
         let product_code = u16::from_le_bytes([data[10], data[11]]);
         let serial_number = u32::from_le_bytes([data[12], data[13], data[14], data[15]]);
+
         let week = data[16];
         let year = data[17] as u16 + 1990;
         let edid_version = data[18];
         let edid_revision = data[19];
+
         let video_input = VideoInputParams::new(&data);
         let hscreen_size = data[21];
         let vscreen_size = data[22];
         let display_gamma = data[23];
 
+        let diagonal_inches = if hscreen_size > 0 && vscreen_size > 0 {
+            let diag_cm = ((hscreen_size as f32).powi(2) + (vscreen_size as f32).powi(2)).sqrt();
+            Some(diag_cm / 2.54)
+        } else {
+            None
+        };
+
+        let mut model = String::new();
+        let mut description = None::<String>;
+        let mut serial = None::<String>;
+        let mut detailed_timings = Vec::new();
+        let mut range_limits = None;
+
+        for i in 0..4 {
+            let start = 54 + i * 18;
+            let block = &data[start..start + 18];
+
+            if block[0] == 0x00 && block[1] == 0x00 {
+                match block[3] {
+                    0xFC => model = extract_text(block),
+                    0xFE => description = Some(extract_text(block)),
+                    0xFF => serial = Some(extract_text(block)),
+                    0xFD => range_limits = Some(RangeLimits::parse(block)),
+                    _ => {}
+                }
+            } else {
+                detailed_timings.push(DetailedTiming::parse(block));
+            }
+        }
+
+        let (resolution_width, resolution_height, pixel_clock_mhz, aspect_ratio) = detailed_timings
+            .first()
+            .map_or((None, None, None, None), |dtd| {
+                (
+                    Some(dtd.h_active),
+                    Some(dtd.v_active),
+                    Some(dtd.pixel_clock_hz as f32 / 1_000_000.),
+                    Some(dtd.aspect_ratio.clone()),
+                )
+            });
+
+        let extension_blocks = data[126];
+        let checksum = data[127];
+
         Ok(Self {
+            raw: data,
+
             manufacturer,
             product_code,
             serial_number,
@@ -265,8 +398,208 @@ impl EDID {
             video_input,
             hscreen_size,
             vscreen_size,
+            diagonal_inches,
             display_gamma,
+            pixel_clock_mhz,
+            aspect_ratio,
+            resolution_width,
+            resolution_height,
+
+            model,
+            description,
+            serial,
+
+            detailed_timings,
+            range_limits,
+
+            extension_blocks,
+            checksum,
         })
+    }
+}
+
+fn extract_text(block: &[u8]) -> String {
+    let data = &block[5..18];
+    let end = data
+        .iter()
+        .position(|&b| b == 0x0A || b == 0x00)
+        .unwrap_or(data.len());
+    String::from_utf8_lossy(&data[..end]).trim().to_string()
+}
+
+/// Single Detailed Timing Descriptor (DTD) block
+///
+/// A DTD contains precise timing information for a specific display mode, including active
+/// resolution, banking intervals, sync pulses, and polarity.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DetailedTiming {
+    /// Pixel clock frequency in Hz
+    pub pixel_clock_hz: u64,
+
+    /// Active horizontal resolution in pixels
+    pub h_active: u32,
+
+    /// Total horizontal blanking interval in pixels
+    pub h_blanking: u32,
+
+    /// Active vertical resolution in lines
+    pub v_active: u32,
+
+    /// Total vertical blanking interval in lines
+    pub v_blanking: u32,
+
+    /// Horizontal front porch (sync offset) in px
+    pub h_front_porch: u32,
+
+    /// Horizontal sync pulse width in px
+    pub h_sync_pulse: u32,
+
+    /// Vertical front porch (sync offset) in lines
+    pub v_front_porch: u32,
+
+    /// Vertical sync pulse width in lines
+    pub v_sync_pulse: u32,
+
+    /// Horizontal back porch in pixels
+    pub h_back_porch: u32,
+
+    /// Vertical back porch in lines
+    pub v_back_porch: u32,
+
+    /// `true` if the horizontal sync pulse is positive polarity
+    pub h_sync_positive: bool,
+
+    /// `true` if the vertical sync pulse is positive polarity
+    pub v_sync_positive: bool,
+
+    /// Calculated aspect ratio for this specific timing mode
+    pub aspect_ratio: String,
+}
+
+impl DetailedTiming {
+    /// Parses an 18-byte DTD block into a structured format
+    pub fn parse(block: &[u8]) -> Self {
+        let pixel_clock_10khz = u16::from_le_bytes([block[0], block[1]]);
+        let pixel_clock_hz = pixel_clock_10khz as u64 * 10_000;
+
+        /* Horizontal parameters */
+        let h_active_low = block[2] as u32;
+        let h_blanking_low = block[3] as u32;
+        let h_active_high = ((block[4] >> 4) as u32) << 8;
+        let h_blanking_high = ((block[4] & 0x0F) as u32) << 8;
+
+        let h_active = h_active_high | h_active_low;
+        let h_blanking = h_blanking_high | h_blanking_low;
+
+        /* Vertical parameters */
+        let v_active_low = block[5] as u32;
+        let v_blanking_low = block[6] as u32;
+        let v_active_high = ((block[7] >> 4) as u32) << 8;
+        let v_blanking_high = ((block[7] & 0x0F) as u32) << 8;
+
+        let v_active = v_active_high | v_active_low;
+        let v_blanking = v_blanking_high | v_blanking_low;
+
+        /* Sync */
+        let h_sync_offset_low = (block[8] >> 4) as u32;
+        let h_sync_pulse_low = (block[8] & 0x0F) as u32;
+        let v_sync_offset_low = (block[9] >> 4) as u32;
+        let v_sync_pulse_low = (block[9] & 0x0F) as u32;
+
+        let h_sync_offset_high = ((block[11] >> 2) & 0x03) as u32;
+        let h_sync_pulse_high = (block[11] & 0x03) as u32;
+        let v_sync_offset_high = ((block[11] >> 6) & 0x03) as u32;
+        let v_sync_pulse_high = ((block[11] >> 4) & 0x03) as u32;
+
+        let h_front_porch = (h_sync_offset_high << 4) | h_sync_offset_low;
+        let h_sync_pulse = (h_sync_pulse_high << 4) | h_sync_pulse_low;
+        let v_front_porch = (v_sync_offset_high << 4) | v_sync_offset_low;
+        let v_sync_pulse = (v_sync_pulse_high << 4) | v_sync_pulse_low;
+
+        /* Back porch */
+        // blanking - front_porch - sync_pulse
+        let h_back_porch = h_blanking.saturating_sub(h_front_porch + h_sync_pulse);
+        let v_back_porch = v_blanking.saturating_sub(v_front_porch + v_sync_pulse);
+
+        let h_sync_positive = (block[17] & 0x02) != 0;
+        let v_sync_positive = (block[17] & 0x04) != 0;
+
+        let aspect_ratio = calc_aspect_ratio(h_active, v_active);
+
+        Self {
+            pixel_clock_hz,
+            h_active,
+            h_blanking,
+            v_active,
+            v_blanking,
+            h_front_porch,
+            h_sync_pulse,
+            v_front_porch,
+            v_sync_pulse,
+            h_back_porch,
+            v_back_porch,
+            h_sync_positive,
+            v_sync_positive,
+            aspect_ratio,
+        }
+    }
+}
+
+fn calc_aspect_ratio(width: u32, height: u32) -> String {
+    if width == 0 || height == 0 {
+        return "??:??".to_string();
+    }
+
+    let ratio = width as f64 / height as f64;
+
+    if (ratio - 1.6).abs() < 0.05 {
+        "16:10".to_string()
+    } else if (ratio - 1.7777).abs() < 0.05 {
+        "16:9".to_string()
+    } else if (ratio - 1.3333).abs() < 0.05 {
+        "4:3".to_string()
+    } else if (ratio - 1.25).abs() < 0.05 {
+        "5:4".to_string()
+    } else if (ratio - 2.3333).abs() < 0.05 {
+        "21:9".to_string()
+    } else {
+        format!("{ratio:.2}:1")
+    }
+}
+
+/// Monitor Range Limits Descriptor (type `0xFD`)
+///
+/// Defines the operational limits of the display to help the graphics driver select
+/// valid timing modes withoyt reading the EDID string
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RangeLimits {
+    /// Minimum vertical field rate (refresh rate) in Hz
+    pub min_v_freq_hz: u8,
+
+    /// Maximum vertical field rate (refresh rate) in Hz
+    pub max_v_freq_hz: u8,
+
+    /// Minimum horizontal line rate in kHz
+    pub min_h_freq_khz: u8,
+
+    /// Maximum horizontal line rate in kHz
+    pub max_h_freq_khz: u8,
+
+    /// Maximum supported pixel clock in MHz (stored as tens of MHz in EDID, multiplied
+    /// bu `10` here)
+    pub max_pixel_clock_mhz: u16,
+}
+
+impl RangeLimits {
+    /// Parses an 18-byte MRL Descriptor block
+    pub fn parse(block: &[u8]) -> Self {
+        Self {
+            min_v_freq_hz: block[5],
+            max_v_freq_hz: block[6],
+            min_h_freq_khz: block[7],
+            max_h_freq_khz: block[8],
+            max_pixel_clock_mhz: block[9] as u16 * 10,
+        }
     }
 }
 
