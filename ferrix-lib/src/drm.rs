@@ -552,16 +552,18 @@ fn calc_aspect_ratio(width: u32, height: u32) -> String {
 
     let ratio = width as f64 / height as f64;
 
-    if (ratio - 1.6).abs() < 0.05 {
-        "16:10".to_string()
+    if (ratio - 2.3333).abs() < 0.05 {
+        "21:9".to_string()
     } else if (ratio - 1.7777).abs() < 0.05 {
         "16:9".to_string()
+    } else if (ratio - 1.6).abs() < 0.05 {
+        "16:10".to_string()
+    } else if (ratio - 1.5).abs() < 0.05 {
+        "3:2".to_string()
     } else if (ratio - 1.3333).abs() < 0.05 {
         "4:3".to_string()
     } else if (ratio - 1.25).abs() < 0.05 {
         "5:4".to_string()
-    } else if (ratio - 2.3333).abs() < 0.05 {
-        "21:9".to_string()
     } else {
         format!("{ratio:.2}:1")
     }
