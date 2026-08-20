@@ -125,10 +125,14 @@ impl Ferrix {
             PageVariant::Screens if self.drm_page.drm.is_none() => {
                 pages::drm::DRMPage::get_data().map(Message::DataReceiver)
             }
-            PageVariant::NetworkInterfaces | PageVariant::NetworkStatistics
-                if self.net_pages.net.is_none() =>
-            {
-                pages::netlist::NetStatPage::get_data().map(Message::DataReceiver)
+            PageVariant::NetworkInterfaces | PageVariant::NetworkStatistics => {
+                self.net_pages.page_type = self.active_page;
+
+                if self.net_pages.net.is_none() {
+                    pages::netlist::NetStatPage::get_data().map(Message::DataReceiver)
+                } else {
+                    Task::none()
+                }
             }
             PageVariant::FirmwareAttributes if self.firmware_page.firmware.is_none() => {
                 pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)

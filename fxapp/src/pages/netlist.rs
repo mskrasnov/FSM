@@ -23,9 +23,10 @@
 use ferrix_data::load_state::{LoadState, ToLoadState};
 use ferrix_lib::net::{Network, Networks};
 use iced::{
+    Alignment::Center,
     Element, Font, Length, Task,
     alignment::Horizontal,
-    widget::{button, column, container, scrollable, table, text},
+    widget::{button, column, container, row, rule, scrollable, space, table, text},
 };
 
 use super::{PageData, PageView};
@@ -33,7 +34,7 @@ use crate::{
     fl,
     message::{DataReceiver, KeyboardAndMouse, Message},
     pages::PageVariant,
-    widgets::table::{InfoRow, fmt_val, hdr_name, kv_info_table},
+    widgets::table::{InfoRow, hdr_name, kv_info_table},
 };
 
 #[derive(Debug, Clone)]
@@ -146,6 +147,31 @@ impl NetStatPage {
         .id(Self::page_id())
         .into()
     }
+
+    fn net_list_tables<'a>(&'a self, net: &'a [Network]) -> Element<'a, Message> {
+        let mut net_data = column![].spacing(5);
+        for n in net {
+            let header = text(fl!("net-adp", adp = n.name.clone())).style(text::warning);
+            let rows = vec![
+                InfoRow::new(fl!("net-os"), Some(n.operstate.to_string())),
+                InfoRow::new(fl!("net-addr"), Some(n.address.clone())),
+                InfoRow::new(fl!("net-bcast"), Some(n.broadcast.clone())),
+                InfoRow::new(fl!("net-mtu"), Some(n.mtu.to_string())),
+            ];
+            net_data = net_data.push(header);
+            net_data = net_data.push(container(kv_info_table(rows)).style(container::rounded_box));
+        }
+
+        container(scrollable(net_data).spacing(5).id(Self::page_id2())).into()
+    }
+
+    pub fn page_id2() -> &'static str {
+        "netlist"
+    }
+
+    pub fn page_title2() -> String {
+        fl!("page-net")
+    }
 }
 
 fn num_item<'a>(num: u64) -> text::Text<'a> {
@@ -171,8 +197,29 @@ impl<'a> PageView<'a> for NetStatPage {
         match &self.net {
             LoadState::Loading => super::loading_page(),
             LoadState::Error(why) => super::error_page::error(why, DataReceiver::GetNetworkData),
-            LoadState::Loaded(net) => self.net_stat_table(&net.networks),
+            LoadState::Loaded(net) => match self.page_type {
+                PageVariant::NetworkInterfaces => self.net_list_tables(&net.networks),
+                PageVariant::NetworkStatistics => self.net_stat_table(&net.networks),
+                _ => panic!("Unknown page type: {:?}", self.page_type),
+            },
         }
+    }
+
+    fn view(&'a self) -> Element<'a, Message> {
+        let title_str = match &self.page_type {
+            PageVariant::NetworkInterfaces => Self::page_title2(),
+            PageVariant::NetworkStatistics => Self::page_title(),
+            _ => "Unknown page".to_string(),
+        };
+        let title = column![
+            row![text(title_str).size(20), space::horizontal(),]
+                .align_y(Center)
+                .spacing(5),
+            rule::horizontal(1),
+        ]
+        .spacing(2);
+
+        column![title, self.page_contents_view()].spacing(5).into()
     }
 }
 
