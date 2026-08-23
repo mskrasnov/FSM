@@ -203,7 +203,7 @@ fn screen_subpage<'a>(drm: &'a [DRM], idx: usize) -> Element<'a, Message> {
             Some(edid) => layout.push(
                 column![
                     text(fl!("drm-summary")).style(text::warning),
-                    edid_summary_table(edid),
+                    edid_summary_table(edid, drm.name.clone()),
                     text(fl!("drm-vparams")).style(text::warning),
                     edid_video_params_table(edid),
                     edid_detailed_timings_blocks_table(edid),
@@ -236,8 +236,9 @@ fn support_modes_table<'a>(modes: &'a [String]) -> Element<'a, Message> {
         .into()
 }
 
-fn edid_summary_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
+fn edid_summary_table<'a>(edid: &'a EDID, name: Option<String>) -> Element<'a, Message> {
     let rows = vec![
+        InfoRow::new("DRM", name),
         InfoRow::new(
             fl!("drm-manufacturer"),
             Some(format!(
