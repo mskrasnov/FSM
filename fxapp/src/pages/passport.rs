@@ -257,7 +257,12 @@ impl Ferrix {
                     .edid
                     .clone()
                     .map(|edid| {
-                        format!("{} (serial: {})\n", &edid.manufacturer, edid.serial_number)
+                        format!(
+                            "{} {} (serial: {})\n",
+                            &edid.manufacturer,
+                            &edid.model,
+                            edid.serial.unwrap_or("unknown".to_string()),
+                        )
                     })
                     .unwrap_or("".to_string())
                     .as_str();
