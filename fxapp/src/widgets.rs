@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+pub mod line_chart;
 pub mod table;
 
 use crate::message::{KeyboardAndMouse, Message};
