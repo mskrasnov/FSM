@@ -86,10 +86,11 @@ You can use the universal AppImage package (no installation required) or install
 
 ### For all systems (AppImage package)
 
-- **Dependencies:**
-    - glibc >= 2.36;
-    - Xorg or Wayland;
-    - Graphics drivers;
+**Dependencies:**
+
+- glibc >= 2.36;
+- Xorg or Wayland;
+- Graphics drivers;
 
 Download the AppImage package (only `amd64` is supported yet):
 <br>[![](https://img.shields.io/badge/FSM_v0.7.1_AppImage-amd64-blue)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/Ferrix.System.Monitor-v0.7.1-x86_64.AppImage)
@@ -108,12 +109,14 @@ Run this package:
 
 ### For Debian/Ubuntu
 
-- **Minimum version required:** Debian 11, Ubuntu 22.04;
-- **Dependencies:**
-    - glibc >= 2.36;
-    - dbus;
-    - Xorg or Wayland;
-    - Graphics drivers;
+Minimum version required: Debian 11, Ubuntu 22.04;
+
+**Dependencies:**
+
+- glibc >= 2.36;
+- dbus;
+- Xorg or Wayland;
+- Graphics drivers;
 
 Download the package for your CPU architecture:
 <br>[![](https://img.shields.io/badge/FSM_v0.7.1_Debian-amd64-yellow)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_amd64.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-i386-orange)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_i386.deb) [![](https://img.shields.io/badge/FSM_v0.7.1_Debian-ARM64-red)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app_0.7.1-1_arm64.deb)
@@ -126,12 +129,14 @@ sudo apt install ./ferrix-app_0.7.1-1_${your architecture}.deb
 
 ### For Fedora/RHEL
 
-- **Minimum version required:** Fedora 42;
-- **Dependencies:**
-    - glibc >= 2.36;
-    - dbus;
-    - Xorg or Wayland;
-    - Graphics drivers;
+Minimum version required: Fedora 42;
+
+**Dependencies:**
+
+- glibc >= 2.36;
+- dbus;
+- Xorg or Wayland;
+- Graphics drivers;
 
 Download the package (only `amd64` is supported yet):
 <br>[![](https://img.shields.io/badge/FSM_v0.7.1_Fedora-amd64-purple)](https://github.com/mskrasnov/FSM/releases/download/v0.7.1/ferrix-app-0.7.1-1.x86_64.rpm)
@@ -144,14 +149,15 @@ sudo dnf install ./ferrix-app-0.7.1-1.x86_64.rpm
 
 ## Building from the source code
 
-- **Dependencies:**
-    - glibc >= 2.36;
-    - GNU make;
-    - GNU coreutils;
-    - `rustc`, `cargo` >= 1.96;
-    - [optional] `dpkg`, `dpkg-dev`, `liblzma-dev` for building the `deb` package;
-    - [optional] `docker`, `buildx-plugin` for docker;
-    - [optional] `libfuse2`, `wget` for appimage build;
+**Dependencies:**
+
+- glibc >= 2.36;
+- GNU make;
+- GNU coreutils;
+- `rustc`, `cargo` >= 1.96;
+- [optional] `dpkg`, `dpkg-dev`, `liblzma-dev` for building the `deb` package;
+- [optional] `docker`, `buildx-plugin` for docker;
+- [optional] `libfuse2`, `wget` for appimage build;
 
 Clone this repository:
 
