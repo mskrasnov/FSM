@@ -234,8 +234,8 @@ fn get_parts(s: &str) -> impl Iterator<Item = &str> {
 #[cfg(not(target_arch = "aarch64"))]
 fn parse_cpuinfo(cpu: &mut CPU, parts: &str) {
     let mut parts = get_parts(parts);
-    match (parts.next(), parts.next()) {
-        (Some(key), Some(val)) => match key {
+    if let (Some(key), Some(val)) = (parts.next(), parts.next()) {
+        match key {
             "processor" => cpu.processor = val.parse().ok(),
             "vendor_id" => cpu.vendor_id = Some(val.to_string()),
             "cpu family" => cpu.cpu_family = val.parse().ok(),
@@ -265,8 +265,7 @@ fn parse_cpuinfo(cpu: &mut CPU, parts: &str) {
             "address sizes" => cpu.address_sizes = Some(val.to_string()),
             "power management" => cpu.power_management = Some(val.to_string()),
             _ => {} // ignore unknown entry
-        },
-        _ => {}
+        }
     }
 }
 
@@ -465,20 +464,14 @@ fn parse_proc_stat() -> Result<Stat> {
                     stat.processes_created = parts[1].parse().ok();
                 }
             }
-            "procs_running" => {
-                if parts.len() >= 2 {
-                    stat.processes_running = parts[1].parse().ok();
-                }
+            "procs_running" if parts.len() >= 2 => {
+                stat.processes_running = parts[1].parse().ok();
             }
-            "procs_blocked" => {
-                if parts.len() >= 2 {
-                    stat.processes_blocked = parts[1].parse().ok();
-                }
+            "procs_blocked" if parts.len() >= 2 => {
+                stat.processes_blocked = parts[1].parse().ok();
             }
-            "softirq" => {
-                if parts.len() >= 12 {
-                    stat.softirq = Some(SoftIrq::from(line));
-                }
+            "softirq" if parts.len() >= 12 => {
+                stat.softirq = Some(SoftIrq::from(line));
             }
             _ => {}
         }
