@@ -247,8 +247,14 @@ fn edid_summary_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
             )),
         ),
         InfoRow::new(fl!("drm-pcode"), fmt_val(Some(edid.product_code))),
-        InfoRow::new(fl!("drm-snum"), edid.serial.clone()),
-        InfoRow::new("Model", Some(edid.model.to_string())),
+        InfoRow::new(
+            fl!("drm-snum"),
+            Some(match &edid.serial {
+                Some(serial) => format!("{} ({})", edid.serial_number, serial),
+                None => format!("{}", edid.serial_number),
+            }),
+        ),
+        InfoRow::new(fl!("drm-model"), Some(edid.model.to_string())),
         InfoRow::new(
             fl!("drm-date"),
             Some(format!("{}/{}", edid.week, edid.year)),
@@ -261,17 +267,17 @@ fn edid_summary_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
         ),
         InfoRow::new(fl!("drm-gamma"), fmt_val(Some(edid.display_gamma))),
         InfoRow::new(
-            "Diagonal",
+            fl!("drm-diag"),
             edid.diagonal_inches.and_then(|d| Some(format!("{d:.1}\""))),
         ),
-        InfoRow::new("Resolution, max.", fmt_resolution(edid)),
-        InfoRow::new("Aspect ratio", edid.aspect_ratio.clone()),
+        InfoRow::new(fl!("drm-resol"), fmt_resolution(edid)),
+        InfoRow::new(fl!("drm-aspratio"), edid.aspect_ratio.clone()),
         InfoRow::new(
-            "Pixel clock, mHz",
-            edid.pixel_clock_mhz.and_then(|p| Some(format!("{p}"))),
+            fl!("drm-pixclck"),
+            edid.pixel_clock_mhz.and_then(|p| Some(format!("{p} MHz"))),
         ),
-        InfoRow::new("Extension blocks", Some(edid.extension_blocks.to_string())),
-        InfoRow::new("Checksum", Some(edid.checksum.to_string())),
+        InfoRow::new(fl!("drm-extblcks"), Some(edid.extension_blocks.to_string())),
+        InfoRow::new(fl!("drm-cksum"), Some(edid.checksum.to_string())),
     ];
     container(kv_info_table(rows))
         .style(container::rounded_box)
@@ -299,7 +305,7 @@ fn edid_raw_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
     .padding(2)
     .width(Length::Fill);
 
-    column![text("EDID Raw Value").style(text::warning), raw_value,]
+    column![text(fl!("drm-edid-raw")).style(text::warning), raw_value,]
         .spacing(5)
         .into()
 }
@@ -347,7 +353,7 @@ fn edid_video_params_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
 fn edid_detailed_timings_blocks_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
     let len = edid.detailed_timings.len();
     if len == 0 {
-        return text("DTBs not found").style(text::danger).into();
+        return text(fl!("drm-no-dtb")).style(text::danger).into();
     }
 
     let mut table = Column::with_capacity(len).spacing(5);
@@ -362,57 +368,48 @@ fn edid_detailed_timings_table_single<'a>(
     dt: &'a DetailedTiming,
 ) -> Element<'a, Message> {
     let rows = vec![
-        InfoRow::new("Pixel clock", Some(format!("{} Hz", dt.pixel_clock_hz))),
-        InfoRow::new("Aspect ratio", Some(dt.aspect_ratio.clone())),
-        InfoRow::new("Horizontal resolution", Some(format!("{} px", dt.h_active))),
         InfoRow::new(
-            "Vertical resolution",
-            Some(format!("{} lines", dt.v_active)),
+            fl!("drm-pixclck"),
+            Some(format!("{} Hz", dt.pixel_clock_hz)),
         ),
+        InfoRow::new(fl!("drm-aspratio"), Some(dt.aspect_ratio.clone())),
+        InfoRow::new(fl!("drm-h-active"), Some(format!("{} px", dt.h_active))),
+        InfoRow::new(fl!("drm-v-active"), Some(format!("{} lines", dt.v_active))),
+        InfoRow::new(fl!("drm-h-blanking"), Some(format!("{} px", dt.h_blanking))),
         InfoRow::new(
-            "Horizontal blanking interval",
-            Some(format!("{} px", dt.h_blanking)),
-        ),
-        InfoRow::new(
-            "Vertical blanking interval",
+            fl!("drm-v-blanking"),
             Some(format!("{} lines", dt.v_blanking)),
         ),
         InfoRow::new(
-            "Horizontal front porch",
+            fl!("drm-h-front-porch"),
             Some(format!("{} px", dt.h_front_porch)),
         ),
         InfoRow::new(
-            "Horizontal sync pulse width",
+            fl!("drm-h-sync-pulse"),
             Some(format!("{} px", dt.h_sync_pulse)),
         ),
         InfoRow::new(
-            "Vertical front porch",
+            fl!("drm-v-front-porch"),
             Some(format!("{} lines", dt.v_front_porch)),
         ),
         InfoRow::new(
-            "Vertical sync pulse width",
+            fl!("drm-v-sync-pulse"),
             Some(format!("{} lines", dt.v_sync_pulse)),
         ),
         InfoRow::new(
-            "Horizontal back porch",
+            fl!("drm-h-back-porch"),
             Some(format!("{} px", dt.h_back_porch)),
         ),
         InfoRow::new(
-            "Vertical back porch",
+            fl!("drm-v-back-porch"),
             Some(format!("{} lines", dt.v_back_porch)),
         ),
-        InfoRow::new(
-            "Horizontal sync pulse is positive polarity",
-            fmt_bool(Some(dt.h_sync_positive)),
-        ),
-        InfoRow::new(
-            "Vertical sync pulse is positive polarity",
-            fmt_bool(Some(dt.v_sync_positive)),
-        ),
+        InfoRow::new(fl!("drm-h-sync-pos"), fmt_bool(Some(dt.h_sync_positive))),
+        InfoRow::new(fl!("drm-v-sync-pos"), fmt_bool(Some(dt.v_sync_positive))),
     ];
 
     column![
-        text(format!("Detailed Timing Descriptor block #{idx}")).style(text::warning),
+        text(fl!("drm-dtdb", idx = idx)).style(text::warning),
         container(kv_info_table(rows)).style(container::rounded_box),
     ]
     .spacing(5)
@@ -422,35 +419,35 @@ fn edid_detailed_timings_table_single<'a>(
 fn edid_range_limits_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
     match &edid.range_limits {
         Some(rl) => column![
-            text("Range limits").style(text::warning),
+            text(fl!("drm-rl")).style(text::warning),
             range_limits_table(rl)
         ]
         .spacing(5)
         .into(),
-        None => text("Range limits not found").style(text::danger).into(),
+        None => text(fl!("drm-no-rl")).style(text::danger).into(),
     }
 }
 
 fn range_limits_table<'a>(rl: &'a RangeLimits) -> Element<'a, Message> {
     let rows = vec![
         InfoRow::new(
-            "Minimum vertical field rate",
+            fl!("drm-min-v-freq"),
             Some(format!("{} Hz", rl.min_v_freq_hz)),
         ),
         InfoRow::new(
-            "Maximum vertical field rate",
+            fl!("drm-max-v-freq"),
             Some(format!("{} Hz", rl.max_v_freq_hz)),
         ),
         InfoRow::new(
-            "Minimum horizontal line rate",
+            fl!("drm-min-h-freq"),
             Some(format!("{} kHz", rl.min_h_freq_khz)),
         ),
         InfoRow::new(
-            "Maximum horizontal line rate",
+            fl!("drm-max-h-freq"),
             Some(format!("{} kHz", rl.max_h_freq_khz)),
         ),
         InfoRow::new(
-            "Maximum supported pixel clock",
+            fl!("drm-max-pixclck"),
             Some(format!("{} MHz", rl.max_pixel_clock_mhz)),
         ),
     ];
