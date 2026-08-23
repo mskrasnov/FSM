@@ -21,18 +21,19 @@
 //! DRM Page
 
 use ferrix_data::load_state::{LoadState, ToLoadState};
-use ferrix_lib::drm::{DRM, EDID, Video, VideoInputParams};
+use ferrix_lib::drm::{DRM, DetailedTiming, EDID, RangeLimits, Video, VideoInputParams};
 use ferrix_widgets::separated_view::SeparatedView;
 use iced::{
-    Element, Length, Task,
+    Element, Font, Length, Task,
     widget::{Column, button, center, column, container, text},
 };
+use std::fmt::Write;
 
 use super::{PageData, PageView};
 use crate::{
     fl,
     message::{DataReceiver, Message, PageMessage},
-    widgets::table::{InfoRow, fmt_val, kv_info_table},
+    widgets::table::{InfoRow, fmt_bool, fmt_val, kv_info_table},
 };
 
 #[derive(Debug, Clone)]
@@ -161,7 +162,7 @@ fn get_screen_name<'a>(screen: &'a ferrix_lib::drm::DRM) -> String {
         fl!("drm-disabled")
     } else {
         match &screen.edid {
-            Some(edid) => format!("{} {:0x}", &edid.manufacturer, edid.product_code),
+            Some(edid) => format!("{} {}", &edid.manufacturer, &edid.model,),
             None => fl!("drm-unknown"),
         }
     }
@@ -205,6 +206,9 @@ fn screen_subpage<'a>(drm: &'a [DRM], idx: usize) -> Element<'a, Message> {
                     edid_summary_table(edid),
                     text(fl!("drm-vparams")).style(text::warning),
                     edid_video_params_table(edid),
+                    edid_detailed_timings_blocks_table(edid),
+                    edid_range_limits_table(edid),
+                    edid_raw_table(edid),
                 ]
                 .spacing(5),
             ),
@@ -234,9 +238,17 @@ fn support_modes_table<'a>(modes: &'a [String]) -> Element<'a, Message> {
 
 fn edid_summary_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
     let rows = vec![
-        InfoRow::new(fl!("drm-manufacturer"), Some(edid.manufacturer.clone())),
+        InfoRow::new(
+            fl!("drm-manufacturer"),
+            Some(format!(
+                "{} ({})",
+                &edid.manufacturer,
+                edid.description.clone().unwrap_or("unknown".to_string())
+            )),
+        ),
         InfoRow::new(fl!("drm-pcode"), fmt_val(Some(edid.product_code))),
-        InfoRow::new(fl!("drm-snum"), Some(format!("{:X}", edid.serial_number))),
+        InfoRow::new(fl!("drm-snum"), edid.serial.clone()),
+        InfoRow::new("Model", Some(edid.model.to_string())),
         InfoRow::new(
             fl!("drm-date"),
             Some(format!("{}/{}", edid.week, edid.year)),
@@ -248,9 +260,47 @@ fn edid_summary_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
             Some(format!("{}x{}", edid.hscreen_size, edid.vscreen_size)),
         ),
         InfoRow::new(fl!("drm-gamma"), fmt_val(Some(edid.display_gamma))),
+        InfoRow::new(
+            "Diagonal",
+            edid.diagonal_inches.and_then(|d| Some(format!("{d:.1}\""))),
+        ),
+        InfoRow::new("Resolution, max.", fmt_resolution(edid)),
+        InfoRow::new("Aspect ratio", edid.aspect_ratio.clone()),
+        InfoRow::new(
+            "Pixel clock, mHz",
+            edid.pixel_clock_mhz.and_then(|p| Some(format!("{p}"))),
+        ),
+        InfoRow::new("Extension blocks", Some(edid.extension_blocks.to_string())),
+        InfoRow::new("Checksum", Some(edid.checksum.to_string())),
     ];
     container(kv_info_table(rows))
         .style(container::rounded_box)
+        .into()
+}
+
+fn fmt_resolution<'a>(edid: &'a EDID) -> Option<String> {
+    match (edid.resolution_width, edid.resolution_height) {
+        (Some(w), Some(h)) => Some(format!("{w}x{h}")),
+        _ => None,
+    }
+}
+
+fn edid_raw_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
+    let raw_edid_hex = edid_raw_row(edid).trim().to_string();
+    let raw_value = container(
+        button(text(raw_edid_hex.clone()).font(Font::MONOSPACE))
+            .style(button::text)
+            .padding(0)
+            .on_press(Message::KeyboardAndMouse(
+                crate::message::KeyboardAndMouse::CopyButtonPressed(raw_edid_hex),
+            )),
+    )
+    .style(container::rounded_box)
+    .padding(2)
+    .width(Length::Fill);
+
+    column![text("EDID Raw Value").style(text::warning), raw_value,]
+        .spacing(5)
         .into()
 }
 
@@ -292,6 +342,146 @@ fn edid_video_params_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
     container(kv_info_table(rows))
         .style(container::rounded_box)
         .into()
+}
+
+fn edid_detailed_timings_blocks_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
+    let len = edid.detailed_timings.len();
+    if len == 0 {
+        return text("DTBs not found").style(text::danger).into();
+    }
+
+    let mut table = Column::with_capacity(len).spacing(5);
+    for dt in edid.detailed_timings.iter().enumerate() {
+        table = table.push(edid_detailed_timings_table_single(dt.0, dt.1));
+    }
+    table.into()
+}
+
+fn edid_detailed_timings_table_single<'a>(
+    idx: usize,
+    dt: &'a DetailedTiming,
+) -> Element<'a, Message> {
+    let rows = vec![
+        InfoRow::new("Pixel clock", Some(format!("{} Hz", dt.pixel_clock_hz))),
+        InfoRow::new("Aspect ratio", Some(dt.aspect_ratio.clone())),
+        InfoRow::new("Horizontal resolution", Some(format!("{} px", dt.h_active))),
+        InfoRow::new(
+            "Vertical resolution",
+            Some(format!("{} lines", dt.v_active)),
+        ),
+        InfoRow::new(
+            "Horizontal blanking interval",
+            Some(format!("{} px", dt.h_blanking)),
+        ),
+        InfoRow::new(
+            "Vertical blanking interval",
+            Some(format!("{} lines", dt.v_blanking)),
+        ),
+        InfoRow::new(
+            "Horizontal front porch",
+            Some(format!("{} px", dt.h_front_porch)),
+        ),
+        InfoRow::new(
+            "Horizontal sync pulse width",
+            Some(format!("{} px", dt.h_sync_pulse)),
+        ),
+        InfoRow::new(
+            "Vertical front porch",
+            Some(format!("{} lines", dt.v_front_porch)),
+        ),
+        InfoRow::new(
+            "Vertical sync pulse width",
+            Some(format!("{} lines", dt.v_sync_pulse)),
+        ),
+        InfoRow::new(
+            "Horizontal back porch",
+            Some(format!("{} px", dt.h_back_porch)),
+        ),
+        InfoRow::new(
+            "Vertical back porch",
+            Some(format!("{} lines", dt.v_back_porch)),
+        ),
+        InfoRow::new(
+            "Horizontal sync pulse is positive polarity",
+            fmt_bool(Some(dt.h_sync_positive)),
+        ),
+        InfoRow::new(
+            "Vertical sync pulse is positive polarity",
+            fmt_bool(Some(dt.v_sync_positive)),
+        ),
+    ];
+
+    column![
+        text(format!("Detailed Timing Descriptor block #{idx}")).style(text::warning),
+        container(kv_info_table(rows)).style(container::rounded_box),
+    ]
+    .spacing(5)
+    .into()
+}
+
+fn edid_range_limits_table<'a>(edid: &'a EDID) -> Element<'a, Message> {
+    match &edid.range_limits {
+        Some(rl) => column![
+            text("Range limits").style(text::warning),
+            range_limits_table(rl)
+        ]
+        .spacing(5)
+        .into(),
+        None => text("Range limits not found").style(text::danger).into(),
+    }
+}
+
+fn range_limits_table<'a>(rl: &'a RangeLimits) -> Element<'a, Message> {
+    let rows = vec![
+        InfoRow::new(
+            "Minimum vertical field rate",
+            Some(format!("{} Hz", rl.min_v_freq_hz)),
+        ),
+        InfoRow::new(
+            "Maximum vertical field rate",
+            Some(format!("{} Hz", rl.max_v_freq_hz)),
+        ),
+        InfoRow::new(
+            "Minimum horizontal line rate",
+            Some(format!("{} kHz", rl.min_h_freq_khz)),
+        ),
+        InfoRow::new(
+            "Maximum horizontal line rate",
+            Some(format!("{} kHz", rl.max_h_freq_khz)),
+        ),
+        InfoRow::new(
+            "Maximum supported pixel clock",
+            Some(format!("{} MHz", rl.max_pixel_clock_mhz)),
+        ),
+    ];
+
+    container(kv_info_table(rows))
+        .style(container::rounded_box)
+        .into()
+}
+
+fn edid_raw_row<'a>(edid: &'a EDID) -> String {
+    // 16 по 2
+    let data = &edid.raw;
+    let mut hex_string = String::new();
+    hex_string.reserve(data.len() * 3 + data.len() / 16 + 1);
+
+    let (mut k, j) = (0, 8);
+    for chunk in data.chunks(16) {
+        for (i, &byte) in chunk.iter().enumerate() {
+            if i > 0 {
+                hex_string.push(' ');
+            }
+            write!(hex_string, "{byte:02X}").unwrap();
+        }
+        hex_string.push('\n');
+        if k >= j {
+            hex_string.push('\n');
+            k = 0;
+        }
+        k += 1;
+    }
+    hex_string
 }
 
 #[derive(Debug, Clone)]
