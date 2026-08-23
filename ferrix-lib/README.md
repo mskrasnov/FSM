@@ -66,6 +66,15 @@ cargo add ferrix-lib    \
   --features=feature1,feature2,...,featuren
 ```
 
+## Changelog
+
+### v0.5.0
+
+- EDID parser update:
+  - Add `description`, `serial`, `model`, `diagonal`, `resolution, max`, `aspect ratio`, `pixel clock, MHz`, `extension blocks count`, `checksum` fields;
+  - New EDID blocks parsing: DTD block, range limits;
+- Update docs;
+
 ## License
 
 `ferrix-lib` is distributed under the GNU GPL v3 license.
