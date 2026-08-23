@@ -126,6 +126,9 @@ impl ToJson for Video {}
 /// Information about selected display
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DRM {
+    /// DRM name
+    pub name: Option<String>,
+
     /// Is enabled
     pub enabled: bool,
 
@@ -139,6 +142,10 @@ pub struct DRM {
 impl DRM {
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
+        let name = path
+            .components()
+            .last()
+            .and_then(|n| Some(n.as_os_str().display().to_string()));
         let enabled = {
             let txt = read_to_string(path.join("enabled"));
             match txt {
@@ -156,6 +163,7 @@ impl DRM {
         let edid = EDID::new(path);
 
         Ok(Self {
+            name,
             enabled,
             edid: match edid {
                 Ok(edid) => Some(edid),
@@ -223,7 +231,7 @@ pub struct EDID {
     /// Week of manufacture; or `FF` model year flag
     ///
     /// > **WARN:** week numbering isn't consistent between manufacturers.
-    /// 
+    ///
     /// > Byte offset: 16
     pub week: u8,
 
