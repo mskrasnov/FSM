@@ -27,7 +27,7 @@ Crate to get information about PC's hardware and software. Only for Linux. Some 
 
 TODO:
 
-- [ ] Get more info from EDID;
+- [X] Get more info from EDID (done in `v0.5.0`);
 - [ ] Get information about installed software (`flatpak`, `deb`, `rpm`);
 - [X] Get information about notebook battery;
 - [ ] Get information about audio;
