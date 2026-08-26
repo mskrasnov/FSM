@@ -21,7 +21,7 @@
 //! Get information about notebook's battery
 //!
 //! ## Example
-//! ```no-test,rust
+//! ```no-test
 //! use ferrix_lib::battery::BatInfo;
 //! use ferrix_lib::traits::ToJson;
 //!
@@ -68,6 +68,8 @@ impl BatInfo {
         Ok(Self { bats })
     }
 }
+
+impl ToJson for BatInfo {}
 
 /// Information from the `uevent` file to a single battery
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
