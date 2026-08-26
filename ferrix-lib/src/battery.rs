@@ -1,6 +1,6 @@
 /* battery.rs
  *
- * Copyright 2025 Michail Krasnov <mskrasnov07@ya.ru>
+ * Copyright 2025-2026 Michail Krasnov <mskrasnov07@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 //! Get information about notebook's battery
 //!
 //! ## Example
-//! ```no-test
+//! ```no-test,rust
 //! use ferrix_lib::battery::BatInfo;
 //! use ferrix_lib::traits::ToJson;
 //!
@@ -46,6 +46,7 @@ pub struct BatInfo {
 }
 
 impl BatInfo {
+    /// Scan `/sys/class/power_supply` and initialize a `BatInfo` instance
     pub fn new() -> Result<Self> {
         let mut bats = Vec::new();
         let base_path = Path::new("/sys/class/power_supply/");
@@ -68,27 +69,66 @@ impl BatInfo {
     }
 }
 
-/// Information from the `uevent` file
+/// Information from the `uevent` file to a single battery
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Battery {
+    /// System name of the battery device (e.g. `BAT0`)
     pub name: Option<String>,
+
+    /// The current charging status of this battery
     pub status: Option<Status>,
+
+    /// The battery technology type
     pub technology: Option<String>,
+
+    /// Number of charge cycles the battery has undergone
     pub cycle_count: Option<usize>,
+
+    /// Minimum design voltage, V
     pub voltage_min_design: Option<f32>,
+
+    /// Current voltage, V
     pub voltage_now: Option<f32>,
+
+    /// Current power draw or charge rate, W
     pub power_now: Option<f32>,
+
+    /// Original design capacity, Wh
     pub energy_full_design: Option<f32>,
+
+    /// Current maximum capacity the battery can hold, Wh
     pub energy_full: Option<f32>,
+
+    /// Current remaining energy, Wh
     pub energy_now: Option<f32>,
+
+    /// Current charge level, % (0..100)
     pub capacity: Option<u8>,
+
+    /// Qualitative description of the current capacity level
     pub capacity_level: Option<Level>,
+
+    /// The model name of the battery
     pub model_name: Option<String>,
+
+    /// The manufacturer of the battery
     pub manufacturer: Option<String>,
+
+    /// The serial number of the battery
     pub serial_number: Option<String>,
+
+    /// Supported charge types (e.g. `Standard`, `Fast`, etc.)
     pub charge_types: Option<String>,
+
+    /// The estimated health of the battery, % (0..100) calculated
+    /// from `energy_full` / `energy_full_design`
     pub health: Option<f32>,
+
+    /// Estimated time remaining until the battery is empty or full, hours
     pub estimated_time: Option<f32>,
+
+    /// Estimated time required to fully charge the battery, hours (if
+    /// applicable)
     pub charge_time: Option<f32>,
 }
 
