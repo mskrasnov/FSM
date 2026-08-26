@@ -19,6 +19,12 @@
  */
 
 //! Get information about mounted partitions
+//!
+//! - [`Partitions`] - parses and represents entries from `/proc/partitions`;
+//! - [`Storages`] - represents physical block devices from `/sys/block`;
+//! - [`Mounts`] - represents currently mounted fs from `/proc/mounts`;
+//! - [`FileSystemStats`] - provides calculated metrics: used space, usage
+//!   percentage based on raw `statvfs` data.
 
 use anyhow::{Result, anyhow};
 use libc::statvfs;
@@ -32,6 +38,9 @@ use crate::utils::Size;
 
 // NOTE: Is this structure really necessary, since there are `Mounts`?
 /// List of partitions from `/proc/partitions` file
+///
+/// > **Note:** this structure filters out virtual devices like `loop` and
+/// > `ram` to focus on actual block devices and their partitions.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Partitions {
     pub parts: Vec<Partition>,
@@ -43,6 +52,8 @@ impl Partitions {
         Self::from_str(&contents)
     }
 
+    /// Parse a raw string representation of `/proc/partitions` into a `Self`
+    /// structure
     fn from_str(s: &str) -> Result<Self> {
         let lines = s.lines().skip(1).filter(|s| {
             !s.is_empty() && !s.starts_with('m') && !s.contains("loop") && !s.contains("ram")
@@ -62,17 +73,33 @@ impl Partitions {
 
 impl ToJson for Partitions {}
 
+/// Single block device partition
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Partition {
+    /// Major device number
     pub major: usize,
+
+    /// Minor device num
     pub minor: usize,
+
+    /// Size of the partition in 1K-blocks
     pub blocks: u64,
+
+    /// Name of the device (e.g. `sda1`, `nvme0n1p2`)
     pub name: String,
+
+    /// Hardware-level metadata retrieved from `/sys/block/`
     pub dev_info: DeviceInfo,
+
+    /// Filesystem statistics, if applicable and retrievable
     pub statvfs: Option<FileSystemStats>,
 }
 
 impl Partition {
+    /// Calculate the logical sise of the partition
+    ///
+    /// Multiplies the number of blocks by the logical block size. Returns
+    /// `None` of the logical size is unknown
     pub fn get_logical_size(&self) -> Option<Size> {
         let lbsize = self.dev_info.logical_block_size;
         match lbsize {
@@ -110,15 +137,27 @@ impl TryFrom<&str> for Partition {
     }
 }
 
+/// Hardware-level metadata for a block device
+///
+/// This data is read directly from the `/sys/block/<device>/device/` and
+/// `/sys/block/<device>/queue/` dirs
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DeviceInfo {
+    /// The model name of this device
     pub model: Option<String>,
+
+    /// Manufacturer of the device
     pub vendor: Option<String>,
+
+    /// The unique serial number of the device
     pub serial: Option<String>,
+
+    /// The logical block size in bytes (typically 510 or 4096)
     pub logical_block_size: Option<u64>,
 }
 
 impl DeviceInfo {
+    /// Get device information for the given device name (e.g. `sda`)
     pub fn get(devname: &str) -> Self {
         let path = Path::new("/sys/block/").join(devname);
         let device = path.join("device");
@@ -148,6 +187,7 @@ impl DeviceInfo {
         }
     }
 
+    /// Returns `true` if all fields in the `DeviceInfo` are `None`
     pub fn is_none(&self) -> bool {
         self.model.is_none()
             && self.vendor.is_none()
@@ -163,6 +203,10 @@ pub struct Storages {
 }
 
 impl Storages {
+    /// Scan `/sys/block/` and populate the list of physical storage devices
+    ///
+    /// > **Note:** this method filters out virtual devies like `loop` and
+    /// > `zram`
     pub fn new() -> Result<Self> {
         let dir_contents = read_dir("/sys/block")?.filter(|entry| {
             if entry.is_err() {
@@ -183,21 +227,27 @@ impl Storages {
     }
 }
 
+/// Physical storage device info (e.g. `sda`, `mmcblk0`, `nvme0n1`, etc.)
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Storage {
     /// `/sys/block/` subdirectory name (e.g. `sda`, `mmcblk0`, `nvme0n1`, etc.)
+    ///
+    /// (the device name as it appears in `/sys/block/` directory)
     pub devname: String,
 
+    /// Indicates if the device is removable
     pub removable: bool,
 
-    /// Readonly
+    /// Indicates if the device is currently mounted or configured as read-only
     pub ro: bool,
 
     /// Total disk size, bytes
     pub size: Size,
 
+    /// Indicates if the device is hidden from the system
     pub hidden: bool,
 
+    /// The filesystem UUID, if applicable
     pub uuid: Option<String>,
 
     /// Device model
@@ -212,12 +262,16 @@ pub struct Storage {
     /// Firmware revision
     pub revision: Option<String>,
 
+    /// The World Wide Name (WWN) of EUI of the device, stripped of the
+    /// `eui.` prefix
     pub wwid_eui: Option<String>,
 
+    /// The transport protocol used (e.g. `sata`, `nvme`, `usb`, etc.)
     pub transport: Option<String>,
 }
 
 impl Storage {
+    /// Get a `Storage` instance from a given `/sys/block/` path
     pub fn from_pathbuf(path: &PathBuf) -> Result<Self> {
         let read = |file: &str| read_to_string(path.join(file));
 
@@ -282,14 +336,28 @@ pub struct Mounts {
     pub mounts: Vec<MountEntry>,
 }
 
+/// Single mounted filesystem entry
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct MountEntry {
+    /// The block device or a virtual fs src (e.g. `/dev/sda1`, `tmpfs`)
     pub device: String,
+
+    /// The directory where the fs is mounted
     pub mount_point: String,
+
+    /// The type of the fs (e.g. `ext4`, `btrfs`, `vfat`)
     pub filesystem: String,
+
+    /// Comma-separated mount options (e.g. `rw,realtime`)
     pub options: String,
+
+    /// Dump flag (used by the `dump` utility, usually 0)
     pub dump: u8,
+
+    /// Pass number (used by the `fsck` to determine check order)
     pub pass: u8,
+
+    /// Filesystem usage statistics, if retrievable
     pub fstats: Option<FileSystemStats>,
 }
 
@@ -335,18 +403,34 @@ impl Mounts {
     }
 }
 
+/// Filesystem usage statistics (via `statvfs` C function)
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct FileSystemStats {
+    /// Block size, bytes
     pub block_size: u64,
+
+    /// Fragment size, bytes
     pub fragment_size: u64,
+
+    /// Total number of blocks in this fs
     pub total_blocks: u64,
+
+    /// Total number of free blocks
     pub free_blocks: u64,
+
+    /// Total number of free blocks available to non-privileged
+    /// processes
     pub available_blocks: u64,
+
+    /// Total number of inodes
     pub total_inodes: u64,
+
+    /// Total number of free inodes
     pub free_inodes: u64,
 }
 
 impl FileSystemStats {
+    /// Get fs stats for the given path
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path_str = path
             .as_ref()
@@ -355,9 +439,12 @@ impl FileSystemStats {
         let c_path = CString::new(path_str)
             .map_err(|err| anyhow!("Failed to convert Rust string into C string: {err}"))?;
 
+        // SAFETY: we are passing a valid null-terminated C-string to statvfs,
+        // and providing a valid zeroed mutable pointer for the output
         unsafe { Self::statvfs(c_path.as_ptr()) }
     }
 
+    /// Unsafe wrapper for the `libc::statvfs` system call
     unsafe fn statvfs(path: *const c_char) -> Result<Self> {
         let mut stats: libc::statvfs = unsafe { std::mem::zeroed() };
         let result = unsafe { statvfs(path, &mut stats) };
@@ -380,22 +467,27 @@ impl FileSystemStats {
         }
     }
 
+    /// Calculate the total capacity of the fs in bytes
     pub fn total_bytes(&self) -> u64 {
         self.total_blocks * self.fragment_size
     }
 
+    /// Calculate the total capacity of the fs as a [`Size`] enum
     pub fn total_size(&self) -> Size {
         Size::B(self.total_bytes())
     }
 
+    /// Calculate the free space in bytes
     pub fn free_bytes(&self) -> u64 {
         self.free_blocks * self.fragment_size
     }
 
+    /// Calculate the free space as a [`Size`] enum
     pub fn free_size(&self) -> Size {
         Size::B(self.free_bytes())
     }
 
+    /// Calculate the space available to non-privileged users in bytes
     pub fn avail_bytes(&self) -> u64 {
         self.available_blocks * self.fragment_size
     }
@@ -404,6 +496,7 @@ impl FileSystemStats {
         Size::B(self.avail_bytes())
     }
 
+    /// Calculate the used space in bytes
     pub fn used_bytes(&self) -> u64 {
         if self.total_bytes() == 0 {
             return 0;
@@ -415,6 +508,7 @@ impl FileSystemStats {
         Size::B(self.used_bytes())
     }
 
+    /// Calculate the percentage of the fs that is currently used (0.0 to 100.0)
     pub fn usage_percent(&self) -> f64 {
         if self.total_bytes() == 0 {
             return 0.;
