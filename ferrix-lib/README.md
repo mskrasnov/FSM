@@ -73,7 +73,7 @@ cargo add ferrix-lib    \
 - EDID parser update:
   - Add `description`, `serial`, `model`, `diagonal`, `resolution, max`, `aspect ratio`, `pixel clock, MHz`, `extension blocks count`, `checksum` fields;
   - New EDID blocks parsing: DTD block, range limits;
-- Update docs;
+- Update docs for `battery`, `parts`, `drm`, `init`, `firmware`, `desktop`, `cpu_freq` modules;
 
 ## License
 
