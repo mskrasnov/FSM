@@ -114,6 +114,21 @@ impl Size {
             _ => None,
         }
     }
+
+    pub fn to_string_pretty(&self) -> String {
+        format!(
+            "{}",
+            match self {
+                Size::B(n) => format!("{n}  B"),
+                Size::KB(n) => format!("{n:.0} KB"),
+                Size::MB(n) => format!("{n:.0} MB"),
+                Size::GB(n) => format!("{n:.0} GB"),
+                Size::TB(n) => format!("{n:.0} TB"),
+                Size::UnknownUnits(n) => format!("{n} ??"),
+                Size::None => format!("None"),
+            }
+        )
+    }
 }
 
 impl TryFrom<&str> for Size {
