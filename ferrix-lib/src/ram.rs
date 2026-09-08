@@ -364,6 +364,19 @@ pub struct Swap {
 }
 
 impl Swap {
+    pub fn used_swap(&self, base: u8) -> Size {
+        if base != 2 && base != 10 {
+            panic!("Unknown base: {base} (supported values: 2 or 10)");
+        }
+        let used = if base == 2 {
+            self.used.get_bytes2()
+        } else {
+            self.used.get_bytes10()
+        }
+        .unwrap_or(0);
+        Size::B(used)
+    }
+
     pub fn usage_percentage(&self) -> Option<f64> {
         let total_swap = self.size.get_bytes2()?;
         let used_swap = self.used.get_bytes2()?;
