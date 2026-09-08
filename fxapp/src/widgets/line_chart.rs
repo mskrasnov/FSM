@@ -107,7 +107,7 @@ pub struct Style {
 impl Default for Style {
     fn default() -> Self {
         Self {
-            y_axis_color: IColor::WHITE,
+            y_axis_color: Theme::GruvboxDark.palette().text,
             line_thickness: 1,
         }
     }
