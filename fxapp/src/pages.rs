@@ -32,6 +32,7 @@ pub mod mem;
 pub mod netlist;
 pub mod passport;
 pub mod proc;
+pub mod sysmon;
 pub mod vuln;
 
 pub use loading_page::loading_page;
@@ -92,8 +93,8 @@ pub trait PageData {
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Deserialize, Serialize)]
 pub enum PageVariant {
-    #[default]
     SystemPassport,
+    #[default]
     SystemMonitor,
     Processors,
     CPUFrequencies,
@@ -161,7 +162,7 @@ impl PageVariant {
     pub fn group(&self) -> GroupVariant {
         match self {
             Self::SystemPassport => passport::Passport::page_group(),
-            Self::SystemMonitor => GroupVariant::General,
+            Self::SystemMonitor => sysmon::SysMonPage::page_group(),
             Self::Processors => proc::ProcPage::page_group(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_group(),
             Self::CPUVulnerabilities => vuln::VulnPage::page_group(),
@@ -192,6 +193,7 @@ impl PageVariant {
     pub fn id(&self) -> Id {
         Id::new(match self {
             Self::SystemPassport => passport::Passport::page_id(),
+            Self::SystemMonitor => sysmon::SysMonPage::page_id(),
             Self::Processors => proc::ProcPage::page_id(),
             Self::CPUVulnerabilities => vuln::VulnPage::page_id(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_id(),
@@ -223,6 +225,7 @@ impl PageVariant {
     pub fn title(&self) -> String {
         match self {
             Self::SystemPassport => passport::Passport::page_title(),
+            Self::SystemMonitor => sysmon::SysMonPage::page_title(),
             Self::Processors => proc::ProcPage::page_title(),
             Self::CPUVulnerabilities => vuln::VulnPage::page_title(),
             Self::CPUFrequencies => freq::CpuFreqPage::page_title(),
@@ -241,6 +244,7 @@ impl PageVariant {
     pub fn view<'a>(&'a self, fx: &'a crate::Ferrix) -> Element<'a, Message> {
         match self {
             Self::SystemPassport => fx.system_passport_view(),
+            Self::SystemMonitor => fx.sysmon_page.view(),
             Self::Processors => fx.proc_page.view(),
             Self::CPUVulnerabilities => fx.vulns_page.view(),
             Self::CPUFrequencies => fx.freq_page.view(),

@@ -22,13 +22,13 @@ use crate::{
     Ferrix,
     pages::{
         PageData, PageVariant, dmi::DMIPageMessage, drm::DRMPageMessage, freq::ProcFreqMessage,
-        mem::MemoryPageMessage, proc::ProcPageMessage,
+        mem::MemoryPageMessage, proc::ProcPageMessage, sysmon::SysMonPageMessage,
     },
 };
 use ferrix_data::{dmi::DMIData, firmware::FResult, load_state::LoadState};
 use ferrix_lib::{
     battery::BatInfo,
-    cpu::Processors,
+    cpu::{Processors, Stat},
     cpu_freq::CpuFreq,
     drm::Video,
     net::Networks,
@@ -59,6 +59,9 @@ pub enum Message {
 pub enum DataReceiver {
     GetProcData,
     ProcDataReceived(LoadState<Processors>),
+
+    GetProcStat,
+    ProcStatReceived(LoadState<Stat>),
 
     GetCpuVulnsData,
     CpuVulnsDataReceived(LoadState<Vulnerabilities>),
@@ -98,6 +101,20 @@ impl DataReceiver {
             }
             Self::ProcDataReceived(val) => {
                 fx.proc_page.proc_data = val;
+                Task::none()
+            }
+            Self::GetProcStat => {
+                crate::pages::sysmon::SysMonPage::get_data().map(Message::DataReceiver)
+            }
+            Self::ProcStatReceived(val) => {
+                if fx.sysmon_page.curr_proc_stat.is_some() {
+                    fx.sysmon_page.prev_proc_stat = fx.sysmon_page.curr_proc_stat.clone();
+                } else if fx.sysmon_page.curr_proc_stat.is_none()
+                    && fx.sysmon_page.prev_proc_stat.is_none()
+                {
+                    fx.sysmon_page.prev_proc_stat = val.clone();
+                }
+                fx.sysmon_page.curr_proc_stat = val;
                 Task::none()
             }
             Self::GetCpuVulnsData => {
@@ -183,6 +200,7 @@ impl DataReceiver {
 
 #[derive(Debug, Clone)]
 pub enum PageMessage {
+    SysMonPage(SysMonPageMessage),
     ProcPage(ProcPageMessage),
     CpuFreqMessage(ProcFreqMessage),
     DMIPage(DMIPageMessage),
@@ -211,6 +229,7 @@ impl PageMessage {
                 }
                 Task::none()
             }
+            Self::SysMonPage(smp) => smp.update(&mut fx.sysmon_page),
             Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
             Self::CpuFreqMessage(cfm) => cfm.update(&mut fx.freq_page),
             Self::DMIPage(dp) => dp.update(&mut fx.dmi_page),

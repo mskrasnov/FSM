@@ -76,6 +76,8 @@ pub struct LineChart {
     show_legend: bool,
     y_axis_format: YAxisFormat,
     palette: ColorPalette,
+    x_label_area_size: u32,
+    y_label_area_size: u32,
 }
 
 /// Represents a single line (series) on the chart
@@ -138,7 +140,7 @@ impl LineSeries {
     /// If the number of data points exceeds `max_points`, the oldest
     /// value is automatically removed from the front of the queue
     pub fn push(&mut self, value: f64) {
-        if self.data.len() > self.max_points {
+        if self.data.len() >= self.max_points {
             self.data.pop_front();
         }
 
@@ -165,6 +167,8 @@ impl LineChart {
             show_legend: true,
             y_axis_format: YAxisFormat::default(),
             palette: ColorPalette::new(predefined_colors),
+            x_label_area_size: 0,
+            y_label_area_size: 30,
         }
     }
 
@@ -237,11 +241,11 @@ impl LineChart {
     /// and calls `update_axis()` to ensure the global Y-axis maximum
     /// is recalculated.
     pub fn push_value(&mut self, value: f64, idx: usize) {
-        if self.data.len() < idx {
+        if idx >= self.data.len() {
             return;
         }
+        self.data[idx].push(value);
         self.update_axis();
-        self.data[idx].data.push_back(value);
     }
 
     /// Toggle the visibility of the chart legend
@@ -269,7 +273,7 @@ impl LineChart {
                     text(format!("{}:", &line.name))
                         .color(to_icolor(line.color))
                         .font(bold_font),
-                    text(self.y_axis_format.format(&value)).style(move |t| if value > 90. {
+                    text(self.y_axis_format.format_legend(&value)).style(move |t| if value > 90. {
                         text::danger(t)
                     } else if value > 70. {
                         text::warning(t)
@@ -301,13 +305,9 @@ impl LineChart {
     /// Internal method to trim data points across all series if they exceed
     /// `max_points`
     fn update_axis(&mut self) {
-        'm: loop {
-            for s in &mut self.data {
-                if s.data.len() > self.max_points {
-                    s.data.pop_front();
-                } else {
-                    break 'm;
-                }
+        for series in &mut self.data {
+            while series.data.len() > self.max_points {
+                series.data.pop_front();
             }
         }
     }
@@ -345,6 +345,14 @@ impl LineChart {
             series.set_y_max(y);
         }
     }
+
+    pub fn set_x_label_area_size(&mut self, size: u32) {
+        self.x_label_area_size = size;
+    }
+
+    pub fn set_y_label_area_size(&mut self, size: u32) {
+        self.y_label_area_size = size;
+    }
 }
 
 impl Chart<Message> for LineChart {
@@ -364,8 +372,8 @@ impl Chart<Message> for LineChart {
         let y_max = self.y_max();
 
         let mut chart = builder
-            .x_label_area_size(0)
-            .y_label_area_size(35)
+            .x_label_area_size(self.x_label_area_size)
+            .y_label_area_size(self.y_label_area_size)
             .margin(5)
             .build_cartesian_2d(0..(self.max_points), 0.0..y_max)
             .expect("Failed to build chart");
@@ -385,7 +393,7 @@ impl Chart<Message> for LineChart {
                     .color(&to_rgbcolor(self.style.y_axis_color))
                     .transform(FontTransform::Rotate270),
             )
-            .y_label_formatter(&|y: &f64| self.y_axis_format.format(y))
+            .y_label_formatter(&|y: &f64| self.y_axis_format.format_y_axis(y))
             .draw()
             .expect("Failed to draw chart mesh");
 
@@ -429,7 +437,7 @@ pub enum YAxisFormat {
 impl YAxisFormat {
     /// Format the given `f64` value according to the selected `YAxisFormat`
     /// variant
-    pub fn format(&self, value: &f64) -> String {
+    pub fn format_legend(&self, value: &f64) -> String {
         match self {
             Self::Percentage => format!("{value:.3}%"),
             Self::Bytes => {
@@ -438,6 +446,18 @@ impl YAxisFormat {
             }
             Self::Frequency => format!("{value:.3} MHz"),
             Self::Plain => format!("{value:.3}"),
+        }
+    }
+
+    pub fn format_y_axis(&self, value: &f64) -> String {
+        match self {
+            Self::Percentage => format!("{value:.0}%"),
+            Self::Bytes => {
+                let size = UnitSize::B(*value as u64).round(2).unwrap_or_default();
+                size.to_string()
+            }
+            Self::Frequency => format!("{value:.0} MHz"),
+            Self::Plain => format!("{value:.0}"),
         }
     }
 }

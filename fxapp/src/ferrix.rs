@@ -24,7 +24,7 @@ use std::time::Duration;
 use crate::{
     message::{DataReceiver, KeyboardAndMouse, Message},
     navigation,
-    pages::{self, PageData, PageVariant},
+    pages::{self, PageData, PageVariant, sysmon::SysMonPageMessage},
     settings::FXSettings,
     utils::get_home,
 };
@@ -35,6 +35,8 @@ const SETTINGS_PATH: &str = "./ferrix.conf";
 pub struct Ferrix {
     pub active_page: PageVariant,
     pub settings: FXSettings,
+
+    pub sysmon_page: pages::sysmon::SysMonPage,
 
     pub proc_page: pages::proc::ProcPage,
     pub vulns_page: pages::vuln::VulnPage,
@@ -58,6 +60,7 @@ impl Ferrix {
             Self {
                 active_page,
                 settings,
+                sysmon_page: pages::sysmon::SysMonPage::new(),
                 proc_page: pages::proc::ProcPage::new(),
                 vulns_page: pages::vuln::VulnPage::new(),
                 freq_page: pages::freq::CpuFreqPage::new(),
@@ -155,6 +158,24 @@ impl Ferrix {
         let scripts = vec![
             iced::event::listen()
                 .map(|event| Message::KeyboardAndMouse(KeyboardAndMouse::Event(event))),
+            /************************************************
+             * Chart update actions                         *
+             ************************************************/
+            iced::time::every(Duration::from_secs_f32(
+                self.settings.charts_update_period_nsecs as f32 / 10.,
+            ))
+            .map(|_| Message::DataReceiver(DataReceiver::GetProcStat)),
+            iced::time::every(Duration::from_secs_f32(
+                self.settings.charts_update_period_nsecs as f32 / 10.,
+            ))
+            .map(|_| {
+                Message::PageMessage(crate::message::PageMessage::SysMonPage(
+                    SysMonPageMessage::AddCPUCoreLineSeries,
+                ))
+            }),
+            /************************************************
+             * Basic data update actions                    *
+             ************************************************/
             iced::time::every(Duration::from_secs(
                 self.settings.update_period_general as u64,
             ))
