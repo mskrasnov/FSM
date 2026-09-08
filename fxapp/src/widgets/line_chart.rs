@@ -78,6 +78,7 @@ pub struct LineChart {
     palette: ColorPalette,
     x_label_area_size: u32,
     y_label_area_size: u32,
+    displayed_y_labels: usize,
 }
 
 /// Represents a single line (series) on the chart
@@ -169,6 +170,7 @@ impl LineChart {
             palette: ColorPalette::new(predefined_colors),
             x_label_area_size: 0,
             y_label_area_size: 30,
+            displayed_y_labels: 8,
         }
     }
 
@@ -346,12 +348,28 @@ impl LineChart {
         }
     }
 
+    pub fn get_y_max(&self) -> f64 {
+        let mut max = 0.;
+        for series in &self.data {
+            for y in &series.data {
+                if *y > max {
+                    max = *y;
+                }
+            }
+        }
+        max
+    }
+
     pub fn set_x_label_area_size(&mut self, size: u32) {
         self.x_label_area_size = size;
     }
 
     pub fn set_y_label_area_size(&mut self, size: u32) {
         self.y_label_area_size = size;
+    }
+
+    pub fn set_displayed_y_labels_cnt(&mut self, count: usize) {
+        self.displayed_y_labels = count;
     }
 }
 
@@ -385,13 +403,13 @@ impl Chart<Message> for LineChart {
             .light_line_style(TRANSPARENT)
             .disable_x_axis()
             .disable_x_mesh()
-            .y_labels(8)
+            .y_labels(self.displayed_y_labels)
             .x_labels(self.max_points)
             .y_label_style(
                 ("sans-serif", 10)
                     .into_font()
                     .color(&to_rgbcolor(self.style.y_axis_color))
-                    .transform(FontTransform::Rotate270),
+                    .transform(FontTransform::Rotate180),
             )
             .y_label_formatter(&|y: &f64| self.y_axis_format.format_y_axis(y))
             .draw()
@@ -454,7 +472,7 @@ impl YAxisFormat {
             Self::Percentage => format!("{value:.0}%"),
             Self::Bytes => {
                 let size = UnitSize::B(*value as u64).round(2).unwrap_or_default();
-                size.to_string()
+                format!("{}", size.to_string_pretty())
             }
             Self::Frequency => format!("{value:.0} MHz"),
             Self::Plain => format!("{value:.0}"),

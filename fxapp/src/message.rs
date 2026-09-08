@@ -229,7 +229,7 @@ impl PageMessage {
                 }
                 Task::none()
             }
-            Self::SysMonPage(smp) => smp.update(&mut fx.sysmon_page),
+            Self::SysMonPage(smp) => smp.update(fx),
             Self::ProcPage(pm) => pm.update(&mut fx.proc_page),
             Self::CpuFreqMessage(cfm) => cfm.update(&mut fx.freq_page),
             Self::DMIPage(dp) => dp.update(&mut fx.dmi_page),

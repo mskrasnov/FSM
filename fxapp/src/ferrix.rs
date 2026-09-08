@@ -170,7 +170,7 @@ impl Ferrix {
             ))
             .map(|_| {
                 Message::PageMessage(crate::message::PageMessage::SysMonPage(
-                    SysMonPageMessage::AddCPUCoreLineSeries,
+                    SysMonPageMessage::AddTotalLineSeries,
                 ))
             }),
             /************************************************

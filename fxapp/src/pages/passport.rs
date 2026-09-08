@@ -76,6 +76,7 @@ impl PageData for Passport {
             super::proc::ProcPage::get_data(),
             super::freq::CpuFreqPage::get_data(),
             super::mem::MemoryPage::get_data(),
+            super::sysmon::SysMonPage::get_data(),
             super::fs::FSPage::get_data(),
             super::battery::BatPage::get_data(),
             super::drm::DRMPage::get_data(),

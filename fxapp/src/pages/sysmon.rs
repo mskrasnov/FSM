@@ -23,10 +23,11 @@ use std::collections::HashSet;
 use ferrix_data::load_state::{LoadState, ToLoadState};
 use ferrix_lib::cpu::Stat;
 use ferrix_widgets::container::glassy_container;
-use iced::{Color, Task, color};
+use iced::{Color, Task, color, widget::column};
 
 use super::{PageData, PageView};
 use crate::{
+    ferrix::Ferrix,
     fl,
     message::{DataReceiver, Message},
     widgets::line_chart::*,
@@ -37,7 +38,12 @@ pub struct SysMonPage {
     pub prev_proc_stat: LoadState<Stat>,
     pub curr_proc_stat: LoadState<Stat>,
     pub cpu_cores_names: HashSet<usize>,
+
+    pub y_axis_label_width: u32,
+    pub max_elements: usize,
+
     pub cpu_chart: LineChart,
+    pub mem_chart: LineChart,
 }
 
 impl SysMonPage {
@@ -46,7 +52,12 @@ impl SysMonPage {
             prev_proc_stat: LoadState::Loading,
             curr_proc_stat: LoadState::Loading,
             cpu_cores_names: HashSet::new(),
+
+            max_elements: 100,
+            y_axis_label_width: 35,
+
             cpu_chart: LineChart::new(CPU_CHARTS_COLORS.to_vec()),
+            mem_chart: LineChart::new(CPU_CHARTS_COLORS.to_vec()),
         }
     }
 }
@@ -65,10 +76,11 @@ impl<'a> PageView<'a> for SysMonPage {
     }
 
     fn page_contents_view(&'a self) -> iced::Element<'a, Message> {
-        glassy_container(
-            fl!("sysmon-cpu-hdr"),
-            self.cpu_chart.view(), /*text("TEST")*/
-        )
+        column![
+            glassy_container(fl!("sysmon-cpu-hdr"), self.cpu_chart.view(),),
+            glassy_container(fl!("sysmon-ram-hdr"), self.mem_chart.view(),),
+        ]
+        .spacing(5)
         .into()
     }
 }
@@ -85,12 +97,20 @@ impl PageData for SysMonPage {
 #[derive(Debug, Clone)]
 pub enum SysMonPageMessage {
     AddCPUCoreLineSeries,
+    AddMemoryLineSeries,
+    AddTotalLineSeries,
 }
 
 impl SysMonPageMessage {
-    pub fn update<'a>(self, smp: &'a mut SysMonPage) -> Task<Message> {
+    pub fn update<'a>(self, fx: &'a mut Ferrix) -> Task<Message> {
+        let smp = &mut fx.sysmon_page;
         match self {
             Self::AddCPUCoreLineSeries => self.add_cpu_core_line_series(smp),
+            Self::AddMemoryLineSeries => self.add_ram_line_series(fx),
+            Self::AddTotalLineSeries => Task::batch([
+                self.add_cpu_core_line_series(smp),
+                self.add_ram_line_series(fx),
+            ]),
         }
     }
 
@@ -112,7 +132,8 @@ impl SysMonPageMessage {
         let len = curr_stat.cpus.len();
 
         smp.cpu_chart.set_y_axis_format(YAxisFormat::Percentage);
-        smp.cpu_chart.set_max_values(100);
+        smp.cpu_chart.set_y_label_area_size(smp.y_axis_label_width);
+        smp.cpu_chart.set_max_values(smp.max_elements);
 
         for id in 0..len {
             let percent = curr_stat.cpus[id].usage_percentage(Some(prev_stat.cpus[id])) as f64;
@@ -127,19 +148,84 @@ impl SysMonPageMessage {
         }
         Task::none()
     }
+
+    fn add_ram_line_series<'a>(&'a self, fx: &'a mut Ferrix) -> Task<Message> {
+        let ram = &fx.mem_page.ram_data;
+        if ram.is_none() {
+            return Task::none();
+        }
+        let ram = ram.to_option().unwrap();
+        let ram_usage = ram.used_ram(2).get_bytes2().unwrap_or(0) as f64;
+
+        let smp = &mut fx.sysmon_page;
+        smp.mem_chart.set_y_axis_format(YAxisFormat::Bytes);
+        smp.mem_chart
+            .set_y_max(ram.total.get_bytes2().unwrap_or(0) as f64);
+        smp.mem_chart.set_y_label_area_size(smp.y_axis_label_width);
+        smp.mem_chart.set_displayed_y_labels_cnt(10);
+
+        if smp.mem_chart.series_count() == 0 {
+            let mut ram_line =
+                LineSeries::new("RAM".to_string(), color!(128, 64, 255), smp.max_elements);
+            ram_line.push(ram_usage);
+            smp.mem_chart.push_series(ram_line);
+        } else {
+            smp.mem_chart.push_to(0, ram_usage);
+        }
+        self.add_swap_core_line_series_helper(fx);
+
+        Task::none()
+    }
+
+    fn add_swap_core_line_series_helper<'a>(&'a self, fx: &'a mut Ferrix) {
+        let swap = &fx.mem_page.swap_data;
+        if swap.is_none() {
+            return;
+        }
+
+        let swap = swap.unwrap();
+        let smp = &mut fx.sysmon_page;
+
+        let len = swap.swaps.len();
+
+        for id in 0..len {
+            let series_idx = id + 1;
+            let current_series_cnt = smp.mem_chart.series_count();
+
+            let swap_usage = swap.swaps[id].used_swap(2).get_bytes2().unwrap_or(0) as f64;
+            let swap_name = swap.swaps[id].filename.clone();
+
+            // вся эта хуйня как-то работает только в таком виде. Если
+            // использовать то, что было в более старых версиях FSM (v0.7.1
+            // и ниже), то графики будут отставать один от другого (сначала
+            // RAM, потом swap, потом проц)
+            //
+            // Мне лень разбираться в этом дерьме, честно.
+            if series_idx >= current_series_cnt {
+                smp.mem_chart.add_series(swap_name);
+            }
+            smp.mem_chart.push_to(series_idx, swap_usage);
+
+            let y_max = smp.mem_chart.get_y_max();
+            let series_max = swap.swaps[id].size.get_bytes2().unwrap_or(0) as f64;
+            if y_max < series_max {
+                smp.mem_chart.set_y_max(series_max);
+            }
+        }
+    }
 }
 
 pub const CPU_CHARTS_COLORS: &'static [Color] = &[
     color!(0xe6194b),
-    color!(0xF58231),
-    color!(0xFFE119),
-    color!(0xBFEF45),
-    color!(0x3CB44B),
-    color!(0x42D4F4),
-    color!(0x4363D8),
-    color!(0x911EB4),
-    color!(0xff00e3),
-    color!(0xffb5ba),
-    color!(0x00a800),
-    color!(0xfdffc5),
+    // color!(0xF58231),
+    // color!(0xFFE119),
+    // color!(0xBFEF45),
+    // color!(0x3CB44B),
+    // color!(0x42D4F4),
+    // color!(0x4363D8),
+    // color!(0x911EB4),
+    // color!(0xff00e3),
+    // color!(0xffb5ba),
+    // color!(0x00a800),
+    // color!(0xfdffc5),
 ];
