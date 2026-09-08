@@ -68,6 +68,11 @@ cargo add ferrix-lib    \
 
 ## Changelog
 
+### v0.5.1
+
+- Add `utils::Size::to_string_pretty()` method;
+- Add `ram::Swap::used_swap()` method;
+
 ### v0.5.0
 
 - EDID parser update:
