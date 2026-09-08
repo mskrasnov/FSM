@@ -209,3 +209,9 @@ impl Ferrix {
             .into()
     }
 }
+
+impl Drop for Ferrix {
+    fn drop(&mut self) {
+        eprintln!("FSM DROP");
+    }
+}
