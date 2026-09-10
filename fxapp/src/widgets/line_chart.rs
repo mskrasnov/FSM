@@ -471,7 +471,9 @@ impl YAxisFormat {
         match self {
             Self::Percentage => format!("{value:.0}%"),
             Self::Bytes => {
-                let size = UnitSize::B(*value as u64).round(2).unwrap_or_default();
+                let size = UnitSize::B(value.ceil() as u64)
+                    .round(2)
+                    .unwrap_or_default();
                 format!("{}", size.to_string_pretty())
             }
             Self::Frequency => format!("{value:.0} MHz"),

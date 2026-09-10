@@ -206,7 +206,6 @@ impl SysMonPageMessage {
         smp.mem_chart.set_y_axis_format(YAxisFormat::Bytes);
         smp.mem_chart.set_y_max(ram_total);
         smp.mem_chart.set_y_label_area_size(smp.y_axis_label_width);
-        smp.mem_chart.set_displayed_y_labels_cnt(10);
 
         if smp.mem_chart.series_count() == 0 {
             let mut ram_line =
@@ -216,9 +215,20 @@ impl SysMonPageMessage {
         } else {
             smp.mem_chart.push_to(0, ram_usage);
         }
+        self.add_cache_line_series_helper(fx, ram.cached.get_bytes2().unwrap_or(0) as f64);
         self.add_swap_line_series_helper(fx);
 
         Task::none()
+    }
+
+    fn add_cache_line_series_helper<'a>(&'a self, fx: &'a mut Ferrix, cached: f64) {
+        let smp = &mut fx.sysmon_page;
+        if smp.mem_chart.series_count() == 1 {
+            smp.mem_chart.add_series("Cached".to_string());
+            smp.mem_chart.push_to(1, cached);
+        } else {
+            smp.mem_chart.push_to(1, cached);
+        }
     }
 
     fn add_swap_line_series_helper<'a>(&'a self, fx: &'a mut Ferrix) {
@@ -233,7 +243,7 @@ impl SysMonPageMessage {
         let len = swap.swaps.len();
 
         for id in 0..len {
-            let series_idx = id + 1;
+            let series_idx = id + 2; // 1 - RAM, 2 - cache
             let current_series_cnt = smp.mem_chart.series_count();
 
             let swap_usage = swap.swaps[id].used_swap(2).get_bytes2().unwrap_or(0) as f64;
@@ -250,11 +260,11 @@ impl SysMonPageMessage {
             }
             smp.mem_chart.push_to(series_idx, swap_usage);
 
-            let y_max = smp.mem_chart.get_y_max();
-            let series_max = swap.swaps[id].size.get_bytes2().unwrap_or(0) as f64;
-            if series_max < y_max {
-                smp.mem_chart.set_y_max(series_max);
-            }
+            // let y_max = smp.mem_chart.get_y_max();
+            // let series_max = swap.swaps[id].size.get_bytes2().unwrap_or(0) as f64;
+            // if series_max < y_max {
+            //     smp.mem_chart.set_y_max(series_max);
+            // }
         }
     }
 
