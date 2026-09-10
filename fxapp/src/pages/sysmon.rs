@@ -216,12 +216,12 @@ impl SysMonPageMessage {
         } else {
             smp.mem_chart.push_to(0, ram_usage);
         }
-        self.add_swap_core_line_series_helper(fx);
+        self.add_swap_line_series_helper(fx);
 
         Task::none()
     }
 
-    fn add_swap_core_line_series_helper<'a>(&'a self, fx: &'a mut Ferrix) {
+    fn add_swap_line_series_helper<'a>(&'a self, fx: &'a mut Ferrix) {
         let swap = &fx.mem_page.swap_data;
         if swap.is_none() {
             return;
