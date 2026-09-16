@@ -65,7 +65,7 @@ impl SysMonPage {
             show_bat_capacity_chart: false,
 
             cpu_chart: LineChart::new(CPU_CHARTS_COLORS.to_vec()),
-            mem_chart: LineChart::new(CPU_CHARTS_COLORS.to_vec()),
+            mem_chart: LineChart::new(vec![color!(255, 128, 128)]),
             bat_capacity_chart: LineChart::new(vec![color!(128, 64, 32)]),
         }
     }
@@ -208,10 +208,8 @@ impl SysMonPageMessage {
         smp.mem_chart.set_y_label_area_size(smp.y_axis_label_width);
 
         if smp.mem_chart.series_count() == 0 {
-            let mut ram_line =
-                LineSeries::new("RAM".to_string(), color!(128, 64, 255), smp.max_elements);
-            ram_line.push(ram_usage);
-            smp.mem_chart.push_series(ram_line);
+            smp.mem_chart.add_series("RAM".to_string());
+            smp.mem_chart.push_to(0, ram_usage);
         } else {
             smp.mem_chart.push_to(0, ram_usage);
         }
