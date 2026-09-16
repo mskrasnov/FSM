@@ -390,10 +390,10 @@ impl Chart<Message> for LineChart {
         let y_max = self.y_max();
 
         let mut chart = builder
-            .x_label_area_size(self.x_label_area_size)
+            .x_label_area_size(0)
             .y_label_area_size(self.y_label_area_size)
             .margin(5)
-            .build_cartesian_2d(0..(self.max_points), 0.0..y_max)
+            .build_cartesian_2d(0..(self.max_points - 1), 0.0..y_max)
             .expect("Failed to build chart");
 
         chart
