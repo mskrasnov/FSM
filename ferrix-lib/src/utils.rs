@@ -173,6 +173,52 @@ impl Display for Size {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Copy)]
+pub struct Size2 {
+    pub units: SizeUnits,
+    pub value: f64,
+}
+
+impl Display for Size2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = match self.units {
+            SizeUnits::B => format!("{}", self.value as u64),
+            _ => format!("{:.2}", self.value),
+        };
+        write!(f, "{} {}", value, self.units)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Copy)]
+pub enum SizeUnits {
+    B,
+    Kb,
+    Mb,
+    Gb,
+    Tb,
+    #[default]
+    Unknown,
+    None,
+}
+
+impl Display for SizeUnits {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::B => " B",
+                Self::Kb => "KB",
+                Self::Mb => "MB",
+                Self::Gb => "GB",
+                Self::Tb => "TB",
+                Self::Unknown => "??",
+                Self::None => "<none units>",
+            }
+        )
+    }
+}
+
 pub fn read_to_string<P: AsRef<Path>>(path: P) -> Result<String> {
     let c = std::fs::read_to_string(path)?.trim().to_string();
     Ok(c)
