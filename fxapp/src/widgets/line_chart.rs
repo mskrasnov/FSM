@@ -270,18 +270,25 @@ impl LineChart {
 
         for line in &self.data {
             let value = line.data.back().copied().unwrap_or(0.);
+            let text_color = match self.y_axis_format {
+                YAxisFormat::Percentage => {
+                    if value > 90. {
+                        text::danger
+                    } else if value > 70. {
+                        text::warning
+                    } else {
+                        text::default
+                    }
+                }
+                _ => text::default,
+            };
+
             items.push(
                 row![
                     text(format!("{}:", &line.name))
                         .color(to_icolor(line.color))
                         .font(bold_font),
-                    text(self.y_axis_format.format_legend(&value)).style(move |t| if value > 90. {
-                        text::danger(t)
-                    } else if value > 70. {
-                        text::warning(t)
-                    } else {
-                        text::default(t)
-                    }),
+                    text(self.y_axis_format.format_legend(&value)).style(move |t| text_color(t)),
                 ]
                 .spacing(3),
             );
@@ -421,7 +428,7 @@ impl Chart<Message> for LineChart {
                     AreaSeries::new(
                         series.data.iter().enumerate().map(|x| (x.0, *x.1 as f64)),
                         0.,
-                        plotters::style::TRANSPARENT,
+                        series.color.mix(0.05),
                     )
                     .border_style(
                         ShapeStyle::from(series.color).stroke_width(self.style.line_thickness),
