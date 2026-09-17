@@ -258,6 +258,11 @@ impl SysMonPageMessage {
             }
             smp.mem_chart.push_to(series_idx, swap_usage);
 
+            // TODO: вернуть эту поебень взад
+            // Дело в том, что ferrix-lib возвращает данные о подкачке в различных
+            // единицах, не всегда совпадающих в том, что записано в `Size::*`.
+            // После исправления этой хуйни раскомментировать.
+            //
             // let y_max = smp.mem_chart.get_y_max();
             // let series_max = swap.swaps[id].size.get_bytes2().unwrap_or(0) as f64;
             // if series_max < y_max {
