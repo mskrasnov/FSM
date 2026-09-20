@@ -49,6 +49,7 @@ pub struct SysMonPage {
     pub cpu_chart: LineChart,
     pub mem_chart: LineChart,
     pub bat_capacity_chart: LineChart,
+    pub cpu_clocks_chart: LineChart,
 }
 
 const DEFAULT_CHART_HEIGHT: f32 = 192.;
@@ -67,6 +68,7 @@ impl SysMonPage {
             cpu_chart: LineChart::new(CPU_CHARTS_COLORS.to_vec()),
             mem_chart: LineChart::new(vec![color!(255, 128, 128)]),
             bat_capacity_chart: LineChart::new(vec![color!(128, 64, 32)]),
+            cpu_clocks_chart: LineChart::new(CPU_CHARTS_COLORS.to_vec()),
         }
     }
 
@@ -106,6 +108,9 @@ impl<'a> PageView<'a> for SysMonPage {
             glassy_container(fl!("sysmon-ram-hdr"), self.mem_chart.view())
                 .height(charts_height)
                 .into(),
+            glassy_container(fl!("page-cpufreq"), self.cpu_clocks_chart.view())
+                .height(self.get_cpu_chart_height())
+                .into(),
         ];
 
         if self.show_bat_capacity_chart {
@@ -141,7 +146,8 @@ impl PageData for SysMonPage {
 pub enum SysMonPageMessage {
     AddCPUCoreLineSeries,
     AddMemoryLineSeries,
-    AddTotalLineSeries,
+    AddBatteryLineSeriesMaybe,
+    AddBasicLineSeries,
 }
 
 impl SysMonPageMessage {
@@ -150,10 +156,11 @@ impl SysMonPageMessage {
         match self {
             Self::AddCPUCoreLineSeries => self.add_cpu_core_line_series(smp),
             Self::AddMemoryLineSeries => self.add_ram_line_series(fx),
-            Self::AddTotalLineSeries => Task::batch([
+            Self::AddBatteryLineSeriesMaybe => self.add_bat_line_series(fx),
+            Self::AddBasicLineSeries => Task::batch([
                 self.add_cpu_core_line_series(smp),
                 self.add_ram_line_series(fx),
-                self.add_bat_line_series(fx),
+                self.add_cpufreq_line_series(fx),
             ]),
         }
     }
@@ -271,6 +278,47 @@ impl SysMonPageMessage {
         }
     }
 
+    fn add_cpufreq_line_series<'a>(&'a self, fx: &'a mut Ferrix) -> Task<Message> {
+        let freq = &fx.freq_page.freqs;
+        if freq.is_none() {
+            return Task::none();
+        }
+        let freq = freq.to_option().unwrap();
+
+        let smp = &mut fx.sysmon_page;
+        smp.cpu_clocks_chart
+            .set_y_axis_format(YAxisFormat::Frequency);
+        let max_policy = freq
+            .policy
+            .iter()
+            .max_by_key(|f| f.cpu_max_freq.unwrap_or(0))
+            .map(|policy| policy.cpu_max_freq.unwrap_or(0))
+            .unwrap_or(0) as f64
+            / 1_000_000.;
+        let max_policy = max_policy.ceil() * 1_000_000.;
+
+        smp.cpu_clocks_chart.set_y_max(max_policy as f64);
+        smp.cpu_clocks_chart
+            .set_y_label_area_size(smp.y_axis_label_width);
+
+        let len = freq.policy.len();
+        for id in 0..len {
+            let policy = &freq.policy[id];
+            let name = format!("CPU #{id}");
+            let current = policy.scaling_cur_freq.unwrap_or(0) as f64;
+
+            let series_idx = id;
+            let current_series_cnt = smp.cpu_clocks_chart.series_count();
+
+            if series_idx >= current_series_cnt {
+                smp.cpu_clocks_chart.add_series(name);
+            }
+            smp.cpu_clocks_chart.push_to(series_idx, current);
+        }
+
+        Task::none()
+    }
+
     fn add_bat_line_series<'a>(&'a self, fx: &'a mut Ferrix) -> Task<Message> {
         let bat = &fx.bat_page.bat_info;
         if bat.is_none() {
@@ -290,7 +338,7 @@ impl SysMonPageMessage {
         smp.bat_capacity_chart
             .set_y_label_area_size(smp.y_axis_label_width);
         smp.bat_capacity_chart.set_displayed_y_labels_cnt(8);
-        smp.bat_capacity_chart.set_max_values(256);
+        smp.bat_capacity_chart.set_max_values(smp.max_elements);
 
         for id in 0..len {
             let bat = &bat.bats[id];
