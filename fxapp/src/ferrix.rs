@@ -187,8 +187,8 @@ impl Ferrix {
             /************************************************
              * Basic data update actions                    *
              ************************************************/
-            iced::time::every(Duration::from_secs(
-                self.settings.update_period_general as u64,
+            iced::time::every(Duration::from_secs_f32(
+                self.settings.charts_update_period_nsecs as f32 / 10.,
             ))
             .map(|_| Message::DataReceiver(DataReceiver::GetCpuFreqData)),
             iced::time::every(Duration::from_secs(
