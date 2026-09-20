@@ -460,6 +460,17 @@ pub enum YAxisFormat {
 }
 
 impl YAxisFormat {
+    fn fmt_freq(&self, value: f64, dec: usize) -> String {
+        let (freq, suf) = if value >= 1_000_000. {
+            (value / 1_000_000., "GHz")
+        } else if value >= 1_000. {
+            (value / 1_000., "MHz")
+        } else {
+            (value, "kHz")
+        };
+        format!("{freq:.dec$} {suf}")
+    }
+
     /// Format the given `f64` value according to the selected `YAxisFormat`
     /// variant
     pub fn format_legend(&self, value: &f64) -> String {
@@ -469,7 +480,7 @@ impl YAxisFormat {
                 let size = UnitSize::B(*value as u64).round(2).unwrap_or_default();
                 size.to_string()
             }
-            Self::Frequency => format!("{value:.3} MHz"),
+            Self::Frequency => self.fmt_freq(*value, 3),
             Self::Plain => format!("{value:.3}"),
         }
     }
@@ -483,7 +494,7 @@ impl YAxisFormat {
                     .unwrap_or_default();
                 format!("{}", size.to_string_pretty())
             }
-            Self::Frequency => format!("{value:.0} MHz"),
+            Self::Frequency => self.fmt_freq(*value, 0),
             Self::Plain => format!("{value:.0}"),
         }
     }
