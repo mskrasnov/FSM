@@ -428,7 +428,7 @@ impl Chart<Message> for LineChart {
                     AreaSeries::new(
                         series.data.iter().enumerate().map(|x| (x.0, *x.1 as f64)),
                         0.,
-                        series.color.mix(0.05),
+                        series.color.mix(0.02),
                     )
                     .border_style(
                         ShapeStyle::from(series.color).stroke_width(self.style.line_thickness),
@@ -480,7 +480,7 @@ impl YAxisFormat {
                 let size = UnitSize::B(*value as u64).round(2).unwrap_or_default();
                 size.to_string()
             }
-            Self::Frequency => self.fmt_freq(*value, 3),
+            Self::Frequency => self.fmt_freq(*value, 2),
             Self::Plain => format!("{value:.3}"),
         }
     }
