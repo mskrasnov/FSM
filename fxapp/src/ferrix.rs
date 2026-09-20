@@ -105,7 +105,10 @@ impl Ferrix {
                     || self.bat_page.bat_info.is_none()
                     || self.drm_page.drm.is_none() =>
             {
-                pages::passport::Passport::get_data().map(Message::DataReceiver)
+                Task::batch([
+                    pages::passport::Passport::get_data().map(Message::DataReceiver),
+                    // ...
+                ])
             }
             PageVariant::Processors if self.proc_page.proc_data.is_none() => {
                 pages::proc::ProcPage::get_data().map(Message::DataReceiver)
@@ -170,7 +173,15 @@ impl Ferrix {
             ))
             .map(|_| {
                 Message::PageMessage(crate::message::PageMessage::SysMonPage(
-                    SysMonPageMessage::AddTotalLineSeries,
+                    SysMonPageMessage::AddBasicLineSeries,
+                ))
+            }),
+            iced::time::every(Duration::from_secs_f32(
+                self.settings.charts_update_period_nsecs as f32 / 2.,
+            ))
+            .map(|_| {
+                Message::PageMessage(crate::message::PageMessage::SysMonPage(
+                    SysMonPageMessage::AddBatteryLineSeriesMaybe,
                 ))
             }),
             /************************************************
