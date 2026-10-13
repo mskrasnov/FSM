@@ -128,7 +128,7 @@ impl Ferrix {
     }
 
     fn system_name(&self) -> Option<String> {
-        None
+        Some("Unknown System".to_string())
     }
 
     fn format_cpu_name(&self, name: &str) -> String {
