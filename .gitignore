@@ -3,6 +3,7 @@
 /Cargo.lock
 /example.*
 /TODO.md
+*.swp
 
 # AppImage build files
 /AppDir
