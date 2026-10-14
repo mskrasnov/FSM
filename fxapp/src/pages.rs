@@ -23,6 +23,7 @@ pub mod loading_page;
 pub mod todo_page;
 
 pub mod battery;
+pub mod distro;
 pub mod dmi;
 pub mod drm;
 pub mod firmware;
@@ -175,7 +176,7 @@ impl PageVariant {
             Self::Resources => GroupVariant::Hardware,
             Self::NetworkInterfaces => netlist::NetStatPage::page_group(),
             Self::NetworkStatistics => netlist::NetStatPage::page_group(),
-            Self::Distro => GroupVariant::Admin,
+            Self::Distro => distro::OsRelPage::page_group(),
             Self::Session => GroupVariant::Admin,
             Self::Users => GroupVariant::Admin,
             Self::Groups => GroupVariant::Admin,
@@ -204,6 +205,7 @@ impl PageVariant {
             Self::Screens => drm::DRMPage::page_id(),
             Self::NetworkInterfaces => netlist::NetStatPage::page_id2(),
             Self::NetworkStatistics => netlist::NetStatPage::page_id(),
+            Self::Distro => distro::OsRelPage::page_id(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_id(),
             _ => "",
         })
@@ -236,6 +238,7 @@ impl PageVariant {
             Self::Screens => drm::DRMPage::page_title(),
             Self::NetworkInterfaces => netlist::NetStatPage::page_title2(),
             Self::NetworkStatistics => netlist::NetStatPage::page_title(),
+            Self::Distro => distro::OsRelPage::page_title(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_title(),
             _ => format!("[???] {:?}", self),
         }
@@ -254,6 +257,7 @@ impl PageVariant {
             Self::Battery => fx.bat_page.view(),
             Self::Screens => fx.drm_page.view(),
             Self::NetworkInterfaces | Self::NetworkStatistics => fx.net_pages.view(),
+            Self::Distro => fx.osrel_page.view(),
             Self::FirmwareAttributes => fx.firmware_page.view(),
             _ => todo_page::todo(),
         }

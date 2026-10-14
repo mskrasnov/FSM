@@ -47,6 +47,7 @@ pub struct Ferrix {
     pub bat_page: pages::battery::BatPage,
     pub drm_page: pages::drm::DRMPage,
     pub net_pages: pages::netlist::NetStatPage,
+    pub osrel_page: pages::distro::OsRelPage,
     pub firmware_page: pages::firmware::FirmwarePage,
 }
 
@@ -70,6 +71,7 @@ impl Ferrix {
                 bat_page: pages::battery::BatPage::new(),
                 drm_page: pages::drm::DRMPage::new(),
                 net_pages: pages::netlist::NetStatPage::new(),
+                osrel_page: pages::distro::OsRelPage::new(),
                 firmware_page: pages::firmware::FirmwarePage::new(),
             },
             crate::pages::passport::Passport::get_data().map(Message::DataReceiver),
@@ -139,6 +141,9 @@ impl Ferrix {
                 } else {
                     Task::none()
                 }
+            }
+            PageVariant::Distro if self.osrel_page.osrel.is_none() => {
+                pages::distro::OsRelPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::FirmwareAttributes if self.firmware_page.firmware.is_none() => {
                 pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)
