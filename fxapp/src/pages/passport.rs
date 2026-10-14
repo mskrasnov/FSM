@@ -20,6 +20,7 @@
 
 //! System Passport page
 
+use ferrix_data::load_state::LoadState;
 use ferrix_lib::{battery, utils::Size};
 use iced::{
     Alignment::Center,
@@ -81,6 +82,7 @@ impl PageData for Passport {
             super::battery::BatPage::get_data(),
             super::drm::DRMPage::get_data(),
             super::netlist::NetStatPage::get_data(),
+            super::distro::OsRelPage::get_data(),
         ])
     }
 }
@@ -128,7 +130,11 @@ impl Ferrix {
     }
 
     fn system_name(&self) -> Option<String> {
-        Some("Unknown System".to_string())
+        match &self.osrel_page.osrel {
+            LoadState::Loaded(osrel) => osrel.pretty_name.clone(),
+            LoadState::Error(why) => Some(why.to_string()),
+            LoadState::Loading => Some("Loading OS name...".to_string()),
+        }
     }
 
     fn format_cpu_name(&self, name: &str) -> String {
