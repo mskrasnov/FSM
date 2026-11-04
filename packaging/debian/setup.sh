@@ -51,7 +51,7 @@ cargo install cargo-deb
 apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu libc6-dev-arm64-cross -y
 rustup target add aarch64-unknown-linux-gnu
 
-apt install gcc-10-i686-linux-gnu binutils-i686-linux-gnu binutils-i686-gnu gcc-i686-linux-gnu -y
+apt install gcc-12-i686-linux-gnu binutils-i686-linux-gnu binutils-i686-gnu gcc-i686-linux-gnu -y
 rustup target add i686-unknown-linux-gnu
 
 wget -O appimage-builder-x86_64.AppImage https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage

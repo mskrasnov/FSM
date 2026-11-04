@@ -1,6 +1,6 @@
 # (C) 2026 Michail Krasnov <mskrasnov07@ya.ru>
 
-FROM debian:11
+FROM debian:12
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/root/.cargo/bin:${PATH}"
