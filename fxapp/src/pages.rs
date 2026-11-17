@@ -34,6 +34,7 @@ pub mod netlist;
 pub mod passport;
 pub mod proc;
 pub mod sysmon;
+pub mod users;
 pub mod vuln;
 
 pub use loading_page::loading_page;
@@ -147,7 +148,7 @@ impl PageVariant {
         Self::NetworkStatistics,
         // Admin
         Self::Distro,
-        Self::Session,
+        //Self::Session,
         Self::Users,
         Self::Groups,
         Self::Environment,
@@ -178,7 +179,7 @@ impl PageVariant {
             Self::NetworkStatistics => netlist::NetStatPage::page_group(),
             Self::Distro => distro::OsRelPage::page_group(),
             Self::Session => GroupVariant::Admin,
-            Self::Users => GroupVariant::Admin,
+            Self::Users => users::UsersPage::page_group(),
             Self::Groups => GroupVariant::Admin,
             Self::Environment => GroupVariant::Admin,
             Self::SystemManager => GroupVariant::Admin,
@@ -206,6 +207,7 @@ impl PageVariant {
             Self::NetworkInterfaces => netlist::NetStatPage::page_id2(),
             Self::NetworkStatistics => netlist::NetStatPage::page_id(),
             Self::Distro => distro::OsRelPage::page_id(),
+            Self::Users => users::UsersPage::page_id(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_id(),
             _ => "",
         })
@@ -239,6 +241,7 @@ impl PageVariant {
             Self::NetworkInterfaces => netlist::NetStatPage::page_title2(),
             Self::NetworkStatistics => netlist::NetStatPage::page_title(),
             Self::Distro => distro::OsRelPage::page_title(),
+            Self::Users => users::UsersPage::page_title(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_title(),
             _ => format!("[???] {:?}", self),
         }
@@ -258,6 +261,7 @@ impl PageVariant {
             Self::Screens => fx.drm_page.view(),
             Self::NetworkInterfaces | Self::NetworkStatistics => fx.net_pages.view(),
             Self::Distro => fx.osrel_page.view(),
+            Self::Users => fx.users_page.view(),
             Self::FirmwareAttributes => fx.firmware_page.view(),
             _ => todo_page::todo(),
         }

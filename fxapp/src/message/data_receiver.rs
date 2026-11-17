@@ -27,7 +27,7 @@ use ferrix_lib::{
     net::Networks,
     parts::Mounts,
     ram::{RAM, Swaps},
-    sys::OsRelease,
+    sys::{OsRelease, Users},
     vulnerabilities::Vulnerabilities,
 };
 use iced::Task;
@@ -69,6 +69,9 @@ pub enum DataReceiver {
 
     GetOsRelData,
     OsRelDataReceived(LoadState<OsRelease>),
+
+    GetUsersData,
+    UsersDataReceived(LoadState<Users>),
 
     GetFirmwareData,
     FirmwareDataRefresh,
@@ -166,6 +169,13 @@ impl DataReceiver {
             }
             Self::OsRelDataReceived(val) => {
                 fx.osrel_page.osrel = val;
+                Task::none()
+            }
+            Self::GetUsersData => {
+                crate::pages::users::UsersPage::get_data().map(Message::DataReceiver)
+            }
+            Self::UsersDataReceived(val) => {
+                fx.users_page.users = val;
                 Task::none()
             }
             Self::GetFirmwareData => {
