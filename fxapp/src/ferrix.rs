@@ -49,6 +49,7 @@ pub struct Ferrix {
     pub net_pages: pages::netlist::NetStatPage,
     pub osrel_page: pages::distro::OsRelPage,
     pub users_page: pages::users::UsersPage,
+    pub groups_page: pages::groups::GroupsPage,
     pub firmware_page: pages::firmware::FirmwarePage,
 }
 
@@ -74,6 +75,7 @@ impl Ferrix {
                 net_pages: pages::netlist::NetStatPage::new(),
                 osrel_page: pages::distro::OsRelPage::new(),
                 users_page: pages::users::UsersPage::new(),
+                groups_page: pages::groups::GroupsPage::new(),
                 firmware_page: pages::firmware::FirmwarePage::new(),
             },
             crate::pages::passport::Passport::get_data().map(Message::DataReceiver),
@@ -149,6 +151,9 @@ impl Ferrix {
             }
             PageVariant::Users if self.users_page.users.is_none() => {
                 pages::users::UsersPage::get_data().map(Message::DataReceiver)
+            }
+            PageVariant::Groups if self.groups_page.groups.is_none() => {
+                pages::groups::GroupsPage::get_data().map(Message::DataReceiver)
             }
             PageVariant::FirmwareAttributes if self.firmware_page.firmware.is_none() => {
                 pages::firmware::FirmwarePage::get_data().map(Message::DataReceiver)

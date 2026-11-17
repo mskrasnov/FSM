@@ -29,6 +29,7 @@ pub mod drm;
 pub mod firmware;
 pub mod freq;
 pub mod fs;
+pub mod groups;
 pub mod mem;
 pub mod netlist;
 pub mod passport;
@@ -180,7 +181,7 @@ impl PageVariant {
             Self::Distro => distro::OsRelPage::page_group(),
             Self::Session => GroupVariant::Admin,
             Self::Users => users::UsersPage::page_group(),
-            Self::Groups => GroupVariant::Admin,
+            Self::Groups => groups::GroupsPage::page_group(),
             Self::Environment => GroupVariant::Admin,
             Self::SystemManager => GroupVariant::Admin,
             Self::Software => GroupVariant::Admin,
@@ -208,6 +209,7 @@ impl PageVariant {
             Self::NetworkStatistics => netlist::NetStatPage::page_id(),
             Self::Distro => distro::OsRelPage::page_id(),
             Self::Users => users::UsersPage::page_id(),
+            Self::Groups => groups::GroupsPage::page_id(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_id(),
             _ => "",
         })
@@ -242,6 +244,7 @@ impl PageVariant {
             Self::NetworkStatistics => netlist::NetStatPage::page_title(),
             Self::Distro => distro::OsRelPage::page_title(),
             Self::Users => users::UsersPage::page_title(),
+            Self::Groups => groups::GroupsPage::page_title(),
             Self::FirmwareAttributes => firmware::FirmwarePage::page_title(),
             _ => format!("[???] {:?}", self),
         }
@@ -262,6 +265,7 @@ impl PageVariant {
             Self::NetworkInterfaces | Self::NetworkStatistics => fx.net_pages.view(),
             Self::Distro => fx.osrel_page.view(),
             Self::Users => fx.users_page.view(),
+            Self::Groups => fx.groups_page.view(),
             Self::FirmwareAttributes => fx.firmware_page.view(),
             _ => todo_page::todo(),
         }
